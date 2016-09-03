@@ -1,2 +1,1 @@
-# participate-new-client
-Rewrite of Participate front-end in Elm
+Rewrite of [Participate front-end](https://github.com/oliverbarnes/participate) in Elm
