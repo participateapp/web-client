@@ -4,40 +4,33 @@ import String
 import Dict exposing (Dict)
 
 import Navigation
-import UrlParameterParser exposing (parseParams)
+import Erl
  
 
 type Route
-    = LoginRoute
-    | NotFoundRoute
-
-matchers : Parser (Route -> a) a
-matchers =
-    oneOf
-        [ format LoginRoute (s "")
-        ]
+    = RootRoute
+    | AuthCodeRoute String
 
 
--- TODO: parse query params
--- ...and add it to the model?
-locationParser : Navigation.Location -> Result String Route
-locationParser location =
+authCodeExtractor : Navigation.Location -> Maybe String
+authCodeExtractor location =
     -- are we doing navigation through hashes
-    location.hash
-        |> String.dropLeft 1
-        |> parse identity matchers
+    location.href
+        |> Erl.parse
+        |> .query
+        |> Dict.get "code"
 
 
-parser : Navigation.Parser (Result String Route)
+parser : Navigation.Parser (Maybe String)
 parser =
-    Navigation.makeParser locationParser
+    Navigation.makeParser authCodeExtractor
 
 
-routeFromResult : Result String Route -> Route
-routeFromResult result =
-    case result of
-        Ok route ->
-            route
+routeFromMaybe : Maybe String -> Route
+routeFromMaybe maybeCode =
+    case maybeCode of
+        Just code ->
+            AuthCodeRoute code
 
-        Err string ->
-            NotFoundRoute
+        Nothing ->
+            RootRoute
