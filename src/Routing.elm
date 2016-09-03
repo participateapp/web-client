@@ -14,7 +14,6 @@ type Route
 
 authCodeExtractor : Navigation.Location -> Maybe String
 authCodeExtractor location =
-    -- are we doing navigation through hashes
     location.href
         |> Erl.parse
         |> .query

@@ -7,12 +7,15 @@ import Routing
 import Routing exposing (Route(..))
 import Navigation
 
+import Http
+import Task
+import Json.Decode as Decode
+import Json.Decode exposing (Decoder)
 
 -- MODEL
 
 type alias Model =
-  { authCode : String
-  , accessToken: String
+  { accessToken: Result String String
   , route : Routing.Route
   }
 
@@ -30,17 +33,47 @@ main =
 
 init : Maybe String -> (Model, Cmd Msg)
 init maybeCode = 
-  Model "" "" Routing.RootRoute
+  { accessToken = Err "Not yet fetched", route = Routing.RootRoute }
     |> urlUpdate maybeCode     
 
 
 urlUpdate : Maybe String -> Model -> (Model, Cmd Msg)
 urlUpdate maybeCode model =
-  let 
-    route = Routing.routeFromMaybe maybeCode
-  in
-    ({ model | route = route }, Cmd.none)
+  let
+    route =
+      Routing.routeFromMaybe maybeCode
 
+    newModel =
+      { model | route = route }
+  in
+    case route of
+      AuthCodeRoute authCode ->
+        (newModel, authenticateCmd authCode)
+
+      RootRoute ->
+        (newModel, Cmd.none)
+
+
+apiRoot : String
+apiRoot = "http://localhost:5000"
+
+
+accessTokenDecoder : Decoder String
+accessTokenDecoder =
+  Decode.at ["access_token"] Decode.string
+
+
+authenticateCmd : String -> Cmd Msg
+authenticateCmd authCode =
+  let
+    body =
+      "{\"auth_code\": \"" ++ authCode ++ "\"}"
+        |> Http.string
+    
+    requestTask =
+      Http.post accessTokenDecoder (apiRoot ++ "/token") body
+  in
+    Task.perform AuthFailed GotAccessToken requestTask
 
 -- VIEW
 
@@ -57,14 +90,21 @@ view model =
       div []
         [ a [ href fbAuthUrl ] [ text "Login with Facebook" ] ]
 
-    AuthCodeRoute authCode ->
-      div []
-        [ text authCode ]
+    AuthCodeRoute _ ->
+      case model.accessToken of
+        Err e ->
+          div []
+            [ text <| "Access token not available: " ++ e ]
 
+        Ok accessToken ->
+          div []
+            [ text <| "Access token: " ++ accessToken ]
 
 -- MESSAGES
 
-type Msg = GetAccessToken
+type Msg
+  = GotAccessToken String
+  | AuthFailed Http.Error
 
 
 -- UPDATE
@@ -76,7 +116,9 @@ type Msg = GetAccessToken
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    GetAccessToken ->
-      (model, Cmd.none)
+    GotAccessToken accessToken ->
+      ({ model | accessToken = Ok accessToken }, Cmd.none)
 
+    AuthFailed httpError ->
+      ({ model | accessToken = Err (toString httpError) }, Cmd.none)
 
