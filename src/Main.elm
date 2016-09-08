@@ -8,7 +8,7 @@ import Routing exposing (Route(..))
 import Navigation
 
 import Http
-import Task
+import Task exposing (Task)
 import Json.Decode as Decode
 import Json.Decode exposing (Decoder)
 
@@ -18,6 +18,17 @@ type alias Model =
   { accessToken: Result String String
   , route : Routing.Route
   }
+
+
+postJsonWithHeaders : List (String, String) -> Decoder a -> String -> String -> Task Http.Error a
+postJsonWithHeaders headers responseDecoder url jsonBody =
+  { verb = "POST", headers = [("Content-Type", "application/json")] ++ headers, url = url, body = Http.string jsonBody }
+    |> Http.send Http.defaultSettings
+    |> Http.fromJson responseDecoder
+
+postJson : Decoder a -> String -> String -> Task Http.Error a
+postJson =
+  postJsonWithHeaders []
 
 
 main : Program Never
@@ -55,7 +66,7 @@ urlUpdate maybeCode model =
 
 
 apiRoot : String
-apiRoot = "http://localhost:5000"
+apiRoot = "http://localhost:4000"
 
 
 accessTokenDecoder : Decoder String
@@ -68,10 +79,9 @@ authenticateCmd authCode =
   let
     body =
       "{\"auth_code\": \"" ++ authCode ++ "\"}"
-        |> Http.string
     
     requestTask =
-      Http.post accessTokenDecoder (apiRoot ++ "/token") body
+      postJson accessTokenDecoder (apiRoot ++ "/token") body
   in
     Task.perform AuthFailed GotAccessToken requestTask
 
