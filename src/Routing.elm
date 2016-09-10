@@ -1,35 +1,62 @@
 module Routing exposing (..)
 
-import String
+import String exposing (split)
 import Dict exposing (Dict)
 
 import Navigation
 import Erl
- 
-
-type Route
-    = RootRoute
-    | AuthCodeRoute String
 
 
-authCodeExtractor : Navigation.Location -> Maybe String
-authCodeExtractor location =
-    location.href
-        |> Erl.parse
-        |> .query
-        |> Dict.get "code"
+type Location
+    = Home
+    | AuthCodeRedirect String
 
 
-parser : Navigation.Parser (Maybe String)
-parser =
-    Navigation.makeParser authCodeExtractor
+type alias Model =
+    Maybe Location
 
 
-routeFromMaybe : Maybe String -> Route
-routeFromMaybe maybeCode =
-    case maybeCode of
-        Just code ->
-            AuthCodeRoute code
+init : Maybe Location -> Model
+init location =
+    location
 
-        Nothing ->
-            RootRoute
+
+urlFor : Location -> String
+urlFor loc =
+    let
+        url =
+            case loc of
+                Home ->
+                    "/"
+                AuthCodeRedirect _ ->
+                    "/"
+    in
+        "#" ++ url
+
+
+locFor : Navigation.Location -> Maybe Location
+locFor location =
+    let
+        authCode = 
+            location.href
+                |> Erl.parse
+                |> .query
+                |> Dict.get "code"
+
+        segments =
+            location.hash
+                |> split "/"
+                |> List.filter (\seg -> seg /= "" && seg /= "#")
+    in
+        case authCode of
+            Just code ->
+                Just (AuthCodeRedirect code)
+
+            Nothing ->
+                case segments of
+                    [] ->
+                        Just Home
+
+                    _ ->
+                        Nothing
+

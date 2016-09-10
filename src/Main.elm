@@ -4,39 +4,55 @@ import Html.Events exposing (..)
 import Html.Attributes exposing (..)
 
 import Routing
-import Routing exposing (Route(..))
 import Navigation
-
-import Http
-import Task exposing (Task)
-import Json.Decode as Decode
-import Json.Decode exposing (Decoder)
-
 import Api
 
 
 main : Program Never
 main =
-  Navigation.program Routing.parser
-    { init = init
-    , update = update
-    , urlUpdate = urlUpdate
-    , subscriptions = \_ -> Sub.none
-    , view = view
-    }
+    Navigation.program (Navigation.makeParser Routing.locFor)
+        { init = init
+        , update = update
+        , urlUpdate = updateRoute
+        , subscriptions = \_ -> Sub.none
+        , view = view
+        }
+
+
+updateRoute : Maybe Routing.Location -> Model -> ( Model, Cmd Msg )
+updateRoute route model =
+    let
+        newModel =
+            { model | route = route }
+    in
+        case route of
+            Routing.AuthCodeRedirect authCode ->
+                (newModel, Api.authenticateCmd ApiMsg authCode)
+
+            Routing.Home ->
+                (newModel, Cmd.none)
+
+
 
 -- MODEL
 
 type alias Model =
-  { accessToken: Result String String
-  , route : Routing.Route
+  { accessToken: String
+  , error : Maybe String
+  , userInfo : Api.UserInfo
+  , route : Routing.Model
   }
 
 
-init : Maybe String -> (Model, Cmd Msg)
-init maybeCode = 
-  { accessToken = Err "Not yet fetched", route = Routing.RootRoute }
-    |> urlUpdate maybeCode     
+init : Maybe Routing.Location -> ( Model, Cmd Msg )
+init location =
+    let
+        route =
+            Routing.init location
+    in
+        { route = route
+        }
+            ! []
 
 
 -- VIEW
@@ -44,20 +60,26 @@ init maybeCode =
 
 view : Model -> Html Msg
 view model =
-  case model.route of
-    RootRoute ->
-      div []
-        [ a [ href Api.fbAuthUrl ] [ text "Login with Facebook" ] ]
+    case model.route of
+      Routing.Home ->
+          case model.accessToken of
+              Just a ->
+                  div [] 
+                      [ text <| "Hello World" ]
+              Nothing ->
+                  div []
+                      [ a [ href Api.fbAuthUrl ] [ text "Login with Facebook" ] ]
 
-    AuthCodeRoute _ ->
-      case model.accessToken of
-        Err e ->
-          div []
-            [ text <| "Access token not available: " ++ e ]
+      Routing.AuthCodeRedirect _ ->
+          case model.error of
+              Just e ->
+                  div []
+                      [ text <| "Access token not available: " ++ e ]
 
-        Ok accessToken ->
-          div []
-            [ text <| "Access token: " ++ accessToken ]
+              Nothing ->
+                 div []
+                    [ text <| "Access token: " ++ model.accessToken ]
+
 
 
 -- UPDATE
@@ -68,28 +90,14 @@ type Msg
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  case msg of
-    ApiMsg apiMsg ->
-      case apiMsg of
-        Api.GotAccessToken accessToken ->
-          ({ model | accessToken = Ok accessToken }, Cmd.none)
+    case msg of
+        ApiMsg apiMsg ->
+            case apiMsg of
+                Api.GotAccessToken accessToken ->
+                    ({ model | accessToken = accessToken }, Api.getMeCmd ApiMsg accessToken)
 
-        Api.AuthFailed httpError ->
-          ({ model | accessToken = Err (toString httpError) }, Cmd.none)
+                Api.AuthFailed httpError ->
+                    ({ model | error = Just <| toString httpError }, Cmd.none)
 
-
-urlUpdate : Maybe String -> Model -> (Model, Cmd Msg)
-urlUpdate maybeCode model =
-  let
-    route =
-      Routing.routeFromMaybe maybeCode
-
-    newModel =
-      { model | route = route }
-  in
-    case route of
-      AuthCodeRoute authCode ->
-        (newModel, Api.authenticateCmd ApiMsg authCode)
-
-      RootRoute ->
-        (newModel, Cmd.none)
+                Api.GotUserInfo userInfo ->
+                    ({ model | userInfo = userInfo }, Cmd.none)
