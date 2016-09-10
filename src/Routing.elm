@@ -23,40 +23,40 @@ init location =
 
 urlFor : Location -> String
 urlFor loc =
-    let
-        url =
-            case loc of
-                Home ->
-                    "/"
-                AuthCodeRedirect _ ->
-                    "/"
-    in
-        "#" ++ url
+  let
+    url =
+      case loc of
+        Home ->
+            "/"
+        AuthCodeRedirect _ ->
+            "/"
+  in
+    "#" ++ url
 
 
 locFor : Navigation.Location -> Maybe Location
 locFor location =
-    let
-        authCode = 
-            location.href
-                |> Erl.parse
-                |> .query
-                |> Dict.get "code"
+  let
+    authCode = 
+      location.href
+        |> Erl.parse
+        |> .query
+        |> Dict.get "code"
 
-        segments =
-            location.hash
-                |> split "/"
-                |> List.filter (\seg -> seg /= "" && seg /= "#")
-    in
-        case authCode of
-            Just code ->
-                Just (AuthCodeRedirect code)
+    segments =
+      location.hash
+        |> split "/"
+        |> List.filter (\seg -> seg /= "" && seg /= "#")
+  in
+    case authCode of
+      Just code ->
+        Just (AuthCodeRedirect code)
 
-            Nothing ->
-                case segments of
-                    [] ->
-                        Just Home
+      Nothing ->
+        case segments of
+          [] ->
+            Just Home
 
-                    _ ->
-                        Nothing
+          _ ->
+            Nothing
 
