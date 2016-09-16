@@ -2,83 +2,76 @@ import Html exposing (..)
 import Html.App as App
 import Html.Events exposing (..)
 import Html.Attributes exposing (..)
-
-import Routing
+import Dict
 import Navigation
+import UrlParser exposing ((</>))
+import Hop
+import Hop.Types exposing (Config, Address, Query)
 import Api
 
 
-main : Program Never
-main =
-  Navigation.program (Navigation.makeParser Routing.locFor)
-    { init = init
-    , update = update
-    , urlUpdate = updateRoute
-    , subscriptions = \_ -> Sub.none
-    , view = view
-    }
+-- ROUTES
+
+type Route
+  = Home
+  | FacebookRedirect
+  | NotFoundRoute
 
 
-updateRoute : Maybe Routing.Location -> Model -> ( Model, Cmd Msg )
-updateRoute route model =
+routes : UrlParser.Parser (Route -> a) a
+routes = 
+  UrlParser.oneOf
+    [ UrlParser.format Home (UrlParser.s "")
+    , UrlParser.format FacebookRedirect (UrlParser.s "facebook_redirect")
+    ]
+
+
+hopConfig : Config
+hopConfig = 
+  { hash = False 
+  , basePath = ""
+  }
+
+
+-- taken from https://github.com/sporto/hop/blob/master/examples/basic/Main.elm
+urlParser : Navigation.Parser ( Route, Address )
+urlParser =
   let
-    newModel =
-        { model | route = route }
+    -- A parse function takes the normalised path from Hop after taking
+    -- in consideration the basePath and the hash.
+    -- This function then returns a result.
+    parse path =
+      -- First we parse using UrlParser.parse.
+      -- Then we return the parsed route or NotFoundRoute if the parsed failed.
+      -- You can choose to return the parse return directly.
+      path
+        |> UrlParser.parse identity routes
+        |> Result.withDefault NotFoundRoute
+
+    resolver =
+      -- Create a function that parses and formats the URL
+      -- This function takes 2 arguments: The Hop Config and the parse function.
+      Hop.makeResolver hopConfig parse
   in
-    case route of
-      Routing.AuthCodeRedirect authCode ->
-        (newModel, Api.authenticateCmd ApiMsg authCode)
+    -- Create a Navigation URL parser
+    Navigation.makeParser (.href >> resolver)
 
-      Routing.Home ->
-        (newModel, Cmd.none)
 
+urlUpdate : ( Route, Address ) -> Model -> ( Model, Cmd Msg )
+urlUpdate ( route, address ) model =
+  ( { model | route = route, address = address }, Cmd.none )
 
 
 -- MODEL
+
 
 type alias Model =
   { accessToken: String
   , error : Maybe String
   , userInfo : Api.UserInfo
-  , route : Routing.Model
+  , route : Route
+  , address: Address
   }
-
-
-init : Maybe Routing.Location -> ( Model, Cmd Msg )
-init location =
-  let
-    route =
-      Routing.init location
-  in
-    { route = route
-    }
-      ! []
-
-
--- VIEW
-
-
-view : Model -> Html Msg
-view model =
-  case model.route of
-    Routing.Home ->
-      case model.accessToken of
-        Just a ->
-          div [] 
-            [ text <| "Hello World" ]
-        Nothing ->
-          div []
-            [ a [ href Api.fbAuthUrl ] [ text "Login with Facebook" ] ]
-
-    Routing.AuthCodeRedirect _ ->
-      case model.error of
-        Just e ->
-            div []
-                [ text <| "Access token not available: " ++ e ]
-
-        Nothing ->
-           div []
-              [ text <| "Access token: " ++ model.accessToken ]
 
 
 
@@ -101,3 +94,38 @@ update msg model =
 
         Api.GotUserInfo userInfo ->
           ({ model | userInfo = userInfo }, Cmd.none)
+
+
+-- VIEW
+
+
+view : Model -> Html Msg
+view model =
+  case model.route of
+    Home ->
+      case model.accessToken of
+        Just a ->
+          div [] 
+            [ text <| "Hello World" ]
+        Nothing ->
+          div []
+            [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
+
+
+-- APP
+
+
+init : ( Route, Address ) -> ( Model, Cmd Msg )
+init ( route, address ) = 
+  ( Model address route "" "" "", Cmd.none)
+
+
+main : Program Never
+main =
+  Navigation.program urlParser
+    { init = init
+    , update = update
+    , urlUpdate = urlUpdate
+    , subscriptions = (always Sub.none)
+    , view = view
+    }

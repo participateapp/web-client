@@ -1,4 +1,4 @@
-module Api exposing (tokenUrl, fbAuthUrl, Msg(..), UserInfo, authenticateCmd, getMeCmd)
+module Api exposing (tokenUrl, facebookAuthUrl, Msg(..), UserInfo, authenticateCmd, getMeCmd)
 
 import Http
 import Task exposing (Task)
@@ -16,8 +16,8 @@ userInfoUrl : String
 userInfoUrl = apiRoot ++ "/me"
 
 -- TODO: move client_id and redirect_uri into environment variables
-fbAuthUrl : String
-fbAuthUrl = "https://www.facebook.com/dialog/oauth?client_id=1583083701926004&redirect_uri=http://localhost:3000/"
+facebookAuthUrl : String
+facebookAuthUrl = "https://www.facebook.com/dialog/oauth?client_id=1583083701926004&redirect_uri=http://localhost:3000/facebook_redirect"
 
 
 -- MESSAGES
