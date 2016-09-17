@@ -3,6 +3,7 @@ import Html.App as App
 import Html.Events exposing (..)
 import Html.Attributes exposing (..)
 import Dict
+import String
 import Navigation
 import UrlParser exposing ((</>))
 import Hop
@@ -19,7 +20,7 @@ type Route
 
 
 routes : UrlParser.Parser (Route -> a) a
-routes = 
+routes =
   UrlParser.oneOf
     [ UrlParser.format Home (UrlParser.s "")
     , UrlParser.format FacebookRedirect (UrlParser.s "facebook_redirect")
@@ -27,8 +28,8 @@ routes =
 
 
 hopConfig : Config
-hopConfig = 
-  { hash = False 
+hopConfig =
+  { hash = False
   , basePath = ""
   }
 
@@ -66,11 +67,11 @@ urlUpdate ( route, address ) model =
 
 
 type alias Model =
-  { accessToken: String
+  { route : Route
+  , address: Address
+  , accessToken: String
   , error : Maybe String
   , userInfo : Api.UserInfo
-  , route : Route
-  , address: Address
   }
 
 
@@ -103,21 +104,38 @@ view : Model -> Html Msg
 view model =
   case model.route of
     Home ->
-      case model.accessToken of
-        Just a ->
-          div [] 
-            [ text <| "Hello World" ]
-        Nothing ->
-          div []
-            [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
+      if String.isEmpty model.accessToken == True then
+        div []
+          [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
+      else
+        div []
+          [ text <| "Hello Autheticated World. Token: " ++ model.accessToken ]
+
+    NotFoundRoute ->
+      div []
+        [ text <| "Not found" ]
+
+    FacebookRedirect ->
+      let
+        authCode = model.address.query |> Dict.get "code"
+
+      in
+        case authCode of
+          Just code ->
+            div []
+              [ text <| "Redirect from facebook. Auth code: " ++ code ]
+
+          Nothing ->
+            div []
+              [ text <| "Redirect from facebook. But no code somehow :("]
 
 
 -- APP
 
 
 init : ( Route, Address ) -> ( Model, Cmd Msg )
-init ( route, address ) = 
-  ( Model address route "" "" "", Cmd.none)
+init ( route, address ) =
+  ( Model route address "" (Just "") { id = "" }, Cmd.none)
 
 
 main : Program Never
