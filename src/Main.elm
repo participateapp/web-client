@@ -130,18 +130,22 @@ view model =
         [ text <| "Not found" ]
 
     FacebookRedirect ->
-      let
-        authCode = model.address.query |> Dict.get "code"
+      div []
+        [ text <| "Authenticating, please wait..." ]
 
-      in
-        case authCode of
-          Just code ->
-            div []
-              [ text <| "Redirect from facebook. Auth code: " ++ code ]
+      -- facebook auth debug
+      --let
+      --  authCode = model.address.query |> Dict.get "code"
 
-          Nothing ->
-            div []
-              [ text <| "Redirect from facebook. But no code somehow :("]
+      --in
+      --  case authCode of
+      --    Just code ->
+      --      div []
+      --        [ text <| "Redirect from facebook. Auth code: " ++ code ]
+
+      --    Nothing ->
+      --      div []
+      --        [ text <| "Redirect from facebook. But no code somehow :("]
 
 
 -- APP
