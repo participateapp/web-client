@@ -63,6 +63,19 @@ urlUpdate ( route, address ) model =
   ( { model | route = route, address = address }, Cmd.none )
 
 
+checkForAuthCode : Address -> Cmd Msg
+checkForAuthCode address =
+  let
+    authCode = address.query |> Dict.get "code"
+  in
+    case authCode of
+      Just code -> 
+        Api.authenticateCmd ApiMsg code
+
+      Nothing -> Cmd.none
+
+
+
 -- MODEL
 
 
@@ -71,12 +84,13 @@ type alias Model =
   , address: Address
   , accessToken: String
   , error : Maybe String
-  , userInfo : Api.UserInfo
+  , me : Api.Me
   }
 
 
 
 -- UPDATE
+
 
 type Msg
   = ApiMsg Api.Msg
@@ -93,8 +107,8 @@ update msg model =
         Api.AuthFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)
 
-        Api.GotUserInfo userInfo ->
-          ({ model | userInfo = userInfo }, Cmd.none)
+        Api.GotMe me ->
+          ({ model | me = me, route = Home }, Cmd.none)
 
 
 -- VIEW
@@ -109,7 +123,7 @@ view model =
           [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
       else
         div []
-          [ text <| "Hello Autheticated World. Token: " ++ model.accessToken ]
+          [ text <| "Hello. I am " ++ ( .name model.me ) ]
 
     NotFoundRoute ->
       div []
@@ -135,9 +149,9 @@ view model =
 
 init : ( Route, Address ) -> ( Model, Cmd Msg )
 init ( route, address ) =
-  ( Model route address "" (Just "") { id = "" }, Cmd.none)
+  ( Model route address "" Nothing { name = "" }, checkForAuthCode address)
 
-
+ 
 main : Program Never
 main =
   Navigation.program urlParser

@@ -1,4 +1,4 @@
-module Api exposing (tokenUrl, facebookAuthUrl, Msg(..), UserInfo, authenticateCmd, getMeCmd)
+module Api exposing (tokenUrl, facebookAuthUrl, Msg(..), Me, authenticateCmd, getMeCmd)
 
 import Http
 import Task exposing (Task)
@@ -12,8 +12,8 @@ apiRoot = "http://localhost:4000"
 tokenUrl : String
 tokenUrl = apiRoot ++ "/token"
 
-userInfoUrl : String
-userInfoUrl = apiRoot ++ "/me"
+meUrl : String
+meUrl = apiRoot ++ "/me"
 
 -- TODO: move client_id and redirect_uri into environment variables
 facebookAuthUrl : String
@@ -25,7 +25,7 @@ facebookAuthUrl = "https://www.facebook.com/dialog/oauth?client_id=1583083701926
 type Msg
   = GotAccessToken String
   | AuthFailed Http.Error
-  | GotUserInfo UserInfo
+  | GotMe Me
 
 
 accessTokenDecoder : Decoder String
@@ -46,19 +46,19 @@ authenticateCmd wrapFn authCode =
       |> Cmd.map wrapFn
 
 
-type alias UserInfo =
-  { id : String
+type alias Me =
+  { name : String
   }
 
-userInfoDecoder : Decoder UserInfo
-userInfoDecoder =
-  Decode.object1 UserInfo
-    (Decode.at ["data", "id"] Decode.string)
+meDecoder : Decoder Me
+meDecoder =
+  Decode.object1 Me
+    (Decode.at ["data", "attributes", "name"] Decode.string)
 
 getMeCmd : (Msg -> a) -> String -> Cmd a
 getMeCmd wrapFn accessToken =
-  getJsonWithAuth accessToken userInfoDecoder userInfoUrl
-    |> Task.perform AuthFailed GotUserInfo
+  getJsonWithAuth accessToken meDecoder meUrl
+    |> Task.perform AuthFailed GotMe
     |> Cmd.map wrapFn
 
 
