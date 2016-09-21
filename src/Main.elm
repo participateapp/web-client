@@ -29,8 +29,8 @@ routes =
 
 hopConfig : Config
 hopConfig =
-  { hash = False
-  , basePath = ""
+  { basePath = ""
+  , hash = False
   }
 
 

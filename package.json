@@ -11,13 +11,11 @@
     "url-loader": "^0.5.7",
     "webpack": "^1.13.2",
     "webpack-dev-middleware": "^1.6.1",
-    "webpack-dev-server": "^1.15.1"
+    "express": "^4.13.4"
   },
   "devDependencies": {},
   "scripts": {
-    "build": "webpack",
-    "watch": "webpack --watch",
-    "dev": "webpack-dev-server --port 3000"
+    "dev": "node dev_server.js"
   },
   "author": "",
   "license": "ISC"
