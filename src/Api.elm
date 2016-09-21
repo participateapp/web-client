@@ -6,26 +6,27 @@ import Json.Decode as Decode
 import Json.Decode exposing (Decoder)
 
 
-apiRoot : String
-apiRoot = "http://localhost:4000"
-
-tokenUrl : String
-tokenUrl = apiRoot ++ "/token"
-
-meUrl : String
-meUrl = apiRoot ++ "/me"
-
--- TODO: move client_id and redirect_uri into environment variables
-facebookAuthUrl : String
-facebookAuthUrl = "https://www.facebook.com/dialog/oauth?client_id=1583083701926004&redirect_uri=http://localhost:3000/facebook_redirect"
-
-
--- MESSAGES
-
 type Msg
   = GotAccessToken String
   | AuthFailed Http.Error
   | GotMe Me
+
+
+apiRoot : String
+apiRoot = "http://localhost:4000"
+
+
+tokenUrl : String
+tokenUrl = apiRoot ++ "/token"
+
+
+meUrl : String
+meUrl = apiRoot ++ "/me"
+
+
+-- TODO: move client_id and redirect_uri into environment variables
+facebookAuthUrl : String
+facebookAuthUrl = "https://www.facebook.com/dialog/oauth?client_id=1583083701926004&redirect_uri=http://localhost:3000/facebook_redirect"
 
 
 accessTokenDecoder : Decoder String
@@ -50,10 +51,12 @@ type alias Me =
   { name : String
   }
 
+
 meDecoder : Decoder Me
 meDecoder =
   Decode.object1 Me
     (Decode.at ["data", "attributes", "name"] Decode.string)
+
 
 getMeCmd : (Msg -> a) -> String -> Cmd a
 getMeCmd wrapFn accessToken =
@@ -67,6 +70,7 @@ postJsonWithHeaders headers responseDecoder url jsonBody =
   { verb = "POST", headers = [("Content-Type", "application/json")] ++ headers, url = url, body = Http.string jsonBody }
     |> Http.send Http.defaultSettings
     |> Http.fromJson responseDecoder
+
 
 postJson : Decoder a -> String -> String -> Task Http.Error a
 postJson =
