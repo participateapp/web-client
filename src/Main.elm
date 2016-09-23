@@ -67,6 +67,7 @@ checkForAuthCode address =
 
 
 
+
 -- MODEL
 
 
@@ -99,7 +100,7 @@ update msg model =
           ({ model | error = Just <| toString httpError }, Cmd.none)
 
         Api.GotMe me ->
-          ({ model | me = me, route = Home }, Cmd.none)
+          ({ model | me = me}, Navigation.newUrl "/")
 
 
 
@@ -115,7 +116,13 @@ view model =
           [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
       else
         div []
-          [ text <| "Hello. I am " ++ ( .name model.me ) ]
+          [ 
+            text <| "Hello, " ++ ( .name model.me ),
+
+            h3 []
+              [ a [ href "/new-proposal" ] [ text "Create a proposal" ] ]
+          ]
+        
 
     NotFoundRoute ->
       div []
