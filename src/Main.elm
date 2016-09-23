@@ -2,12 +2,19 @@ import Html exposing (..)
 import Html.App as App
 import Html.Events exposing (..)
 import Html.Attributes exposing (..)
+
+import Form exposing (Form)
+import Form.Validate as Validate exposing (..)
+import Form.Input as Input
+
 import Dict
 import String
+
 import Navigation
 import UrlParser exposing ((</>))
 import Hop
 import Hop.Types exposing (Config, Address, Query)
+
 import Api
 
 
@@ -16,6 +23,7 @@ import Api
 
 type Route
   = Home
+  | NewProposalRoute
   | FacebookRedirect
   | NotFoundRoute
 
@@ -24,6 +32,7 @@ routes : UrlParser.Parser (Route -> a) a
 routes =
   UrlParser.oneOf
     [ UrlParser.format Home (UrlParser.s "")
+    , UrlParser.format NewProposalRoute (UrlParser.s "new-proposal")
     , UrlParser.format FacebookRedirect (UrlParser.s "facebook_redirect")
     ]
 
@@ -77,6 +86,13 @@ type alias Model =
   , accessToken: String
   , error : Maybe String
   , me : Api.Me
+  , form : Form () Proposal
+  }
+
+
+type alias Proposal =
+  { title : String
+  , body : String
   }
 
 
@@ -86,6 +102,8 @@ type alias Model =
 
 type Msg
   = ApiMsg Api.Msg
+  | FormMsg Form.Msg
+  | NoOp
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -102,7 +120,18 @@ update msg model =
         Api.GotMe me ->
           ({ model | me = me}, Navigation.newUrl "/")
 
+    FormMsg formMsg ->
+      ({ model | form = Form.update formMsg model.form }, Cmd.none)
 
+    NoOp ->
+      (model, Cmd.none)
+
+
+validate : Validation () Proposal
+validate =
+  form2 Proposal
+    (get "title" string)
+    (get "body" string)
 
 -- VIEW
 
@@ -117,12 +146,21 @@ view model =
       else
         div []
           [ 
-            text <| "Hello, " ++ ( .name model.me ),
-
+            text <| "Hello, " ++ ( .name model.me )
+            ,
             h3 []
               [ a [ href "/new-proposal" ] [ text "Create a proposal" ] ]
           ]
-        
+
+    NewProposalRoute ->
+      div []
+        [ 
+          h2 []
+            [ text <| "New Proposal" ]
+          ,
+
+          App.map FormMsg (formView model.form)
+        ]
 
     NotFoundRoute ->
       div []
@@ -147,13 +185,42 @@ view model =
       --        [ text <| "Redirect from facebook. But no code somehow :("]
 
 
+formView : Form () Proposal -> Html Form.Msg
+formView form =
+  let
+    errorFor field =
+      case field.liveError of
+        Just error ->
+          div [ class "error" ] [ text (toString error) ]
+
+        Nothing ->
+          text ""
+
+    title = Form.getFieldAsString "title" form
+    body = Form.getFieldAsString "body" form
+  in
+    div []
+      [ label [] [ text "Title" ]
+      , Input.textInput title []
+      , errorFor title
+
+      , label [] [ text "Body" ]
+      , Input.textArea body []
+      , errorFor body
+
+      , button
+          [ onClick Form.Submit ]
+          [ text "Submit" ]
+      ]
+
+
 
 -- APP
 
 
 init : ( Route, Address ) -> ( Model, Cmd Msg )
 init ( route, address ) =
-  ( Model route address "" Nothing { name = "" }, checkForAuthCode address)
+  ( Model route address "" Nothing { name = "" } (Form.initial [] validate), checkForAuthCode address)
 
  
 main : Program Never
