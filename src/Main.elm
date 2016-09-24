@@ -7,8 +7,10 @@ import Material
 import Material.Scheme
 import Material.Button as Button
 import Material.Options exposing (css)
+import Material.Options as Options
 import Material.Layout as Layout
 import Material.Color as Color
+import Material.Elevation as Elevation
 
 import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
@@ -161,12 +163,12 @@ type alias Mdl =
 
 view : Model -> Html Msg
 view model =
-  Material.Scheme.topWithScheme Color.Teal Color.LightGreen <|
+  Material.Scheme.topWithScheme Color.Amber Color.Red <|
     Layout.render Mdl
       model.mdl
       [ Layout.fixedHeader
       ]
-      { header = [ h1 [ style [ ( "padding", ".5rem" ) ] ] [ text "Participate!" ] ]
+      { header = [ h4 [ style [ ( "padding", ".5rem" ) ] ] [ text "Participate!" ] ]
       , drawer = []
       , tabs = ( [], [] )
       , main = [ viewBody model ]
@@ -180,7 +182,14 @@ viewBody model =
     Home ->
       if String.isEmpty model.accessToken == True then
         div []
-          [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
+          [ Options.div
+              [ Elevation.e2
+              , css "height" "96px"
+              , css "width"  "128px" 
+              , Options.center
+              ]
+              [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
+          ]
       else
         div []
           [ 
