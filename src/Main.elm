@@ -3,6 +3,13 @@ import Html.App as App
 import Html.Events exposing (..)
 import Html.Attributes exposing (..)
 
+import Material
+import Material.Scheme
+import Material.Button as Button
+import Material.Options exposing (css)
+import Material.Layout as Layout
+import Material.Color as Color
+
 import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
 import Form.Input as Input
@@ -87,7 +94,13 @@ type alias Model =
   , error : Maybe String
   , me : Api.Me
   , form : Form () Proposal
+  , mdl : Material.Model
   }
+
+
+initialModel : Route -> Address -> Model
+initialModel route address = 
+  Model route address "" Nothing { name = "" } (Form.initial [] validate) Material.model
 
 
 type alias Proposal =
@@ -104,6 +117,7 @@ type Msg
   = ApiMsg Api.Msg
   | FormMsg Form.Msg
   | NoOp
+  | Mdl (Material.Msg Msg)
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -124,7 +138,10 @@ update msg model =
       ({ model | form = Form.update formMsg model.form }, Cmd.none)
 
     NoOp ->
-      (model, Cmd.none)
+      ( model, Cmd.none )
+
+    Mdl msg' ->
+      Material.update msg' model
 
 
 validate : Validation () Proposal
@@ -133,11 +150,32 @@ validate =
     (get "title" string)
     (get "body" string)
 
+
+
 -- VIEW
+
+
+type alias Mdl =
+  Material.Model
 
 
 view : Model -> Html Msg
 view model =
+  Material.Scheme.topWithScheme Color.Teal Color.LightGreen <|
+    Layout.render Mdl
+      model.mdl
+      [ Layout.fixedHeader
+      ]
+      { header = [ h1 [ style [ ( "padding", ".5rem" ) ] ] [ text "Participate!" ] ]
+      , drawer = []
+      , tabs = ( [], [] )
+      , main = [ viewBody model ]
+      }
+
+
+
+viewBody : Model -> Html Msg
+viewBody model =
   case model.route of
     Home ->
       if String.isEmpty model.accessToken == True then
@@ -220,7 +258,7 @@ formView form =
 
 init : ( Route, Address ) -> ( Model, Cmd Msg )
 init ( route, address ) =
-  ( Model route address "" Nothing { name = "" } (Form.initial [] validate), checkForAuthCode address)
+  ( initialModel route address, checkForAuthCode address)
 
  
 main : Program Never
