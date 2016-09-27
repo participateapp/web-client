@@ -171,7 +171,7 @@ view model =
       { header = [ h4 [ style [ ( "padding", ".5rem" ) ] ] [ text "Participate!" ] ]
       , drawer = []
       , tabs = ( [], [] )
-      , main = [ viewBody model ]
+      , main = [ div [ style [ ( "margin", "2rem" ) ] ] [ viewBody model ] ]
       }
 
 
@@ -182,14 +182,7 @@ viewBody model =
     Home ->
       if String.isEmpty model.accessToken == True then
         div []
-          [ Options.div
-              [ Elevation.e2
-              , css "height" "96px"
-              , css "width"  "128px" 
-              , Options.center
-              ]
-              [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
-          ]
+          [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
       else
         div []
           [ 
