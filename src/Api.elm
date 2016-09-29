@@ -1,20 +1,32 @@
-module Api exposing (facebookAuthUrl, Msg(..), Me, authenticateCmd, getMeCmd)
+module Api exposing (facebookAuthUrl, Msg(..), Me, authenticateCmd, getMeCmd, createProposalCmd)
 
 import Http
 import Task exposing (Task)
 import Json.Decode as Decode
 import Json.Decode exposing (Decoder)
+import Json.Encode as Encode
 
 
 type Msg
   = GotAccessToken String
   | AuthFailed Http.Error
+  | ProposalCreationSucceeded Proposal
+  | ProposalCreationFailed Http.Error
   | GotMe Me
 
 
 type alias Me =
   { name : String
   }
+
+type alias Proposal =
+  { title : String
+  , body : String
+  }
+
+
+
+-- ENDPOINTS
 
 
 apiUrl : String
@@ -28,29 +40,23 @@ tokenEndpoint = apiUrl ++ "/token"
 meEndpoint : String
 meEndpoint = apiUrl ++ "/me"
 
+newProposalEndpoint : String
+newProposalEndpoint = apiUrl ++ "/proposals"
+
 
 -- TODO: move client_id and redirect_uri into environment variables
 facebookAuthUrl : String
 facebookAuthUrl = "https://www.facebook.com/dialog/oauth?client_id=1583083701926004&redirect_uri=http://localhost:3000/facebook_redirect"
 
 
+
+-- DECODERS & ENCODERS
+
+
 tokenDecoder : Decoder String
 tokenDecoder =
   Decode.at ["access_token"] Decode.string
-
-
-authenticateCmd : (Msg -> a) -> String -> Cmd a
-authenticateCmd wrapFn authCode =
-  let
-    body =
-      "{\"auth_code\": \"" ++ authCode ++ "\"}"
-    
-    requestTask =
-      post tokenEndpoint body tokenDecoder
-  in
-    Task.perform AuthFailed GotAccessToken requestTask
-      |> Cmd.map wrapFn
-
+  
 
 meDecoder : Decoder Me
 meDecoder =
@@ -58,18 +64,84 @@ meDecoder =
     (Decode.at ["data", "attributes", "name"] Decode.string)
 
 
-getMeCmd : (Msg -> a) -> String -> Cmd a
-getMeCmd wrapFn accessToken =
+proposalDecoder : Decoder Proposal
+proposalDecoder =
+  Decoder.object2 Proposal
+    (Decode.at ["data", "attributes", "title"] Decode.string)
+    (Decode.at ["data", "attributes", "body"] Decode.string)
+
+
+encodeProposal : Proposal -> Encode.Value
+encodeProposal proposal =
+  Encode.object
+    [ ( "data"
+      , Encode.object
+          [ ( "type", "proposal" )
+          , ( "attributes"
+            , Encode.object
+              [ ( "title", proposal.title )
+              , ( "body", proposal.body )
+              ]
+            )
+          ]
+      )
+    ]
+
+
+
+-- COMMANDS
+
+
+authenticateCmd : String -> (Msg -> a) -> Cmd a
+authenticateCmd authCode wrapMsg =
+  let
+    body =
+      "{\"auth_code\": \"" ++ authCode ++ "\"}"
+    
+    requestTask =
+      exchangeAuthCodeForToken body
+  in
+    Task.perform AuthFailed GotAccessToken requestTask
+      |> Cmd.map wrapMsg
+
+
+getMeCmd : String -> (Msg -> a) -> Cmd a
+getMeCmd accessToken wrapMsg =
   getWithToken meEndpoint accessToken meDecoder
     |> Task.perform AuthFailed GotMe
-    |> Cmd.map wrapFn
+    |> Cmd.map wrapMsg
 
 
-post : String -> String -> Decoder a -> Task Http.Error a
-post url jsonBody responseDecoder =
-  { verb = "POST", headers = [("Content-Type", "application/json")], url = url, body = Http.string jsonBody }
+createProposalCmd : Proposal -> String -> (Msg -> a) -> Cmd a
+createProposalCmd proposal accessToken wrapMsg =
+  postProposal proposal accessToken
+    |> Task.perform ProposalCreationFailed ProposalCreationSucceeded
+    |> Cmd.map wrapMsg  
+
+
+
+-- HTTP requests
+
+
+exchangeAuthCodeForToken : String -> Task Http.Error a
+exchangeAuthCodeForToken body =
+  { verb = "POST", headers = [("Content-Type", "application/json")], url = tokenEndpoint, body = Http.string body }
     |> Http.send Http.defaultSettings
-    |> Http.fromJson responseDecoder
+    |> Http.fromJson tokenDecoder
+
+
+postProposal : Proposal -> String -> Decoder a -> Task Http.Error a
+postProposal proposal accessToken responseDecoder =
+  { verb = "POST"
+  , headers =
+      [ ("Authorization", "Bearer " ++ accessToken)
+      , ("Content-Type", "application/vnd.api+json")
+      ]
+  , url = url
+  , body = encodeProposal proposal
+  }
+  |> Http.send Http.defaultSettings
+  |> Http.fromJson responseDecoder
 
 
 getWithToken : String -> String -> Decoder a -> Task Http.Error a

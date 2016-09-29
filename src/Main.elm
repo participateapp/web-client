@@ -6,15 +6,20 @@ import Html.Attributes exposing (..)
 import Material
 import Material.Scheme
 import Material.Button as Button
+import Material.Textfield as Textfield
+import Material.List as List
 import Material.Options exposing (css)
 import Material.Options as Options
 import Material.Layout as Layout
 import Material.Color as Color
 import Material.Elevation as Elevation
+import Material.Grid exposing (grid, size, cell, Device(..))
 
 import Form exposing (Form)
-import Form.Validate as Validate exposing (..)
-import Form.Input as Input
+import Form.Field
+import Form.Input
+import Form.Error
+import Form.Validate exposing (Validation, form1, get, string)
 
 import Dict
 import String
@@ -79,7 +84,7 @@ checkForAuthCode address =
   in
     case authCode of
       Just code -> 
-        Api.authenticateCmd ApiMsg code
+        Api.authenticateCmd code ApiMsg
 
       Nothing -> Cmd.none
 
@@ -118,6 +123,7 @@ type alias Proposal =
 type Msg
   = ApiMsg Api.Msg
   | FormMsg Form.Msg
+  | NewProposalFormMsg
   | NoOp
   | Mdl (Material.Msg Msg)
 
@@ -128,7 +134,7 @@ update msg model =
     ApiMsg apiMsg ->
       case apiMsg of
         Api.GotAccessToken accessToken ->
-          ({ model | accessToken = accessToken }, Api.getMeCmd ApiMsg accessToken)
+          ({ model | accessToken = accessToken }, Api.getMeCmd accessToken ApiMsg )
 
         Api.AuthFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)
@@ -136,8 +142,19 @@ update msg model =
         Api.GotMe me ->
           ({ model | me = me}, Navigation.newUrl "/")
 
+        Api.ProposalCreationSucceeded proposal ->
+          ({ model }, Navigation.newUrl "/")
+
+        Api.ProposalCreationFailed httpError ->
+          ({ model | error = Just <| toString httpError }, Cmd.none)
+
     FormMsg formMsg ->
-      ({ model | form = Form.update formMsg model.form }, Cmd.none)
+      case ( formMsg, Form.getOutput model.form ) of
+        ( Form.Submit, Just proposal ) ->
+          model ! [ Api.createProposalCmd proposal accessToken ApiMsg ]
+
+        _ ->
+          ({ model | form = Form.update formMsg model.form }, Cmd.none)
 
     NoOp ->
       ( model, Cmd.none )
@@ -210,20 +227,6 @@ viewBody model =
       div []
         [ text <| "Authenticating, please wait..." ]
 
-      -- facebook auth debug
-      --let
-      --  authCode = model.address.query |> Dict.get "code"
-
-      --in
-      --  case authCode of
-      --    Just code ->
-      --      div []
-      --        [ text <| "Redirect from facebook. Auth code: " ++ code ]
-
-      --    Nothing ->
-      --      div []
-      --        [ text <| "Redirect from facebook. But no code somehow :("]
-
 
 formView : Form () Proposal -> Html Form.Msg
 formView form =
@@ -239,19 +242,50 @@ formView form =
     title = Form.getFieldAsString "title" form
     body = Form.getFieldAsString "body" form
   in
-    div []
-      [ label [] [ text "Title" ]
-      , Input.textInput title []
-      , errorFor title
-
-      , label [] [ text "Body" ]
-      , Input.textArea body []
-      , errorFor body
-
-      , button
-          [ onClick Form.Submit ]
-          [ text "Submit" ]
+    grid []
+      [ cell [ size All 12 ] [ titleField model ]
+      , cell [ size All 12 ] [ bodyField model ]
+      , cell [ size All 12 ] [ submitButton model ]
       ]
+
+
+
+titleField : Model -> Html Msg
+titleField model =
+  let
+    title =
+      Form.getFieldAsString "title" model.form
+
+    conditionalProperties =
+      case title.liveError of
+        Just error ->
+          case error of
+            Form.Error.InvalidString ->
+              [ Textfield.error "Can't be blank" ]
+
+            Form.Error.Empty ->
+              [ Textfield.error "Can't be blank" ]
+
+            _ ->
+              [ Textfield.error <| toString error ]
+
+        Nothing ->
+          []
+  in
+      Textfield.render Mdl
+        [ 1, 0 ]
+        model.mdl
+        ([ Textfield.label "Title"
+         , Textfield.floatingLabel
+         , Textfield.text'
+         , Textfield.value <| Maybe.withDefault "" title.value
+         , Textfield.onInput <| FormMsg << (Form.Field.Text >> Form.Input title.path)
+         , Textfield.onFocus <| FormMsg <| Form.Focus title.path
+         , Textfield.onBlur <| FormMsg <| Form.Blur title.path
+         ]
+           ++ conditionalProperties
+        )
+
 
 
 
