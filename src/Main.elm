@@ -142,7 +142,7 @@ update msg model =
         Api.GotMe me ->
           ({ model | me = me}, Navigation.newUrl "/")
 
-        Api.ProposalCreationSucceeded proposal ->
+        Api.ProposalCreated proposal ->
           ({ model }, Navigation.newUrl "/")
 
         Api.ProposalCreationFailed httpError ->

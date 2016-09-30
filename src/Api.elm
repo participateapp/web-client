@@ -10,7 +10,7 @@ import Json.Encode as Encode
 type Msg
   = GotAccessToken String
   | AuthFailed Http.Error
-  | ProposalCreationSucceeded Proposal
+  | ProposalCreated Proposal
   | ProposalCreationFailed Http.Error
   | GotMe Me
 
@@ -66,12 +66,12 @@ meDecoder =
 
 proposalDecoder : Decoder Proposal
 proposalDecoder =
-  Decoder.object2 Proposal
+  Decode.object2 Proposal
     (Decode.at ["data", "attributes", "title"] Decode.string)
     (Decode.at ["data", "attributes", "body"] Decode.string)
 
 
-encodeProposal : Proposal -> Encode.Value
+encodeProposal : Proposal -> String
 encodeProposal proposal =
   Encode.object
     [ ( "data"
@@ -85,7 +85,8 @@ encodeProposal proposal =
             )
           ]
       )
-    ]
+    ] 
+    |> Encode.encode 0
 
 
 
@@ -115,7 +116,7 @@ getMeCmd accessToken wrapMsg =
 createProposalCmd : Proposal -> String -> (Msg -> a) -> Cmd a
 createProposalCmd proposal accessToken wrapMsg =
   postProposal proposal accessToken
-    |> Task.perform ProposalCreationFailed ProposalCreationSucceeded
+    |> Task.perform ProposalCreationFailed ProposalCreated
     |> Cmd.map wrapMsg  
 
 
@@ -123,25 +124,25 @@ createProposalCmd proposal accessToken wrapMsg =
 -- HTTP requests
 
 
-exchangeAuthCodeForToken : String -> Task Http.Error a
+exchangeAuthCodeForToken : String -> Task Http.Error String
 exchangeAuthCodeForToken body =
   { verb = "POST", headers = [("Content-Type", "application/json")], url = tokenEndpoint, body = Http.string body }
     |> Http.send Http.defaultSettings
     |> Http.fromJson tokenDecoder
 
 
-postProposal : Proposal -> String -> Decoder a -> Task Http.Error a
-postProposal proposal accessToken responseDecoder =
+postProposal : Proposal -> String -> Task Http.Error Proposal
+postProposal proposal accessToken =
   { verb = "POST"
   , headers =
       [ ("Authorization", "Bearer " ++ accessToken)
       , ("Content-Type", "application/vnd.api+json")
       ]
-  , url = url
-  , body = encodeProposal proposal
+  , url = newProposalEndpoint
+  , body = Http.string (encodeProposal proposal)
   }
-  |> Http.send Http.defaultSettings
-  |> Http.fromJson responseDecoder
+    |> Http.send Http.defaultSettings
+    |> Http.fromJson proposalDecoder
 
 
 getWithToken : String -> String -> Decoder a -> Task Http.Error a
