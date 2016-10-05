@@ -53,19 +53,19 @@ facebookAuthUrl = "https://www.facebook.com/dialog/oauth?client_id=1583083701926
 -- DECODERS & ENCODERS
 
 
-tokenDecoder : Decoder String
-tokenDecoder =
+decodeToken : Decoder String
+decodeToken =
   Decode.at ["access_token"] Decode.string
   
 
-meDecoder : Decoder Me
-meDecoder =
+decodeMe : Decoder Me
+decodeMe =
   Decode.object1 Me
     (Decode.at ["data", "attributes", "name"] Decode.string)
 
 
-proposalDecoder : Decoder Proposal
-proposalDecoder =
+decodeProposal : Decoder Proposal
+decodeProposal =
   Decode.object2 Proposal
     (Decode.at ["data", "attributes", "title"] Decode.string)
     (Decode.at ["data", "attributes", "body"] Decode.string)
@@ -73,6 +73,7 @@ proposalDecoder =
 
 encodeProposal : Proposal -> String
 encodeProposal proposal =
+  -- http://noredink.github.io/json-to-elm/
   Encode.object
     [ ( "data"
       , Encode.object
@@ -108,7 +109,7 @@ authenticateCmd authCode wrapMsg =
 
 getMeCmd : String -> (Msg -> a) -> Cmd a
 getMeCmd accessToken wrapMsg =
-  getWithToken meEndpoint accessToken meDecoder
+  getWithToken meEndpoint accessToken decodeMe
     |> Task.perform AuthFailed GotMe
     |> Cmd.map wrapMsg
 
@@ -128,7 +129,7 @@ exchangeAuthCodeForToken : String -> Task Http.Error String
 exchangeAuthCodeForToken body =
   { verb = "POST", headers = [("Content-Type", "application/json")], url = tokenEndpoint, body = Http.string body }
     |> Http.send Http.defaultSettings
-    |> Http.fromJson tokenDecoder
+    |> Http.fromJson decodeToken
 
 
 postProposal : Proposal -> String -> Task Http.Error Proposal
@@ -142,7 +143,7 @@ postProposal proposal accessToken =
   , body = Http.string (encodeProposal proposal)
   }
     |> Http.send Http.defaultSettings
-    |> Http.fromJson proposalDecoder
+    |> Http.fromJson decodeProposal
 
 
 getWithToken : String -> String -> Decoder a -> Task Http.Error a
