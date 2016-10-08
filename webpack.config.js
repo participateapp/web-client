@@ -1,11 +1,7 @@
 var path = require("path");
 
 module.exports = {
-  entry: {
-    app: [
-      './src/index.js'
-    ]
-  },
+  entry: './src/index.js',
 
   output: {
     path: path.resolve(__dirname + '/dist'),
@@ -47,6 +43,6 @@ module.exports = {
   devServer: {
     inline: true,
     stats: { colors: true },
-  },
+  }
 
 };
