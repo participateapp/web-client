@@ -85,14 +85,16 @@ formView form =
     body =
       Form.getFieldAsString "body" form
   in
-    grid [] []
-
-
-
+    grid
+      []
 -- [ cell [ size All 12 ] [ titleField model ]
 -- , cell [ size All 12 ] [ bodyField model ]
 -- , cell [ size All 12 ] [ submitButton model ]
 -- ]
+      [ cell [ size All 12 ] [ text "title" ]
+      , cell [ size All 12 ] [ text "body" ]
+      , cell [ size All 12 ] [ text "submit?" ]
+      ]
 
 
 titleField : Model -> Html Msg

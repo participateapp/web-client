@@ -38,7 +38,6 @@ facebookAuthUrl =
   ++ "&redirect_uri=http://localhost:3000/facebook_redirect"
 
 
-
 -- DECODERS & ENCODERS
 
 
@@ -60,25 +59,26 @@ decodeProposal =
     (Decode.at [ "data", "attributes", "body" ] Decode.string)
 
 
+
 encodeProposal : Proposal -> String
 encodeProposal proposal =
-  "PROPOSAL"
-  -- http://noredink.github.io/json-to-elm/
-  -- Encode.object
-  --   [ ( "data"
-  --     , Encode.object
-  --       [ ( "type", "proposal" )
-  --       , ( "attributes"
-  --         , Encode.object
-  --           [ ( "title", proposal.title )
-  --           , ( "body", proposal.body )
-  --           ]
-  --         )
-  --       ]
-  --     )
-  --   ]
-  --   |> Encode.encode 0
-
+  let
+    title = Encode.string proposal.title
+    body = Encode.string proposal.body
+    attributes =
+      Encode.object
+        [ ( "title", title )
+        , ( "body", body )
+        ]
+    type_ = Encode.string "proposal"
+    data =
+      Encode.object
+        [ ( "type", type_ )
+        , ( "attributes", attributes )
+        ]
+  in
+  Encode.object [ ( "data", data ) ]
+    |> Encode.encode 0
 
 
 -- COMMANDS

@@ -11,7 +11,6 @@ import View exposing (..)
 import Update exposing (update, validate)
 
 
--- MODEL
 
 initialModel : Route -> Address -> Model
 initialModel route address =
