@@ -1,5 +1,6 @@
-module Api exposing (facebookAuthUrl, Msg(..), Me, authenticateCmd, getMeCmd, createProposalCmd)
+module Api exposing (..)
 
+import Types exposing (..)
 import Http
 import Task exposing (Task)
 import Json.Decode as Decode
@@ -7,47 +8,36 @@ import Json.Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
-type Msg
-  = GotAccessToken String
-  | AuthFailed Http.Error
-  | ProposalCreated Proposal
-  | ProposalCreationFailed Http.Error
-  | GotMe Me
-
-
-type alias Me =
-  { name : String
-  }
-
-type alias Proposal =
-  { title : String
-  , body : String
-  }
-
-
-
--- ENDPOINTS
-
-
 apiUrl : String
-apiUrl = "http://localhost:4000"
+apiUrl =
+  -- host and port should be dynamic and coming from window.location.host
+  "http://localhost:4000"
 
 
 tokenEndpoint : String
-tokenEndpoint = apiUrl ++ "/token"
+tokenEndpoint =
+  apiUrl ++ "/token"
 
 
 meEndpoint : String
-meEndpoint = apiUrl ++ "/me"
+meEndpoint =
+  apiUrl ++ "/me"
+
 
 newProposalEndpoint : String
-newProposalEndpoint = apiUrl ++ "/proposals"
+newProposalEndpoint =
+  apiUrl ++ "/proposals"
+
 
 
 -- TODO: move client_id and redirect_uri into environment variables
-facebookAuthUrl : String
-facebookAuthUrl = "https://www.facebook.com/dialog/oauth?client_id=1583083701926004&redirect_uri=http://localhost:3000/facebook_redirect"
 
+
+facebookAuthUrl : String
+facebookAuthUrl =
+  -- host and port should be dynamic and coming from window.location.host
+  "https://www.facebook.com/dialog/oauth?client_id=1583083701926004"
+  ++ "&redirect_uri=http://localhost:3000/facebook_redirect"
 
 
 -- DECODERS & ENCODERS
@@ -55,51 +45,53 @@ facebookAuthUrl = "https://www.facebook.com/dialog/oauth?client_id=1583083701926
 
 decodeToken : Decoder String
 decodeToken =
-  Decode.at ["access_token"] Decode.string
-  
+  Decode.at [ "access_token" ] Decode.string
+
 
 decodeMe : Decoder Me
 decodeMe =
   Decode.object1 Me
-    (Decode.at ["data", "attributes", "name"] Decode.string)
+    (Decode.at [ "data", "attributes", "name" ] Decode.string)
 
 
 decodeProposal : Decoder Proposal
 decodeProposal =
   Decode.object2 Proposal
-    (Decode.at ["data", "attributes", "title"] Decode.string)
-    (Decode.at ["data", "attributes", "body"] Decode.string)
+    (Decode.at [ "data", "attributes", "title" ] Decode.string)
+    (Decode.at [ "data", "attributes", "body" ] Decode.string)
+
 
 
 encodeProposal : Proposal -> String
 encodeProposal proposal =
-  -- http://noredink.github.io/json-to-elm/
-  Encode.object
-    [ ( "data"
-      , Encode.object
-          [ ( "type", "proposal" )
-          , ( "attributes"
-            , Encode.object
-              [ ( "title", proposal.title )
-              , ( "body", proposal.body )
-              ]
-            )
-          ]
-      )
-    ] 
+  let
+    title = Encode.string proposal.title
+    body = Encode.string proposal.body
+    attributes =
+      Encode.object
+        [ ( "title", title )
+        , ( "body", body )
+        ]
+    type_ = Encode.string "proposal"
+    data =
+      Encode.object
+        [ ( "type", type_ )
+        , ( "attributes", attributes )
+        ]
+  in
+  Encode.object [ ( "data", data ) ]
     |> Encode.encode 0
-
 
 
 -- COMMANDS
 
 
-authenticateCmd : String -> (Msg -> a) -> Cmd a
+authenticateCmd : String -> (AsyncActionMsg -> a) -> Cmd a
 authenticateCmd authCode wrapMsg =
   let
     body =
       "{\"auth_code\": \"" ++ authCode ++ "\"}"
-    
+
     requestTask =
       exchangeAuthCodeForToken body
   in
@@ -107,18 +99,18 @@ authenticateCmd authCode wrapMsg =
       |> Cmd.map wrapMsg
 
 
-getMeCmd : String -> (Msg -> a) -> Cmd a
+getMeCmd : String -> (AsyncActionMsg -> a) -> Cmd a
 getMeCmd accessToken wrapMsg =
   getWithToken meEndpoint accessToken decodeMe
     |> Task.perform AuthFailed GotMe
     |> Cmd.map wrapMsg
 
 
-createProposalCmd : Proposal -> String -> (Msg -> a) -> Cmd a
+createProposalCmd : Proposal -> String -> (AsyncActionMsg -> a) -> Cmd a
 createProposalCmd proposal accessToken wrapMsg =
   postProposal proposal accessToken
     |> Task.perform ProposalCreationFailed ProposalCreated
-    |> Cmd.map wrapMsg  
+    |> Cmd.map wrapMsg
 
 
 
@@ -127,7 +119,7 @@ createProposalCmd proposal accessToken wrapMsg =
 
 exchangeAuthCodeForToken : String -> Task Http.Error String
 exchangeAuthCodeForToken body =
-  { verb = "POST", headers = [("Content-Type", "application/json")], url = tokenEndpoint, body = Http.string body }
+  { verb = "POST", headers = [ ( "Content-Type", "application/json" ) ], url = tokenEndpoint, body = Http.string body }
     |> Http.send Http.defaultSettings
     |> Http.fromJson decodeToken
 
@@ -136,9 +128,9 @@ postProposal : Proposal -> String -> Task Http.Error Proposal
 postProposal proposal accessToken =
   { verb = "POST"
   , headers =
-      [ ("Authorization", "Bearer " ++ accessToken)
-      , ("Content-Type", "application/vnd.api+json")
-      ]
+    [ ( "Authorization", "Bearer " ++ accessToken )
+    , ( "Content-Type", "application/vnd.api+json" )
+    ]
   , url = newProposalEndpoint
   , body = Http.string (encodeProposal proposal)
   }
@@ -147,14 +139,14 @@ postProposal proposal accessToken =
 
 
 getWithToken : String -> String -> Decoder a -> Task Http.Error a
-getWithToken url accessToken responseDecoder  =
+getWithToken url accessToken responseDecoder =
   { verb = "GET"
   , headers =
-      [ ("Authorization", "Bearer " ++ accessToken)
-      , ("Content-Type", "application/vnd.api+json")
-      ]
+    [ ( "Authorization", "Bearer " ++ accessToken )
+    , ( "Content-Type", "application/vnd.api+json" )
+    ]
   , url = url
   , body = Http.empty
   }
-  |> Http.send Http.defaultSettings
-  |> Http.fromJson responseDecoder
+    |> Http.send Http.defaultSettings
+    |> Http.fromJson responseDecoder

@@ -15,6 +15,8 @@
   },
   "devDependencies": {},
   "scripts": {
+    "build-elm": "elm-make src/Main.elm --output dist/elm.js",
+    "watch-elm": "watch --wait=1 'elm-make src/Main.elm --output dist/elm.js' ./src",
     "build": "webpack",
     "watch": "webpack --watch",
     "dev": "node dev_server.js"
