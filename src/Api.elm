@@ -10,6 +10,7 @@ import Json.Encode as Encode
 
 apiUrl : String
 apiUrl =
+  -- host and port should be dynamic and coming from window.location.host
   "http://localhost:4000"
 
 
@@ -34,6 +35,7 @@ newProposalEndpoint =
 
 facebookAuthUrl : String
 facebookAuthUrl =
+  -- host and port should be dynamic and coming from window.location.host
   "https://www.facebook.com/dialog/oauth?client_id=1583083701926004"
   ++ "&redirect_uri=http://localhost:3000/facebook_redirect"
 
