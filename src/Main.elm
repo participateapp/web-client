@@ -1,7 +1,7 @@
 import Html exposing (..)
 import Html.App as App
 import Html.Events exposing (..)
-import Html.Attributes exposing (..)
+import Html.Attributes exposing (style, href, class)
 
 import Material
 import Material.Scheme
@@ -162,6 +162,9 @@ update msg model =
     Mdl msg' ->
       Material.update msg' model
 
+    NewProposalFormMsg ->
+      ( model, Cmd.none )
+
 
 validate : Validation () Proposal
 validate =
@@ -243,9 +246,9 @@ formView form =
     body = Form.getFieldAsString "body" form
   in
     grid []
-      [ cell [ Material.Grid.size All 12 ] [ titleField model ]
-      , cell [ Material.Grid.size All 12 ] [ bodyField model ]
-      , cell [ Material.Grid.size All 12 ] [ submitButton model ]
+      [ cell [ size All 12 ] [ text "...title..." {- titleField model -} ]
+      , cell [ size All 12 ] [ text "...body..." {- bodyField model -} ]
+      , cell [ size All 12 ] [ text "Submit" ]
       ]
 
 
