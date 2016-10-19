@@ -77,11 +77,11 @@ encodeProposal proposal =
   Encode.object
     [ ( "data"
       , Encode.object
-          [ ( "type", "proposal" )
+          [ ( "type", Encode.string "proposal" )
           , ( "attributes"
             , Encode.object
-              [ ( "title", proposal.title )
-              , ( "body", proposal.body )
+              [ ( "title", Encode.string proposal.title )
+              , ( "body", Encode.string proposal.body )
               ]
             )
           ]
