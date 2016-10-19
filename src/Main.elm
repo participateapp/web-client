@@ -1,7 +1,7 @@
 import Html exposing (..)
 import Html.App as App
 import Html.Events exposing (..)
-import Html.Attributes exposing (..)
+import Html.Attributes exposing (style, href, class)
 
 import Material
 import Material.Scheme
@@ -19,7 +19,7 @@ import Form exposing (Form)
 import Form.Field
 import Form.Input
 import Form.Error
-import Form.Validate exposing (Validation, form1, get, string)
+import Form.Validate exposing (Validation, form1, form2, get, string)
 
 import Dict
 import String
@@ -143,7 +143,7 @@ update msg model =
           ({ model | me = me}, Navigation.newUrl "/")
 
         Api.ProposalCreated proposal ->
-          ({ model }, Navigation.newUrl "/")
+          (model, Navigation.newUrl "/")
 
         Api.ProposalCreationFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)
@@ -151,7 +151,7 @@ update msg model =
     FormMsg formMsg ->
       case ( formMsg, Form.getOutput model.form ) of
         ( Form.Submit, Just proposal ) ->
-          model ! [ Api.createProposalCmd proposal accessToken ApiMsg ]
+          model ! [ Api.createProposalCmd proposal model.accessToken ApiMsg ]
 
         _ ->
           ({ model | form = Form.update formMsg model.form }, Cmd.none)
@@ -161,6 +161,9 @@ update msg model =
 
     Mdl msg' ->
       Material.update msg' model
+
+    NewProposalFormMsg ->
+      ( model, Cmd.none )
 
 
 validate : Validation () Proposal
@@ -243,9 +246,9 @@ formView form =
     body = Form.getFieldAsString "body" form
   in
     grid []
-      [ cell [ size All 12 ] [ titleField model ]
-      , cell [ size All 12 ] [ bodyField model ]
-      , cell [ size All 12 ] [ submitButton model ]
+      [ cell [ size All 12 ] [ text "...title..." {- titleField model -} ]
+      , cell [ size All 12 ] [ text "...body..." {- bodyField model -} ]
+      , cell [ size All 12 ] [ text "Submit" ]
       ]
 
 
