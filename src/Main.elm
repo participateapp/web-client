@@ -122,6 +122,7 @@ type alias Proposal =
 
 type Msg
   = ApiMsg Api.Msg
+  | NavigateToPath String
   | FormMsg Form.Msg
   | NewProposalFormMsg
   | NoOp
@@ -147,6 +148,11 @@ update msg model =
 
         Api.ProposalCreationFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)
+
+    NavigateToPath path ->
+      ( model,
+        Navigation.newUrl <| Hop.outputFromPath hopConfig path
+      )
 
     FormMsg formMsg ->
       case ( formMsg, Form.getOutput model.form ) of
@@ -209,7 +215,8 @@ viewBody model =
             text <| "Hello, " ++ ( .name model.me )
             ,
             h3 []
-              [ a [ href "/new-proposal" ] [ text "Create a proposal" ] ]
+              [ a [ onClick <| NavigateToPath "/new-proposal" ]
+                  [ text "Create a proposal 3" ] ]
           ]
 
     NewProposalRoute ->
