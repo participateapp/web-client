@@ -229,18 +229,6 @@ viewBody model =
 
 formView : Model -> Html Msg
 formView model =
-  let
-    errorFor field =
-      case field.liveError of
-        Just error ->
-          div [ class "error" ] [ text (toString error) ]
-
-        Nothing ->
-          text ""
-
-    title = Form.getFieldAsString "title" model.form
-    body = Form.getFieldAsString "body" model.form
-  in
     grid []
       [ cell [ size All 12 ] [ titleField model ]
       , cell [ size All 12 ] [ bodyField model ]
