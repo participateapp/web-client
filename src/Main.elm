@@ -325,7 +325,8 @@ submitButton model =
     model.mdl
     [ Button.raised
     , Button.ripple
-    , Button.colored
+    , Color.background <| Color.color Color.Green Color.S500
+    , Color.text <| Color.white
     , Button.onClick <| FormMsg <| Form.Submit
     ]
     [ text "Submit" ]
