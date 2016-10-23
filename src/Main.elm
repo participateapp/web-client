@@ -229,18 +229,6 @@ viewBody model =
 
 formView : Model -> Html Msg
 formView model =
-  let
-    errorFor field =
-      case field.liveError of
-        Just error ->
-          div [ class "error" ] [ text (toString error) ]
-
-        Nothing ->
-          text ""
-
-    title = Form.getFieldAsString "title" model.form
-    body = Form.getFieldAsString "body" model.form
-  in
     grid []
       [ cell [ size All 12 ] [ titleField model ]
       , cell [ size All 12 ] [ bodyField model ]
@@ -272,7 +260,7 @@ titleField model =
           []
   in
       Textfield.render Mdl
-        [ 1, 0 ]
+        [ 0, 0 ]
         model.mdl
         ([ Textfield.label "Title"
          , Textfield.floatingLabel
@@ -309,11 +297,11 @@ bodyField model =
           []
   in
       Textfield.render Mdl
-        [ 1, 0 ]
+        [ 0, 1 ]
         model.mdl
         ([ Textfield.label "Body"
          , Textfield.floatingLabel
-         , Textfield.text'
+         , Textfield.textarea
          , Textfield.value <| Maybe.withDefault "" body.value
          , Textfield.onInput <| FormMsg << (Form.Field.Text >> Form.Input body.path)
          , Textfield.onFocus <| FormMsg <| Form.Focus body.path
@@ -326,7 +314,7 @@ bodyField model =
 submitButton : Model -> Html Msg
 submitButton model =
   Button.render Mdl
-    [ 1, 1 ]
+    [ 1 ]
     model.mdl
     [ Button.raised
     , Button.ripple
