@@ -122,8 +122,8 @@ type alias Proposal =
 
 type Msg
   = ApiMsg Api.Msg
+  | NavigateToPath String
   | FormMsg Form.Msg
-  | NewProposalFormMsg
   | NoOp
   | Mdl (Material.Msg Msg)
 
@@ -148,6 +148,11 @@ update msg model =
         Api.ProposalCreationFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)
 
+    NavigateToPath path ->
+      ( model,
+        Navigation.newUrl <| Hop.outputFromPath hopConfig path
+      )
+
     FormMsg formMsg ->
       case ( formMsg, Form.getOutput model.form ) of
         ( Form.Submit, Just proposal ) ->
@@ -161,9 +166,6 @@ update msg model =
 
     Mdl msg' ->
       Material.update msg' model
-
-    NewProposalFormMsg ->
-      ( model, Cmd.none )
 
 
 validate : Validation () Proposal
@@ -209,7 +211,8 @@ viewBody model =
             text <| "Hello, " ++ ( .name model.me )
             ,
             h3 []
-              [ a [ href "/new-proposal" ] [ text "Create a proposal" ] ]
+              [ a [ onClick <| NavigateToPath "/new-proposal" ]
+                  [ text "Create a proposal" ] ]
           ]
 
     NewProposalRoute ->
@@ -219,7 +222,7 @@ viewBody model =
             [ text <| "New Proposal" ]
           ,
 
-          App.map FormMsg (formView model.form)
+          formView model
         ]
 
     NotFoundRoute ->
@@ -231,24 +234,12 @@ viewBody model =
         [ text <| "Authenticating, please wait..." ]
 
 
-formView : Form () Proposal -> Html Form.Msg
-formView form =
-  let
-    errorFor field =
-      case field.liveError of
-        Just error ->
-          div [ class "error" ] [ text (toString error) ]
-
-        Nothing ->
-          text ""
-
-    title = Form.getFieldAsString "title" form
-    body = Form.getFieldAsString "body" form
-  in
+formView : Model -> Html Msg
+formView model =
     grid []
-      [ cell [ size All 12 ] [ text "...title..." {- titleField model -} ]
-      , cell [ size All 12 ] [ text "...body..." {- bodyField model -} ]
-      , cell [ size All 12 ] [ text "Submit" ]
+      [ cell [ size All 12 ] [ titleField model ]
+      , cell [ size All 12 ] [ bodyField model ]
+      , cell [ size All 12 ] [ submitButton model ]
       ]
 
 
@@ -276,7 +267,7 @@ titleField model =
           []
   in
       Textfield.render Mdl
-        [ 1, 0 ]
+        [ 0, 0 ]
         model.mdl
         ([ Textfield.label "Title"
          , Textfield.floatingLabel
@@ -290,6 +281,54 @@ titleField model =
         )
 
 
+bodyField : Model -> Html Msg
+bodyField model =
+  let
+    body =
+      Form.getFieldAsString "body" model.form
+
+    conditionalProperties =
+      case body.liveError of
+        Just error ->
+          case error of
+            Form.Error.InvalidString ->
+              [ Textfield.error "Can't be blank" ]
+
+            Form.Error.Empty ->
+              [ Textfield.error "Can't be blank" ]
+
+            _ ->
+              [ Textfield.error <| toString error ]
+
+        Nothing ->
+          []
+  in
+      Textfield.render Mdl
+        [ 0, 1 ]
+        model.mdl
+        ([ Textfield.label "Body"
+         , Textfield.floatingLabel
+         , Textfield.textarea
+         , Textfield.value <| Maybe.withDefault "" body.value
+         , Textfield.onInput <| FormMsg << (Form.Field.Text >> Form.Input body.path)
+         , Textfield.onFocus <| FormMsg <| Form.Focus body.path
+         , Textfield.onBlur <| FormMsg <| Form.Blur body.path
+         ]
+           ++ conditionalProperties
+        )
+
+
+submitButton : Model -> Html Msg
+submitButton model =
+  Button.render Mdl
+    [ 1 ]
+    model.mdl
+    [ Button.raised
+    , Button.ripple
+    , Button.colored
+    , Button.onClick <| FormMsg <| Form.Submit
+    ]
+    [ text "Submit" ]
 
 
 -- APP
