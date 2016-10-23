@@ -301,7 +301,7 @@ bodyField model =
         model.mdl
         ([ Textfield.label "Body"
          , Textfield.floatingLabel
-         , Textfield.text'
+         , Textfield.textarea
          , Textfield.value <| Maybe.withDefault "" body.value
          , Textfield.onInput <| FormMsg << (Form.Field.Text >> Form.Input body.path)
          , Textfield.onFocus <| FormMsg <| Form.Focus body.path
