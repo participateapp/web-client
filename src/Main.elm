@@ -260,7 +260,7 @@ titleField model =
           []
   in
       Textfield.render Mdl
-        [ 1, 0 ]
+        [ 0, 0 ]
         model.mdl
         ([ Textfield.label "Title"
          , Textfield.floatingLabel
@@ -297,7 +297,7 @@ bodyField model =
           []
   in
       Textfield.render Mdl
-        [ 1, 0 ]
+        [ 0, 1 ]
         model.mdl
         ([ Textfield.label "Body"
          , Textfield.floatingLabel
@@ -314,7 +314,7 @@ bodyField model =
 submitButton : Model -> Html Msg
 submitButton model =
   Button.render Mdl
-    [ 1, 1 ]
+    [ 1 ]
     model.mdl
     [ Button.raised
     , Button.ripple
