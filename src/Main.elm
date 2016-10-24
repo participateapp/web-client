@@ -76,7 +76,20 @@ urlParser =
 
 urlUpdate : ( Route, Address ) -> Model -> ( Model, Cmd Msg )
 urlUpdate ( route, address ) model =
-  ( { model | route = route, address = address }, Cmd.none )
+  let
+    model1 = { model | route = route, address = address }
+    _ = Debug.log "urlUpdate" ( route, address )
+  in
+    case route of
+      ProposalRoute id ->
+        case Dict.get id model.proposals of
+          Nothing ->
+            -- Todo: Get proposal from server
+            ( model1, Cmd.none )
+          Just _ ->
+            ( model1, Cmd.none )
+      _ ->
+        ( model1, Cmd.none )
 
 
 checkForAuthCode : Address -> Cmd Msg
