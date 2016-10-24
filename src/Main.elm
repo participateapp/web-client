@@ -21,7 +21,7 @@ import Form.Input
 import Form.Error
 import Form.Validate exposing (Validation, form1, form2, get, string)
 
-import Dict
+import Dict exposing (Dict)
 import String
 
 import Navigation
@@ -102,6 +102,7 @@ type alias Model =
   , me : Api.Me
   , form : Form () Proposal
   , mdl : Material.Model
+  , proposals : Dict String Proposal
   }
 
 
@@ -114,6 +115,7 @@ initialModel route address =
   , me = { name = "" }
   , form = Form.initial [] validate
   , mdl = Material.model
+  , proposals = Dict.empty
   }
 
 
@@ -150,7 +152,7 @@ update msg model =
           ({ model | me = me}, Navigation.newUrl "/")
 
         Api.ProposalCreated id proposal ->
-          ( model
+          ( { model | proposals = Dict.insert id proposal model.proposals }
           , Navigation.newUrl
               <| Hop.output hopConfig { path = ["proposals", id], query = Dict.empty }
           )
