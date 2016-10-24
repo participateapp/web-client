@@ -1,4 +1,10 @@
-module Api exposing (facebookAuthUrl, Msg(..), Me, authenticateCmd, getMeCmd, createProposalCmd)
+module Api
+  exposing
+    ( facebookAuthUrl
+    , Msg(..), Me
+    , authenticateCmd, getMeCmd, createProposalCmd, getProposalCmd
+    )
+
 
 import Http
 import Task exposing (Task)
@@ -12,6 +18,8 @@ type Msg
   | AuthFailed Http.Error
   | ProposalCreated String Proposal
   | ProposalCreationFailed Http.Error
+  | GotProposal String Proposal
+  | GettingProposalFailed Http.Error
   | GotMe Me
 
 
@@ -42,6 +50,10 @@ meEndpoint = apiUrl ++ "/me"
 
 newProposalEndpoint : String
 newProposalEndpoint = apiUrl ++ "/proposals"
+
+getProposalEndpoint : String -> String
+getProposalEndpoint id =
+  apiUrl ++ "/proposals/" ++ id
 
 
 -- TODO: move client_id and redirect_uri into environment variables
@@ -124,6 +136,13 @@ createProposalCmd proposal accessToken wrapMsg =
     |> Cmd.map wrapMsg
 
 
+getProposalCmd : String -> String -> (Msg -> a) -> Cmd a
+getProposalCmd id accessToken wrapMsg =
+  getProposal id accessToken
+    |> Task.perform GettingProposalFailed (uncurry GotProposal)
+    |> Cmd.map wrapMsg
+
+
 
 -- HTTP requests
 
@@ -144,6 +163,20 @@ postProposal proposal accessToken =
       ]
   , url = newProposalEndpoint
   , body = Http.string (encodeProposal proposal)
+  }
+    |> Http.send Http.defaultSettings
+    |> Http.fromJson decodeProposal
+
+
+getProposal : String -> String -> Task Http.Error (String, {- Maybe -} Proposal)
+getProposal id accessToken =
+  { verb = "GET"
+  , headers =
+      [ ("Authorization", "Bearer " ++ accessToken)
+      , ("Content-Type", "application/vnd.api+json")
+      ]
+  , url = getProposalEndpoint id
+  , body = Http.empty
   }
     |> Http.send Http.defaultSettings
     |> Http.fromJson decodeProposal

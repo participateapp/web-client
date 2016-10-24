@@ -84,8 +84,9 @@ urlUpdate ( route, address ) model =
       ProposalRoute id ->
         case Dict.get id model.proposals of
           Nothing ->
-            -- Todo: Get proposal from server
-            ( model1, Cmd.none )
+            ( model1
+            , Api.getProposalCmd id model.accessToken ApiMsg
+            )
           Just _ ->
             ( model1, Cmd.none )
       _ ->
@@ -167,12 +168,20 @@ update msg model =
           ({ model | me = me}, Navigation.newUrl "/")
 
         Api.ProposalCreated id proposal ->
-          ( { model | proposals = Dict.insert id proposal model.proposals }
+          ( model -- { model | proposals = Dict.insert id proposal model.proposals }
           , Navigation.newUrl
               <| Hop.output hopConfig { path = ["proposals", id], query = Dict.empty }
           )
 
         Api.ProposalCreationFailed httpError ->
+          ({ model | error = Just <| toString httpError }, Cmd.none)
+
+        Api.GotProposal id proposal ->
+          ( { model | proposals = Dict.insert id proposal model.proposals }
+          , Cmd.none
+          )
+
+        Api.GettingProposalFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)
 
     NavigateToPath path ->
