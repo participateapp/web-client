@@ -242,7 +242,7 @@ viewBody model =
     ProposalRoute id ->
       div []
         [ h2 [] [ text "Proposal" ]
-        , p [] [ text "Id: ", text id ]
+        , viewProposal model id
         ]
 
     NotFoundRoute ->
@@ -349,6 +349,18 @@ submitButton model =
     , Button.onClick <| FormMsg <| Form.Submit
     ]
     [ text "Submit" ]
+
+
+viewProposal : Model -> String -> Html Msg
+viewProposal model id =
+  case Dict.get id model.proposals of
+    Nothing ->
+      div [] [text "Unknown proposal id: ", text id]
+    Just proposal ->
+      div []
+        [ div [] [text "Titel: ", text proposal.title]
+        , div [] [text "Body: ", text proposal.body]
+        ]
 
 
 -- APP
