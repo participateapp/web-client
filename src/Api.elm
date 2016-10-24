@@ -10,7 +10,7 @@ import Json.Encode as Encode
 type Msg
   = GotAccessToken String
   | AuthFailed Http.Error
-  | ProposalCreated Proposal
+  | ProposalCreated String Proposal
   | ProposalCreationFailed Http.Error
   | GotMe Me
 
@@ -64,11 +64,14 @@ decodeMe =
     (Decode.at ["data", "attributes", "name"] Decode.string)
 
 
-decodeProposal : Decoder Proposal
+decodeProposal : Decoder (String, Proposal)
 decodeProposal =
-  Decode.object2 Proposal
-    (Decode.at ["data", "attributes", "title"] Decode.string)
-    (Decode.at ["data", "attributes", "body"] Decode.string)
+  Decode.object2 (,)
+  ( Decode.at ["data", "id"] Decode.string )
+    ( Decode.object2 Proposal
+        (Decode.at ["data", "attributes", "title"] Decode.string)
+        (Decode.at ["data", "attributes", "body"] Decode.string)
+    )
 
 
 encodeProposal : Proposal -> String
@@ -117,8 +120,8 @@ getMeCmd accessToken wrapMsg =
 createProposalCmd : Proposal -> String -> (Msg -> a) -> Cmd a
 createProposalCmd proposal accessToken wrapMsg =
   postProposal proposal accessToken
-    |> Task.perform ProposalCreationFailed ProposalCreated
-    |> Cmd.map wrapMsg  
+    |> Task.perform ProposalCreationFailed (uncurry ProposalCreated)
+    |> Cmd.map wrapMsg
 
 
 
@@ -132,7 +135,7 @@ exchangeAuthCodeForToken body =
     |> Http.fromJson decodeToken
 
 
-postProposal : Proposal -> String -> Task Http.Error Proposal
+postProposal : Proposal -> String -> Task Http.Error (String, Proposal)
 postProposal proposal accessToken =
   { verb = "POST"
   , headers =
