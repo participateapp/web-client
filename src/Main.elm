@@ -38,6 +38,7 @@ import Api
 type Route
   = Home
   | NewProposalRoute
+  | ProposalRoute String
   | FacebookRedirect
   | NotFoundRoute
 
@@ -47,6 +48,7 @@ routes =
   UrlParser.oneOf
     [ UrlParser.format Home (UrlParser.s "")
     , UrlParser.format NewProposalRoute (UrlParser.s "new-proposal")
+    , UrlParser.format ProposalRoute (UrlParser.s "proposals" </> UrlParser.string)
     , UrlParser.format FacebookRedirect (UrlParser.s "facebook_redirect")
     ]
 
@@ -235,6 +237,12 @@ viewBody model =
           ,
 
           formView model
+        ]
+
+    ProposalRoute id ->
+      div []
+        [ h2 [] [ text "Proposal" ]
+        , p [] [ text "Id: ", text id ]
         ]
 
     NotFoundRoute ->
