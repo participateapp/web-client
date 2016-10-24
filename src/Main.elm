@@ -107,7 +107,14 @@ type alias Model =
 
 initialModel : Route -> Address -> Model
 initialModel route address = 
-  Model route address "" Nothing { name = "" } (Form.initial [] validate) Material.model
+  { route = route
+  , address = address
+  , accessToken = ""
+  , error = Nothing
+  , me = { name = "" }
+  , form = Form.initial [] validate
+  , mdl = Material.model
+  }
 
 
 type alias Proposal =
