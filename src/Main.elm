@@ -143,7 +143,10 @@ update msg model =
           ({ model | me = me}, Navigation.newUrl "/")
 
         Api.ProposalCreated id proposal ->
-          (model, Navigation.newUrl "/")
+          ( model
+          , Navigation.newUrl
+              <| Hop.output hopConfig { path = ["proposals", id], query = Dict.empty }
+          )
 
         Api.ProposalCreationFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)
