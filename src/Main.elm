@@ -129,11 +129,11 @@ type alias Model =
   }
 
 
-initialModel : Route -> Address -> Model
-initialModel route address = 
+initialModel : String -> Route -> Address -> Model
+initialModel accessToken route address =
   { route = route
   , address = address
-  , accessToken = ""
+  , accessToken = accessToken
   , error = Nothing
   , me = { name = "" }
   , form = Form.initial [] validate
@@ -400,11 +400,11 @@ viewProposal model id =
 -- APP
 
 
-init : flags -> ( Route, Address ) -> ( Model, Cmd Msg )
+init : Flags -> ( Route, Address ) -> ( Model, Cmd Msg )
 init flags ( route, address ) =
-  let _ = Debug.log "flags" flags
-  in
-    ( initialModel route address, checkForAuthCode address)
+  ( initialModel (Maybe.withDefault "" flags.accessToken) route address
+  , checkForAuthCode address
+  )
 
 
 type alias Flags =
