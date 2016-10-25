@@ -1,3 +1,5 @@
+port module Main exposing (main)
+
 import Html exposing (..)
 import Html.App as App
 import Html.Events exposing (..)
@@ -107,6 +109,11 @@ checkForAuthCode address =
 
 
 
+-- Port for storage of accessToken
+
+port storeAccessToken : String -> Cmd msg
+
+
 -- MODEL
 
 
@@ -159,7 +166,12 @@ update msg model =
     ApiMsg apiMsg ->
       case apiMsg of
         Api.GotAccessToken accessToken ->
-          ({ model | accessToken = accessToken }, Api.getMeCmd accessToken ApiMsg )
+          ( { model | accessToken = accessToken }
+          , Cmd.batch
+              [ storeAccessToken accessToken
+              , Api.getMeCmd accessToken ApiMsg
+              ]
+          )
 
         Api.AuthFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)

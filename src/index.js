@@ -9,6 +9,10 @@ var mountNode = document.getElementById('main');
 // The third value on embed are the initial values for incomming ports into Elm
 var app = Elm.Main.embed(mountNode);
 
+app.ports.storeAccessToken.subscribe (function (accessToken) {
+  sessionStorage.setItem ('accessToken', accessToken);
+});
+
 // TODO: Figure out how popup that only gets the authorization code
 // so we can post it to our backend and continue oauth from there
 
