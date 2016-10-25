@@ -400,6 +400,10 @@ viewProposal model id =
 -- APP
 
 
+type alias Flags =
+  { accessToken : Maybe String }
+
+
 init : Flags -> ( Route, Address ) -> ( Model, Cmd Msg )
 init flags ( route, address ) =
   ( initialModel (Maybe.withDefault "" flags.accessToken) route address
@@ -407,9 +411,6 @@ init flags ( route, address ) =
   )
 
 
-type alias Flags =
-  { accessToken : Maybe String }
- 
 main : Program Flags
 main =
   Navigation.programWithFlags urlParser
