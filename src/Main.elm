@@ -168,7 +168,7 @@ update msg model =
           ({ model | me = me}, Navigation.newUrl "/")
 
         Api.ProposalCreated id proposal ->
-          ( model -- { model | proposals = Dict.insert id proposal model.proposals }
+          ( { model | proposals = Dict.insert id proposal model.proposals }
           , Navigation.newUrl
               <| Hop.output hopConfig { path = ["proposals", id], query = Dict.empty }
           )
