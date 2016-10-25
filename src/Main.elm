@@ -400,14 +400,19 @@ viewProposal model id =
 -- APP
 
 
-init : ( Route, Address ) -> ( Model, Cmd Msg )
-init ( route, address ) =
-  ( initialModel route address, checkForAuthCode address)
+init : flags -> ( Route, Address ) -> ( Model, Cmd Msg )
+init flags ( route, address ) =
+  let _ = Debug.log "flags" flags
+  in
+    ( initialModel route address, checkForAuthCode address)
 
+
+type alias Flags =
+  { accessToken : Maybe String }
  
-main : Program Never
+main : Program Flags
 main =
-  Navigation.program urlParser
+  Navigation.programWithFlags urlParser
     { init = init
     , update = update
     , urlUpdate = urlUpdate
