@@ -406,9 +406,11 @@ type alias Flags =
 
 init : Flags -> ( Route, Address ) -> ( Model, Cmd Msg )
 init flags ( route, address ) =
-  ( initialModel (Maybe.withDefault "" flags.accessToken) route address
-  , checkForAuthCode address
-  )
+  let
+    model0 = initialModel (Maybe.withDefault "" flags.accessToken) route address
+    ( model1, cmd1 ) = urlUpdate ( route, address ) model0
+  in
+    ( model1, Cmd.batch [cmd1, checkForAuthCode address] )
 
 
 main : Program Flags
