@@ -6,8 +6,16 @@ require('./index.html');
 var Elm = require('./Main.elm');
 var mountNode = document.getElementById('main');
 
+var programFlags = {
+  accessToken: sessionStorage.getItem ('accessToken')
+};
+
 // The third value on embed are the initial values for incomming ports into Elm
-var app = Elm.Main.embed(mountNode);
+var app = Elm.Main.embed(mountNode, programFlags);
+
+app.ports.storeAccessToken.subscribe (function (accessToken) {
+  sessionStorage.setItem ('accessToken', accessToken);
+});
 
 // TODO: Figure out how popup that only gets the authorization code
 // so we can post it to our backend and continue oauth from there

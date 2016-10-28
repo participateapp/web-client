@@ -1,4 +1,10 @@
-module Api exposing (facebookAuthUrl, Msg(..), Me, authenticateCmd, getMeCmd, createProposalCmd)
+module Api
+  exposing
+    ( facebookAuthUrl
+    , Msg(..), Me
+    , authenticateCmd, getMeCmd, createProposalCmd, getProposalCmd
+    )
+
 
 import Http
 import Task exposing (Task)
@@ -10,8 +16,10 @@ import Json.Encode as Encode
 type Msg
   = GotAccessToken String
   | AuthFailed Http.Error
-  | ProposalCreated Proposal
+  | ProposalCreated String Proposal
   | ProposalCreationFailed Http.Error
+  | GotProposal String Proposal
+  | GettingProposalFailed Http.Error
   | GotMe Me
 
 
@@ -43,6 +51,10 @@ meEndpoint = apiUrl ++ "/me"
 newProposalEndpoint : String
 newProposalEndpoint = apiUrl ++ "/proposals"
 
+getProposalEndpoint : String -> String
+getProposalEndpoint id =
+  apiUrl ++ "/proposals/" ++ id
+
 
 -- TODO: move client_id and redirect_uri into environment variables
 facebookAuthUrl : String
@@ -64,11 +76,14 @@ decodeMe =
     (Decode.at ["data", "attributes", "name"] Decode.string)
 
 
-decodeProposal : Decoder Proposal
+decodeProposal : Decoder (String, Proposal)
 decodeProposal =
-  Decode.object2 Proposal
-    (Decode.at ["data", "attributes", "title"] Decode.string)
-    (Decode.at ["data", "attributes", "body"] Decode.string)
+  Decode.object2 (,)
+  ( Decode.at ["data", "id"] Decode.string )
+    ( Decode.object2 Proposal
+        (Decode.at ["data", "attributes", "title"] Decode.string)
+        (Decode.at ["data", "attributes", "body"] Decode.string)
+    )
 
 
 encodeProposal : Proposal -> String
@@ -117,8 +132,15 @@ getMeCmd accessToken wrapMsg =
 createProposalCmd : Proposal -> String -> (Msg -> a) -> Cmd a
 createProposalCmd proposal accessToken wrapMsg =
   postProposal proposal accessToken
-    |> Task.perform ProposalCreationFailed ProposalCreated
-    |> Cmd.map wrapMsg  
+    |> Task.perform ProposalCreationFailed (uncurry ProposalCreated)
+    |> Cmd.map wrapMsg
+
+
+getProposalCmd : String -> String -> (Msg -> a) -> Cmd a
+getProposalCmd id accessToken wrapMsg =
+  getProposal id accessToken
+    |> Task.perform GettingProposalFailed (uncurry GotProposal)
+    |> Cmd.map wrapMsg
 
 
 
@@ -132,7 +154,7 @@ exchangeAuthCodeForToken body =
     |> Http.fromJson decodeToken
 
 
-postProposal : Proposal -> String -> Task Http.Error Proposal
+postProposal : Proposal -> String -> Task Http.Error (String, Proposal)
 postProposal proposal accessToken =
   { verb = "POST"
   , headers =
@@ -141,6 +163,20 @@ postProposal proposal accessToken =
       ]
   , url = newProposalEndpoint
   , body = Http.string (encodeProposal proposal)
+  }
+    |> Http.send Http.defaultSettings
+    |> Http.fromJson decodeProposal
+
+
+getProposal : String -> String -> Task Http.Error (String, {- Maybe -} Proposal)
+getProposal id accessToken =
+  { verb = "GET"
+  , headers =
+      [ ("Authorization", "Bearer " ++ accessToken)
+      , ("Content-Type", "application/vnd.api+json")
+      ]
+  , url = getProposalEndpoint id
+  , body = Http.empty
   }
     |> Http.send Http.defaultSettings
     |> Http.fromJson decodeProposal

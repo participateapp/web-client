@@ -1,3 +1,5 @@
+port module Main exposing (main)
+
 import Html exposing (..)
 import Html.App as App
 import Html.Events exposing (..)
@@ -21,7 +23,7 @@ import Form.Input
 import Form.Error
 import Form.Validate exposing (Validation, form1, form2, get, string)
 
-import Dict
+import Dict exposing (Dict)
 import String
 
 import Navigation
@@ -38,6 +40,7 @@ import Api
 type Route
   = Home
   | NewProposalRoute
+  | ProposalRoute String
   | FacebookRedirect
   | NotFoundRoute
 
@@ -47,6 +50,7 @@ routes =
   UrlParser.oneOf
     [ UrlParser.format Home (UrlParser.s "")
     , UrlParser.format NewProposalRoute (UrlParser.s "new-proposal")
+    , UrlParser.format ProposalRoute (UrlParser.s "proposals" </> UrlParser.string)
     , UrlParser.format FacebookRedirect (UrlParser.s "facebook_redirect")
     ]
 
@@ -74,7 +78,21 @@ urlParser =
 
 urlUpdate : ( Route, Address ) -> Model -> ( Model, Cmd Msg )
 urlUpdate ( route, address ) model =
-  ( { model | route = route, address = address }, Cmd.none )
+  let
+    model1 = { model | route = route, address = address }
+    _ = Debug.log "urlUpdate" ( route, address )
+  in
+    case route of
+      ProposalRoute id ->
+        case Dict.get id model.proposals of
+          Nothing ->
+            ( model1
+            , Api.getProposalCmd id model.accessToken ApiMsg
+            )
+          Just _ ->
+            ( model1, Cmd.none )
+      _ ->
+        ( model1, Cmd.none )
 
 
 checkForAuthCode : Address -> Cmd Msg
@@ -91,6 +109,11 @@ checkForAuthCode address =
 
 
 
+-- Port for storage of accessToken
+
+port storeAccessToken : String -> Cmd msg
+
+
 -- MODEL
 
 
@@ -102,12 +125,21 @@ type alias Model =
   , me : Api.Me
   , form : Form () Proposal
   , mdl : Material.Model
+  , proposals : Dict String Proposal
   }
 
 
-initialModel : Route -> Address -> Model
-initialModel route address = 
-  Model route address "" Nothing { name = "" } (Form.initial [] validate) Material.model
+initialModel : String -> Route -> Address -> Model
+initialModel accessToken route address =
+  { route = route
+  , address = address
+  , accessToken = accessToken
+  , error = Nothing
+  , me = { name = "" }
+  , form = Form.initial [] validate
+  , mdl = Material.model
+  , proposals = Dict.empty
+  }
 
 
 type alias Proposal =
@@ -134,7 +166,12 @@ update msg model =
     ApiMsg apiMsg ->
       case apiMsg of
         Api.GotAccessToken accessToken ->
-          ({ model | accessToken = accessToken }, Api.getMeCmd accessToken ApiMsg )
+          ( { model | accessToken = accessToken }
+          , Cmd.batch
+              [ storeAccessToken accessToken
+              , Api.getMeCmd accessToken ApiMsg
+              ]
+          )
 
         Api.AuthFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)
@@ -142,10 +179,21 @@ update msg model =
         Api.GotMe me ->
           ({ model | me = me}, Navigation.newUrl "/")
 
-        Api.ProposalCreated proposal ->
-          (model, Navigation.newUrl "/")
+        Api.ProposalCreated id proposal ->
+          ( { model | proposals = Dict.insert id proposal model.proposals }
+          , Navigation.newUrl
+              <| Hop.output hopConfig { path = ["proposals", id], query = Dict.empty }
+          )
 
         Api.ProposalCreationFailed httpError ->
+          ({ model | error = Just <| toString httpError }, Cmd.none)
+
+        Api.GotProposal id proposal ->
+          ( { model | proposals = Dict.insert id proposal model.proposals }
+          , Cmd.none
+          )
+
+        Api.GettingProposalFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)
 
     NavigateToPath path ->
@@ -223,6 +271,12 @@ viewBody model =
           ,
 
           formView model
+        ]
+
+    ProposalRoute id ->
+      div []
+        [ h2 [] [ text "Proposal" ]
+        , viewProposal model id
         ]
 
     NotFoundRoute ->
@@ -332,17 +386,37 @@ submitButton model =
     [ text "Submit" ]
 
 
+viewProposal : Model -> String -> Html Msg
+viewProposal model id =
+  case Dict.get id model.proposals of
+    Nothing ->
+      div [] [text "Unknown proposal id: ", text id]
+    Just proposal ->
+      div []
+        [ div [] [text "Titel: ", text proposal.title]
+        , div [] [text "Body: ", text proposal.body]
+        ]
+
+
 -- APP
 
 
-init : ( Route, Address ) -> ( Model, Cmd Msg )
-init ( route, address ) =
-  ( initialModel route address, checkForAuthCode address)
+type alias Flags =
+  { accessToken : Maybe String }
 
- 
-main : Program Never
+
+init : Flags -> ( Route, Address ) -> ( Model, Cmd Msg )
+init flags ( route, address ) =
+  let
+    model0 = initialModel (Maybe.withDefault "" flags.accessToken) route address
+    ( model1, cmd1 ) = urlUpdate ( route, address ) model0
+  in
+    ( model1, Cmd.batch [cmd1, checkForAuthCode address] )
+
+
+main : Program Flags
 main =
-  Navigation.program urlParser
+  Navigation.programWithFlags urlParser
     { init = init
     , update = update
     , urlUpdate = urlUpdate
