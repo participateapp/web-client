@@ -16,9 +16,9 @@ import Json.Encode as Encode
 type Msg
   = GotAccessToken String
   | AuthFailed Http.Error
-  | ProposalCreated String Proposal
+  | ProposalCreated Proposal
   | ProposalCreationFailed Http.Error
-  | GotProposal String Proposal
+  | GotProposal Proposal
   | GettingProposalFailed Http.Error
   | GotMe Me
 
@@ -27,9 +27,14 @@ type alias Me =
   { name : String
   }
 
-type alias Proposal =
+type alias ProposalAttr =
   { title : String
   , body : String
+  }
+
+type alias Proposal =
+  { id : String
+  , attr: ProposalAttr
   }
 
 
@@ -76,17 +81,18 @@ decodeMe =
     (Decode.at ["data", "attributes", "name"] Decode.string)
 
 
-decodeProposal : Decoder (String, Proposal)
+decodeProposal : Decoder Proposal
 decodeProposal =
-  Decode.object2 (,)
-  ( Decode.at ["data", "id"] Decode.string )
-    ( Decode.object2 Proposal
+  Decode.object2
+    Proposal
+    ( Decode.at ["data", "id"] Decode.string )
+    ( Decode.object2 ProposalAttr
         (Decode.at ["data", "attributes", "title"] Decode.string)
         (Decode.at ["data", "attributes", "body"] Decode.string)
     )
 
 
-encodeProposal : Proposal -> String
+encodeProposal : ProposalAttr -> String
 encodeProposal proposal =
   -- http://noredink.github.io/json-to-elm/
   Encode.object
@@ -129,17 +135,17 @@ getMeCmd accessToken wrapMsg =
     |> Cmd.map wrapMsg
 
 
-createProposalCmd : Proposal -> String -> (Msg -> a) -> Cmd a
+createProposalCmd : ProposalAttr -> String -> (Msg -> a) -> Cmd a
 createProposalCmd proposal accessToken wrapMsg =
   postProposal proposal accessToken
-    |> Task.perform ProposalCreationFailed (uncurry ProposalCreated)
+    |> Task.perform ProposalCreationFailed ProposalCreated
     |> Cmd.map wrapMsg
 
 
 getProposalCmd : String -> String -> (Msg -> a) -> Cmd a
 getProposalCmd id accessToken wrapMsg =
   getProposal id accessToken
-    |> Task.perform GettingProposalFailed (uncurry GotProposal)
+    |> Task.perform GettingProposalFailed GotProposal
     |> Cmd.map wrapMsg
 
 
@@ -154,7 +160,7 @@ exchangeAuthCodeForToken body =
     |> Http.fromJson decodeToken
 
 
-postProposal : Proposal -> String -> Task Http.Error (String, Proposal)
+postProposal : ProposalAttr -> String -> Task Http.Error Proposal
 postProposal proposal accessToken =
   { verb = "POST"
   , headers =
@@ -168,7 +174,7 @@ postProposal proposal accessToken =
     |> Http.fromJson decodeProposal
 
 
-getProposal : String -> String -> Task Http.Error (String, {- Maybe -} Proposal)
+getProposal : String -> String -> Task Http.Error {- Maybe -} Proposal
 getProposal id accessToken =
   { verb = "GET"
   , headers =

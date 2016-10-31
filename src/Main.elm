@@ -123,9 +123,9 @@ type alias Model =
   , accessToken: String
   , error : Maybe String
   , me : Api.Me
-  , form : Form () Proposal
+  , form : Form () ProposalAttr
   , mdl : Material.Model
-  , proposals : Dict String Proposal
+  , proposals : Dict String ProposalAttr
   }
 
 
@@ -142,7 +142,7 @@ initialModel accessToken route address =
   }
 
 
-type alias Proposal =
+type alias ProposalAttr =
   { title : String
   , body : String
   }
@@ -179,17 +179,17 @@ update msg model =
         Api.GotMe me ->
           ({ model | me = me}, Navigation.newUrl "/")
 
-        Api.ProposalCreated id proposal ->
-          ( { model | proposals = Dict.insert id proposal model.proposals }
+        Api.ProposalCreated proposal ->
+          ( { model | proposals = Dict.insert proposal.id proposal.attr model.proposals }
           , Navigation.newUrl
-              <| Hop.output hopConfig { path = ["proposals", id], query = Dict.empty }
+              <| Hop.output hopConfig { path = ["proposals", proposal.id], query = Dict.empty }
           )
 
         Api.ProposalCreationFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)
 
-        Api.GotProposal id proposal ->
-          ( { model | proposals = Dict.insert id proposal model.proposals }
+        Api.GotProposal proposal ->
+          ( { model | proposals = Dict.insert proposal.id proposal.attr model.proposals }
           , Cmd.none
           )
 
@@ -203,8 +203,8 @@ update msg model =
 
     FormMsg formMsg ->
       case ( formMsg, Form.getOutput model.form ) of
-        ( Form.Submit, Just proposal ) ->
-          model ! [ Api.createProposalCmd proposal model.accessToken ApiMsg ]
+        ( Form.Submit, Just proposalAttr ) ->
+          model ! [ Api.createProposalCmd proposalAttr model.accessToken ApiMsg ]
 
         _ ->
           ({ model | form = Form.update formMsg model.form }, Cmd.none)
@@ -216,9 +216,9 @@ update msg model =
       Material.update msg' model
 
 
-validate : Validation () Proposal
+validate : Validation () ProposalAttr
 validate =
-  form2 Proposal
+  form2 ProposalAttr
     (get "title" string)
     (get "body" string)
 
