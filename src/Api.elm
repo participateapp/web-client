@@ -38,6 +38,15 @@ type alias Proposal =
   , attr: ProposalAttr
   }
 
+type alias ParticipantAttr =
+  { name : String
+  }
+
+type alias Participant =
+  { id : String
+  , attr: ParticipantAttr
+  }
+
 
 
 -- ENDPOINTS
@@ -92,6 +101,18 @@ decodeProposal =
         (Decode.at ["data", "attributes", "title"] Decode.string)
         (Decode.at ["data", "attributes", "body"] Decode.string)
     )
+
+
+decodeProposalIncluded : Decoder (List Participant)
+decodeProposalIncluded =
+  Decode.at ["included"] <|
+    Decode.list <|
+      Decode.object2
+        Participant
+        ( Decode.at ["id"] Decode.string )
+        ( Decode.object1 ParticipantAttr
+            (Decode.at ["attributes", "name"] Decode.string)
+        )
 
 
 encodeProposal : ProposalAttr -> String
