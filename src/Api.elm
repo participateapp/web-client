@@ -34,6 +34,7 @@ type alias ProposalAttr =
 
 type alias Proposal =
   { id : String
+  , author : String
   , attr: ProposalAttr
   }
 
@@ -83,9 +84,10 @@ decodeMe =
 
 decodeProposal : Decoder Proposal
 decodeProposal =
-  Decode.object2
+  Decode.object3
     Proposal
     ( Decode.at ["data", "id"] Decode.string )
+    ( Decode.at ["data", "relationships", "author", "data", "id"] Decode.string )
     ( Decode.object2 ProposalAttr
         (Decode.at ["data", "attributes", "title"] Decode.string)
         (Decode.at ["data", "attributes", "body"] Decode.string)
