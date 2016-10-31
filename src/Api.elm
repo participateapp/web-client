@@ -115,6 +115,17 @@ decodeProposalIncluded =
         )
 
 
+decodeProposalIncludedAuthor : Decoder Participant
+decodeProposalIncludedAuthor =
+  Decode.andThen
+    decodeProposalIncluded
+    ( \included ->
+        case included of
+          [author] -> Decode.succeed author
+          _ -> Decode.fail "No author included in JSON for proposal"
+    )
+
+
 encodeProposal : ProposalAttr -> String
 encodeProposal proposal =
   -- http://noredink.github.io/json-to-elm/
