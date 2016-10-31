@@ -3,7 +3,7 @@ Contributing
 
 Contributions are much appreciated!
 
-You're welcome to submit [pull requests](https://github.com/oliverbarnes/participate/pulls), propose features and post bugs on [Github issues](https://github.com/oliverbarnes/participate/issues), and ask questions on our [Slack channel](https://participateapp.slack.com) (ping me for an invite [by email](mailto:oliverbwork@gmail.com) or on [twitter](http://twitter/digiberber)). 
+You're welcome to submit [pull requests](https://github.com/oliverbarnes/participate/pulls), propose features and post bugs on [Github issues](https://github.com/oliverbarnes/participate/issues), and ask questions on our [Slack channel](https://participateapp.slack.com) (ping me for an invite [by email](mailto:oliverbwork@gmail.com) or on [twitter](http://twitter.com/digiberber)). 
 
 Here are the steps for contributing code:
 
