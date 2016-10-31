@@ -126,6 +126,7 @@ type alias Model =
   , form : Form () ProposalAttr
   , mdl : Material.Model
   , proposals : Dict String ProposalAttr
+  , participants : Dict String ParticipantAttr
   }
 
 
@@ -139,6 +140,7 @@ initialModel accessToken route address =
   , form = Form.initial [] validate
   , mdl = Material.model
   , proposals = Dict.empty
+  , participants = Dict.empty
   }
 
 
@@ -148,6 +150,20 @@ type alias ProposalAttr =
   }
 
 
+type alias Proposal =
+  { id : String
+  , author : String
+  , attr: ProposalAttr
+  }
+
+type alias ParticipantAttr =
+  { name : String
+  }
+
+type alias Participant =
+  { id : String
+  , attr: ParticipantAttr
+  }
 
 -- UPDATE
 
@@ -158,6 +174,16 @@ type Msg
   | FormMsg Form.Msg
   | NoOp
   | Mdl (Material.Msg Msg)
+
+
+addProposal : Proposal -> Model -> Model
+addProposal { id, attr } model =
+  { model | proposals = Debug.log "proposals" <| Dict.insert id attr model.proposals }
+
+
+addParticipant : Participant -> Model -> Model
+addParticipant { id, attr } model =
+  { model | participants = Debug.log "participants" <| Dict.insert id attr model.participants }
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -180,7 +206,9 @@ update msg model =
           ({ model | me = me}, Navigation.newUrl "/")
 
         Api.ProposalCreated proposal participant ->
-          ( { model | proposals = Dict.insert proposal.id proposal.attr model.proposals }
+          ( model
+             |> addProposal proposal
+             |> addParticipant participant
           , Navigation.newUrl
               <| Hop.output hopConfig { path = ["proposals", proposal.id], query = Dict.empty }
           )
@@ -189,7 +217,9 @@ update msg model =
           ({ model | error = Just <| toString httpError }, Cmd.none)
 
         Api.GotProposal proposal participant ->
-          ( { model | proposals = Dict.insert proposal.id proposal.attr model.proposals }
+          ( model
+             |> addProposal proposal
+             |> addParticipant participant
           , Cmd.none
           )
 
