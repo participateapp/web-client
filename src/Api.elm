@@ -16,9 +16,9 @@ import Json.Encode as Encode
 type Msg
   = GotAccessToken String
   | AuthFailed Http.Error
-  | ProposalCreated Proposal
+  | ProposalCreated Proposal Participant
   | ProposalCreationFailed Http.Error
-  | GotProposal Proposal
+  | GotProposal Proposal Participant
   | GettingProposalFailed Http.Error
   | GotMe Me
 
@@ -126,6 +126,14 @@ decodeProposalIncludedAuthor =
     )
 
 
+decodeProposalAndAuthor : Decoder (Proposal, Participant)
+decodeProposalAndAuthor =
+  Decode.object2
+    (,)
+    decodeProposal
+    decodeProposalIncludedAuthor
+
+
 encodeProposal : ProposalAttr -> String
 encodeProposal proposal =
   -- http://noredink.github.io/json-to-elm/
@@ -172,14 +180,14 @@ getMeCmd accessToken wrapMsg =
 createProposalCmd : ProposalAttr -> String -> (Msg -> a) -> Cmd a
 createProposalCmd proposal accessToken wrapMsg =
   postProposal proposal accessToken
-    |> Task.perform ProposalCreationFailed ProposalCreated
+    |> Task.perform ProposalCreationFailed (uncurry ProposalCreated)
     |> Cmd.map wrapMsg
 
 
 getProposalCmd : String -> String -> (Msg -> a) -> Cmd a
 getProposalCmd id accessToken wrapMsg =
   getProposal id accessToken
-    |> Task.perform GettingProposalFailed GotProposal
+    |> Task.perform GettingProposalFailed (uncurry GotProposal)
     |> Cmd.map wrapMsg
 
 
@@ -194,7 +202,7 @@ exchangeAuthCodeForToken body =
     |> Http.fromJson decodeToken
 
 
-postProposal : ProposalAttr -> String -> Task Http.Error Proposal
+postProposal : ProposalAttr -> String -> Task Http.Error (Proposal, Participant)
 postProposal proposal accessToken =
   { verb = "POST"
   , headers =
@@ -205,10 +213,10 @@ postProposal proposal accessToken =
   , body = Http.string (encodeProposal proposal)
   }
     |> Http.send Http.defaultSettings
-    |> Http.fromJson decodeProposal
+    |> Http.fromJson decodeProposalAndAuthor
 
 
-getProposal : String -> String -> Task Http.Error {- Maybe -} Proposal
+getProposal : String -> String -> Task Http.Error {- Maybe -} (Proposal, Participant)
 getProposal id accessToken =
   { verb = "GET"
   , headers =
@@ -219,7 +227,7 @@ getProposal id accessToken =
   , body = Http.empty
   }
     |> Http.send Http.defaultSettings
-    |> Http.fromJson decodeProposal
+    |> Http.fromJson decodeProposalAndAuthor
 
 
 getWithToken : String -> String -> Decoder a -> Task Http.Error a

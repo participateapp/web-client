@@ -179,17 +179,17 @@ update msg model =
         Api.GotMe me ->
           ({ model | me = me}, Navigation.newUrl "/")
 
-        Api.ProposalCreated { id, attr } ->
-          ( { model | proposals = Dict.insert id attr model.proposals }
+        Api.ProposalCreated proposal participant ->
+          ( { model | proposals = Dict.insert proposal.id proposal.attr model.proposals }
           , Navigation.newUrl
-              <| Hop.output hopConfig { path = ["proposals", id], query = Dict.empty }
+              <| Hop.output hopConfig { path = ["proposals", proposal.id], query = Dict.empty }
           )
 
         Api.ProposalCreationFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)
 
-        Api.GotProposal { id, attr } ->
-          ( { model | proposals = Dict.insert id attr model.proposals }
+        Api.GotProposal proposal participant ->
+          ( { model | proposals = Dict.insert proposal.id proposal.attr model.proposals }
           , Cmd.none
           )
 
