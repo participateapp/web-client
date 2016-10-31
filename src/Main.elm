@@ -125,8 +125,8 @@ type alias Model =
   , me : Api.Me
   , form : Form () ProposalAttr
   , mdl : Material.Model
-  , proposals : Dict String ProposalAttr
-  , participants : Dict String ParticipantAttr
+  , proposals : Dict String Proposal
+  , participants : Dict String Participant
   }
 
 
@@ -177,13 +177,13 @@ type Msg
 
 
 addProposal : Proposal -> Model -> Model
-addProposal { id, attr } model =
-  { model | proposals = Debug.log "proposals" <| Dict.insert id attr model.proposals }
+addProposal proposal model =
+  { model | proposals = Dict.insert proposal.id proposal model.proposals }
 
 
 addParticipant : Participant -> Model -> Model
-addParticipant { id, attr } model =
-  { model | participants = Debug.log "participants" <| Dict.insert id attr model.participants }
+addParticipant participant model =
+  { model | participants = Dict.insert participant.id participant model.participants }
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -423,9 +423,9 @@ viewProposal model id =
       div [] [text "Unknown proposal id: ", text id]
     Just proposal ->
       div []
-        [ div [] [text "Titel: ", text proposal.title]
+        [ div [] [text "Titel: ", text proposal.attr.title]
         , div [] [text "Author: ", viewParticipantName model proposal.author]
-        , div [] [text "Body: ", text proposal.body]
+        , div [] [text "Body: ", text proposal.attr.body]
         ]
 
 
@@ -434,8 +434,8 @@ viewParticipantName model id =
   case Dict.get id model.participants of
     Nothing ->
       div [] [text "Unknown (or uncached) author id: ", text id]
-    Just attr ->
-      text attr.name
+    Just participant ->
+      text participant.attr.name
 
 
 -- APP
