@@ -424,8 +424,18 @@ viewProposal model id =
     Just proposal ->
       div []
         [ div [] [text "Titel: ", text proposal.title]
+        , div [] [text "Author: ", viewParticipantName model proposal.author]
         , div [] [text "Body: ", text proposal.body]
         ]
+
+
+viewParticipantName : Model -> String -> Html Msg
+viewParticipantName model id =
+  case Dict.get id model.participants of
+    Nothing ->
+      div [] [text "Unknown (or uncached) author id: ", text id]
+    Just attr ->
+      text attr.name
 
 
 -- APP
