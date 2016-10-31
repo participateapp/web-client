@@ -15,7 +15,7 @@ Early stages of development. Participate! is open source and plans are to have a
 Stack:
 ------------
 
-Elm front-end app and Elixir/Phoenix API.
+Elm front-end app talking to an [Elixir/Phoenix API](https://github.com/oliverbarnes/participate-api).
 
 
 ### Want to get involved?
