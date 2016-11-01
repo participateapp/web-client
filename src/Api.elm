@@ -80,6 +80,17 @@ facebookAuthUrl = "https://www.facebook.com/dialog/oauth?client_id=1583083701926
 -- DECODERS & ENCODERS
 
 
+decoderAssertType : List String -> String -> Decoder a -> Decoder a
+decoderAssertType path expectedType decoder =
+  Decode.at path Decode.string
+    `Decode.andThen` \actualType ->
+      if actualType == expectedType then
+        decoder
+      else
+        Decode.fail <|
+          "Expected type \"" ++ expectedType ++ "\", got \"" ++ actualType ++ "\""
+
+
 decodeToken : Decoder String
 decodeToken =
   Decode.at ["access_token"] Decode.string
@@ -87,32 +98,40 @@ decodeToken =
 
 decodeMe : Decoder Me
 decodeMe =
-  Decode.object1 Me
-    (Decode.at ["data", "attributes", "name"] Decode.string)
+  Decode.at ["data"] <|
+    decoderAssertType ["type"] "participant" <|
+      Decode.object1 Me
+        (Decode.at ["attributes", "name"] Decode.string)
 
 
 decodeProposal : Decoder Proposal
 decodeProposal =
-  Decode.object3
-    Proposal
-    ( Decode.at ["data", "id"] Decode.string )
-    ( Decode.at ["data", "relationships", "author", "data", "id"] Decode.string )
-    ( Decode.object2 ProposalAttr
-        (Decode.at ["data", "attributes", "title"] Decode.string)
-        (Decode.at ["data", "attributes", "body"] Decode.string)
-    )
+  Decode.at ["data"] <|
+    decoderAssertType ["type"] "proposal" <|
+      Decode.object3
+        Proposal
+        ( Decode.at ["id"] Decode.string )
+        ( Decode.at ["relationships", "author", "data"] <|
+            decoderAssertType ["type"] "participant" <|
+              Decode.at ["id"] Decode.string
+        )
+        ( Decode.object2 ProposalAttr
+            (Decode.at ["attributes", "title"] Decode.string)
+            (Decode.at ["attributes", "body"] Decode.string)
+        )
 
 
 decodeProposalIncluded : Decoder (List Participant)
 decodeProposalIncluded =
   Decode.at ["included"] <|
     Decode.list <|
-      Decode.object2
-        Participant
-        ( Decode.at ["id"] Decode.string )
-        ( Decode.object1 ParticipantAttr
-            (Decode.at ["attributes", "name"] Decode.string)
-        )
+      decoderAssertType ["type"] "participant" <|
+        Decode.object2
+          Participant
+          ( Decode.at ["id"] Decode.string )
+          ( Decode.object1 ParticipantAttr
+              (Decode.at ["attributes", "name"] Decode.string)
+          )
 
 
 decodeProposalIncludedAuthor : Decoder Participant
