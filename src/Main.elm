@@ -123,9 +123,10 @@ type alias Model =
   , accessToken: String
   , error : Maybe String
   , me : Api.Me
-  , form : Form () Proposal
+  , form : Form () ProposalAttr
   , mdl : Material.Model
   , proposals : Dict String Proposal
+  , participants : Dict String Participant
   }
 
 
@@ -139,15 +140,30 @@ initialModel accessToken route address =
   , form = Form.initial [] validate
   , mdl = Material.model
   , proposals = Dict.empty
+  , participants = Dict.empty
   }
 
 
-type alias Proposal =
+type alias ProposalAttr =
   { title : String
   , body : String
   }
 
 
+type alias Proposal =
+  { id : String
+  , author : String
+  , attr: ProposalAttr
+  }
+
+type alias ParticipantAttr =
+  { name : String
+  }
+
+type alias Participant =
+  { id : String
+  , attr: ParticipantAttr
+  }
 
 -- UPDATE
 
@@ -158,6 +174,16 @@ type Msg
   | FormMsg Form.Msg
   | NoOp
   | Mdl (Material.Msg Msg)
+
+
+addProposal : Proposal -> Model -> Model
+addProposal proposal model =
+  { model | proposals = Dict.insert proposal.id proposal model.proposals }
+
+
+addParticipant : Participant -> Model -> Model
+addParticipant participant model =
+  { model | participants = Dict.insert participant.id participant model.participants }
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -179,17 +205,21 @@ update msg model =
         Api.GotMe me ->
           ({ model | me = me}, Navigation.newUrl "/")
 
-        Api.ProposalCreated id proposal ->
-          ( { model | proposals = Dict.insert id proposal model.proposals }
+        Api.ProposalCreated proposal participant ->
+          ( model
+             |> addProposal proposal
+             |> addParticipant participant
           , Navigation.newUrl
-              <| Hop.output hopConfig { path = ["proposals", id], query = Dict.empty }
+              <| Hop.output hopConfig { path = ["proposals", proposal.id], query = Dict.empty }
           )
 
         Api.ProposalCreationFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)
 
-        Api.GotProposal id proposal ->
-          ( { model | proposals = Dict.insert id proposal model.proposals }
+        Api.GotProposal proposal participant ->
+          ( model
+             |> addProposal proposal
+             |> addParticipant participant
           , Cmd.none
           )
 
@@ -203,8 +233,8 @@ update msg model =
 
     FormMsg formMsg ->
       case ( formMsg, Form.getOutput model.form ) of
-        ( Form.Submit, Just proposal ) ->
-          model ! [ Api.createProposalCmd proposal model.accessToken ApiMsg ]
+        ( Form.Submit, Just proposalAttr ) ->
+          model ! [ Api.createProposalCmd proposalAttr model.accessToken ApiMsg ]
 
         _ ->
           ({ model | form = Form.update formMsg model.form }, Cmd.none)
@@ -216,9 +246,9 @@ update msg model =
       Material.update msg' model
 
 
-validate : Validation () Proposal
+validate : Validation () ProposalAttr
 validate =
-  form2 Proposal
+  form2 ProposalAttr
     (get "title" string)
     (get "body" string)
 
@@ -393,9 +423,19 @@ viewProposal model id =
       div [] [text "Unknown proposal id: ", text id]
     Just proposal ->
       div []
-        [ div [] [text "Titel: ", text proposal.title]
-        , div [] [text "Body: ", text proposal.body]
+        [ div [] [text "Titel: ", text proposal.attr.title]
+        , div [] [text "Author: ", viewParticipantName model proposal.author]
+        , div [] [text "Body: ", text proposal.attr.body]
         ]
+
+
+viewParticipantName : Model -> String -> Html Msg
+viewParticipantName model id =
+  case Dict.get id model.participants of
+    Nothing ->
+      div [] [text "Unknown (or uncached) author id: ", text id]
+    Just participant ->
+      text participant.attr.name
 
 
 -- APP
