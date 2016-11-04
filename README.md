@@ -22,7 +22,7 @@ Elm front-end app talking to an [Elixir/Phoenix API](https://github.com/oliverba
 
 We'll pair with you so you can get up to speed quickly, and we pair on features as well. 
 
-[Shoot us an email](mailto:oliverbwork@gmail.com/), we'll add you to our Slack channel to join the discussion and talk about next steps.
+[Shoot us an email](mailto:oliverbwork@gmail.com), we'll add you to our Slack channel to join the discussion and talk about next steps.
 
 See the complete guide to contributing [here](CONTRIBUTING.md).
 
