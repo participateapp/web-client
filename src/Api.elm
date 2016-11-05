@@ -3,6 +3,7 @@ module Api
     ( facebookAuthUrl
     , Msg(..), Me
     , authenticateCmd, getMeCmd, createProposalCmd, getProposalCmd
+    , getProposalListCmd
     )
 
 
@@ -20,6 +21,8 @@ type Msg
   | ProposalCreationFailed Http.Error
   | GotProposal Proposal Participant
   | GettingProposalFailed Http.Error
+  | GotProposalList ProposalList
+  | GettingProposalListFailed Http.Error
   | GotMe Me
 
 
@@ -27,10 +30,12 @@ type alias Me =
   { name : String
   }
 
+
 type alias ProposalAttr =
   { title : String
   , body : String
   }
+
 
 type alias Proposal =
   { id : String
@@ -38,14 +43,20 @@ type alias Proposal =
   , attr: ProposalAttr
   }
 
+
 type alias ParticipantAttr =
   { name : String
   }
+
 
 type alias Participant =
   { id : String
   , attr: ParticipantAttr
   }
+
+
+type alias ProposalList =
+  List (Proposal, Participant)
 
 
 
@@ -63,12 +74,18 @@ tokenEndpoint = apiUrl ++ "/token"
 meEndpoint : String
 meEndpoint = apiUrl ++ "/me"
 
+
 newProposalEndpoint : String
 newProposalEndpoint = apiUrl ++ "/proposals"
+
 
 getProposalEndpoint : String -> String
 getProposalEndpoint id =
   apiUrl ++ "/proposals/" ++ id
+
+
+proposalListEndpoint : String
+proposalListEndpoint = apiUrl ++ "/proposals"
 
 
 -- TODO: move client_id and redirect_uri into environment variables
@@ -152,6 +169,10 @@ decodeProposalAndAuthor =
     decodeProposal
     decodeProposalIncludedAuthor
 
+decodeProposalList : Decoder ProposalList
+decodeProposalList =
+  Decode.list decodeProposalAndAuthor
+
 
 encodeProposal : ProposalAttr -> String
 encodeProposal proposal =
@@ -210,6 +231,13 @@ getProposalCmd id accessToken wrapMsg =
     |> Cmd.map wrapMsg
 
 
+getProposalListCmd : String -> String -> (Msg -> a) -> Cmd a
+getProposalListCmd id accessToken wrapMsg =
+  getProposalList id accessToken
+    |> Task.perform GettingProposalListFailed (uncurry GotProposalList)
+    |> Cmd.map wrapMsg
+
+
 
 -- HTTP requests
 
@@ -247,6 +275,20 @@ getProposal id accessToken =
   }
     |> Http.send Http.defaultSettings
     |> Http.fromJson decodeProposalAndAuthor
+
+
+getProposalList : String -> String -> Task Http.Error ProposalList
+getProposalList id accessToken =
+  { verb = "GET"
+  , headers =
+      [ ("Authorization", "Bearer " ++ accessToken)
+      , ("Content-Type", "application/vnd.api+json")
+      ]
+  , url = proposalListEndpoint
+  , body = Http.empty
+  }
+    |> Http.send Http.defaultSettings
+    |> Http.fromJson decodeProposalList
 
 
 getWithToken : String -> String -> Decoder a -> Task Http.Error a

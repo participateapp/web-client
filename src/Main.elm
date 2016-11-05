@@ -79,20 +79,26 @@ urlParser =
 urlUpdate : ( Route, Address ) -> Model -> ( Model, Cmd Msg )
 urlUpdate ( route, address ) model =
   let
-    model1 = { model | route = route, address = address }
+    updatedModel = { model | route = route, address = address }
     _ = Debug.log "urlUpdate" ( route, address )
   in
     case route of
       ProposalRoute id ->
         case Dict.get id model.proposals of
           Nothing ->
-            ( model1
+            ( updatedModel
             , Api.getProposalCmd id model.accessToken ApiMsg
             )
           Just _ ->
-            ( model1, Cmd.none )
+            ( updatedModel, Cmd.none )
+
+      Home ->
+        ( updatedModel
+        , Api.getProposalListCmd model.accessToken ApiMsg
+        )
+
       _ ->
-        ( model1, Cmd.none )
+        ( updatedModel, Cmd.none )
 
 
 checkForAuthCode : Address -> Cmd Msg
@@ -105,7 +111,6 @@ checkForAuthCode address =
         Api.authenticateCmd code ApiMsg
 
       Nothing -> Cmd.none
-
 
 
 
@@ -156,14 +161,22 @@ type alias Proposal =
   , attr: ProposalAttr
   }
 
+
 type alias ParticipantAttr =
   { name : String
   }
+
 
 type alias Participant =
   { id : String
   , attr: ParticipantAttr
   }
+
+
+type alias ProposalList = 
+  List Proposal
+
+
 
 -- UPDATE
 
@@ -226,6 +239,12 @@ update msg model =
         Api.GettingProposalFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)
 
+        Api.GotProposalList proposalList ->
+          ({ model | proposals = proposalList }, Cmd.none)
+
+        Api.GettingProposalListFailed httpError ->
+          ({ model | error = Just <| toString httpError }, Cmd.none)
+
     NavigateToPath path ->
       ( model,
         Navigation.newUrl <| Hop.outputFromPath hopConfig path
@@ -273,7 +292,6 @@ view model =
       , tabs = ( [], [] )
       , main = [ div [ style [ ( "margin", "2rem" ) ] ] [ viewBody model ] ]
       }
-
 
 
 viewBody : Model -> Html Msg
@@ -325,7 +343,6 @@ formView model =
       , cell [ size All 12 ] [ bodyField model ]
       , cell [ size All 12 ] [ submitButton model ]
       ]
-
 
 
 titleField : Model -> Html Msg
