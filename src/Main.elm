@@ -479,7 +479,11 @@ viewProposalList model =
 
 viewProposalListEntry : Proposal -> Html Msg
 viewProposalListEntry proposal =
-  li [] [ text proposal.attr.title ]
+  li []
+    [ a
+        [onClick <| NavigateToPath <| "proposals/" ++ proposal.id]
+        [text proposal.attr.title]
+    ]
 
 
 -- APP
