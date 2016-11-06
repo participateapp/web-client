@@ -321,7 +321,8 @@ viewBody model =
             , h3 []
                 [ a [ onClick <| NavigateToPath "/new-proposal" ]
                     [ text "Create a proposal" ] ]
-            , h3 [] [ viewProposalList model ]
+            , h3 [] [ text "Existing Proposals" ]
+            , div [] [ viewProposalList model ]
             ]
 
       NewProposalRoute ->
