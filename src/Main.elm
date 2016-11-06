@@ -240,9 +240,14 @@ update msg model =
           ({ model | error = Just <| toString httpError }, Cmd.none)
 
         Api.GotProposalList proposalList ->
-          (
-            let _ = Debug.log "proposalList" proposalList
-            in model -- { model | proposals = proposalList }
+          ( let
+              updatedProposals =
+                Dict.fromList <|
+                  List.map
+                    (\proposal -> (proposal.id, proposal))
+                    proposalList
+            in
+              { model | proposals = updatedProposals }
           , Cmd.none
           )
 
@@ -312,12 +317,11 @@ viewBody model =
             [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
         else
           div []
-            [
-              text <| "Hello, " ++ ( .name model.me )
-              ,
-              h3 []
+            [ text <| "Hello, " ++ ( .name model.me )
+            , h3 []
                 [ a [ onClick <| NavigateToPath "/new-proposal" ]
                     [ text "Create a proposal" ] ]
+            , h3 [] [ viewProposalList model ]
             ]
 
       NewProposalRoute ->
@@ -462,6 +466,19 @@ viewParticipantName model id =
       div [] [text "Unknown (or uncached) author id: ", text id]
     Just participant ->
       text participant.attr.name
+
+
+viewProposalList : Model -> Html Msg
+viewProposalList model =
+  ul [] <|
+    List.map
+      viewProposalListEntry
+      (Dict.values model.proposals)
+
+
+viewProposalListEntry : Proposal -> Html Msg
+viewProposalListEntry proposal =
+  li [] [ text proposal.attr.title ]
 
 
 -- APP
