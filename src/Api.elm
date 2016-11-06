@@ -56,7 +56,7 @@ type alias Participant =
 
 
 type alias ProposalList =
-  List (Proposal, Participant)
+  List Proposal
 
 
 
@@ -108,14 +108,19 @@ decoderAssertType path expectedType decoder =
           "Expected type \"" ++ expectedType ++ "\", got \"" ++ actualType ++ "\""
 
 
+decodeData : Decoder a -> Decoder a
+decodeData =
+  Decode.at ["data"]
+
+
 decodeToken : Decoder String
 decodeToken =
   Decode.at ["access_token"] Decode.string
-  
+
 
 decodeMe : Decoder Me
 decodeMe =
-  Decode.at ["data"] <|
+  decodeData <|
     decoderAssertType ["type"] "participant" <|
       Decode.object1 Me
         (Decode.at ["attributes", "name"] Decode.string)
@@ -123,19 +128,18 @@ decodeMe =
 
 decodeProposal : Decoder Proposal
 decodeProposal =
-  Decode.at ["data"] <|
-    decoderAssertType ["type"] "proposal" <|
-      Decode.object3
-        Proposal
-        ( Decode.at ["id"] Decode.string )
-        ( Decode.at ["relationships", "author", "data"] <|
-            decoderAssertType ["type"] "participant" <|
-              Decode.at ["id"] Decode.string
-        )
-        ( Decode.object2 ProposalAttr
-            (Decode.at ["attributes", "title"] Decode.string)
-            (Decode.at ["attributes", "body"] Decode.string)
-        )
+  decoderAssertType ["type"] "proposal" <|
+    Decode.object3
+      Proposal
+      ( Decode.at ["id"] Decode.string )
+      ( Decode.at ["relationships", "author", "data"] <|
+          decoderAssertType ["type"] "participant" <|
+            Decode.at ["id"] Decode.string
+      )
+      ( Decode.object2 ProposalAttr
+          (Decode.at ["attributes", "title"] Decode.string)
+          (Decode.at ["attributes", "body"] Decode.string)
+      )
 
 
 decodeProposalIncluded : Decoder (List Participant)
@@ -166,12 +170,13 @@ decodeProposalAndAuthor : Decoder (Proposal, Participant)
 decodeProposalAndAuthor =
   Decode.object2
     (,)
-    decodeProposal
+    ( decodeData decodeProposal )
     decodeProposalIncludedAuthor
 
 decodeProposalList : Decoder ProposalList
 decodeProposalList =
-  Decode.list decodeProposalAndAuthor
+  decodeData <|
+    Decode.list decodeProposal
 
 
 encodeProposal : ProposalAttr -> String
@@ -231,10 +236,10 @@ getProposalCmd id accessToken wrapMsg =
     |> Cmd.map wrapMsg
 
 
-getProposalListCmd : String -> String -> (Msg -> a) -> Cmd a
-getProposalListCmd id accessToken wrapMsg =
-  getProposalList id accessToken
-    |> Task.perform GettingProposalListFailed (uncurry GotProposalList)
+getProposalListCmd : String -> (Msg -> a) -> Cmd a
+getProposalListCmd accessToken wrapMsg =
+  getProposalList accessToken
+    |> Task.perform GettingProposalListFailed GotProposalList
     |> Cmd.map wrapMsg
 
 
@@ -277,8 +282,8 @@ getProposal id accessToken =
     |> Http.fromJson decodeProposalAndAuthor
 
 
-getProposalList : String -> String -> Task Http.Error ProposalList
-getProposalList id accessToken =
+getProposalList : String -> Task Http.Error ProposalList
+getProposalList accessToken =
   { verb = "GET"
   , headers =
       [ ("Authorization", "Bearer " ++ accessToken)

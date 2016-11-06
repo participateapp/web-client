@@ -240,7 +240,11 @@ update msg model =
           ({ model | error = Just <| toString httpError }, Cmd.none)
 
         Api.GotProposalList proposalList ->
-          ({ model | proposals = proposalList }, Cmd.none)
+          (
+            let _ = Debug.log "proposalList" proposalList
+            in model -- { model | proposals = proposalList }
+          , Cmd.none
+          )
 
         Api.GettingProposalListFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)
@@ -296,44 +300,49 @@ view model =
 
 viewBody : Model -> Html Msg
 viewBody model =
-  case model.route of
-    Home ->
-      if String.isEmpty model.accessToken == True then
+  let
+    _ = case model.error of
+      Nothing -> ""
+      Just error -> Debug.log "model.error" error
+  in
+    case model.route of
+      Home ->
+        if String.isEmpty model.accessToken == True then
+          div []
+            [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
+        else
+          div []
+            [
+              text <| "Hello, " ++ ( .name model.me )
+              ,
+              h3 []
+                [ a [ onClick <| NavigateToPath "/new-proposal" ]
+                    [ text "Create a proposal" ] ]
+            ]
+
+      NewProposalRoute ->
         div []
-          [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
-      else
-        div []
-          [ 
-            text <| "Hello, " ++ ( .name model.me )
+          [
+            h2 []
+              [ text <| "New Proposal" ]
             ,
-            h3 []
-              [ a [ onClick <| NavigateToPath "/new-proposal" ]
-                  [ text "Create a proposal" ] ]
+
+            formView model
           ]
 
-    NewProposalRoute ->
-      div []
-        [ 
-          h2 []
-            [ text <| "New Proposal" ]
-          ,
+      ProposalRoute id ->
+        div []
+          [ h2 [] [ text "Proposal" ]
+          , viewProposal model id
+          ]
 
-          formView model
-        ]
+      NotFoundRoute ->
+        div []
+          [ text <| "Not found" ]
 
-    ProposalRoute id ->
-      div []
-        [ h2 [] [ text "Proposal" ]
-        , viewProposal model id
-        ]
-
-    NotFoundRoute ->
-      div []
-        [ text <| "Not found" ]
-
-    FacebookRedirect ->
-      div []
-        [ text <| "Authenticating, please wait..." ]
+      FacebookRedirect ->
+        div []
+          [ text <| "Authenticating, please wait..." ]
 
 
 formView : Model -> Html Msg
