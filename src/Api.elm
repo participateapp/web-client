@@ -73,7 +73,7 @@ getProposalEndpoint id =
 
 -- TODO: move client_id and redirect_uri into environment variables
 facebookAuthUrl : String
-facebookAuthUrl = "https://www.facebook.com/dialog/oauth?client_id=1583083701926004&redirect_uri=http://localhost:3000/facebook_redirect"
+facebookAuthUrl = "https://www.facebook.com/dialog/oauth?client_id=1583083701926004&redirect_uri=http://localhost:8000/facebook_redirect"
 
 
 
