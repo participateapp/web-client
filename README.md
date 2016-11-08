@@ -12,13 +12,36 @@ Representation is ensured for participants who are less involved (be it for lack
 
 Early stages of development. Participate! is open source and plans are to have a hosted version in the future as well.
 
-Stack:
-------------
+## Stack
 
 Elm front-end app talking to an [Elixir/Phoenix API](https://github.com/oliverbarnes/participate-api).
 
 
-### Want to get involved?
+## Setup the client
+
+### Prerequisites
+
+- [Elm 0.17](http://elm-lang.org/)
+- [NPM](https://www.npmjs.com/)
+
+### Build
+
+Get dependencies:
+
+```sh
+$ npm install
+```
+
+Start the [API](https://github.com/oliverbarnes/participate-api#setup).
+
+Compile and run dev server:
+
+```sh
+$ npm run dev
+```
+
+
+## Want to get involved?
 
 We'll pair with you so you can get up to speed quickly, and we pair on features as well. 
 
