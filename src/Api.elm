@@ -19,9 +19,9 @@ import Types exposing (..)
 type Msg
     = GotAccessToken String
     | AuthFailed Http.Error
-    | ProposalCreated Proposal Participant
+    | ProposalCreated Proposal
     | ProposalCreationFailed Http.Error
-    | GotProposal Proposal Participant
+    | GotProposal Proposal
     | GettingProposalFailed Http.Error
     | GotMe Me
 
@@ -99,67 +99,32 @@ decodeMe =
 
 decodeProposal : Decoder Proposal
 decodeProposal =
-    Decode.at [ "data" ] <|
-        decoderAssertType [ "type" ] "proposal" <|
-            Decode.object3
-                Proposal
-                (Decode.at [ "id" ] Decode.string)
-                (Decode.at [ "relationships", "author", "data" ] <|
-                    decoderAssertType [ "type" ] "participant" <|
-                        Decode.at [ "id" ] Decode.string
-                )
-                (Decode.object2 ProposalAttr
-                    (Decode.at [ "attributes", "title" ] Decode.string)
-                    (Decode.at [ "attributes", "body" ] Decode.string)
-                )
+    decoderAssertType [ "data", "type" ] "proposal" <|
+        Decode.object4
+            Proposal
+            (Decode.at [ "data", "id" ] Decode.string)
+            (Decode.at [ "data", "attributes", "title" ] Decode.string)
+            (Decode.at [ "data", "attributes", "body" ] Decode.string)
+            (Decode.at [ "data", "relationships", "author", "data" ] <|
+                decoderAssertType [ "type" ] "participant" <|
+                    Decode.object2
+                        Participant
+                        (Decode.at [ "id" ] Decode.string)
+                        (Decode.succeed "author-lookup-not-yet-implemented")
+             -- will be done by elm-jsonapi
+            )
 
 
-decodeProposalIncluded : Decoder (List Participant)
-decodeProposalIncluded =
-    Decode.at [ "included" ] <|
-        Decode.list <|
-            decoderAssertType [ "type" ] "participant" <|
-                Decode.object2
-                    Participant
-                    (Decode.at [ "id" ] Decode.string)
-                    (Decode.object1 ParticipantAttr
-                        (Decode.at [ "attributes", "name" ] Decode.string)
-                    )
-
-
-decodeProposalIncludedAuthor : Decoder Participant
-decodeProposalIncludedAuthor =
-    Decode.andThen
-        decodeProposalIncluded
-        (\included ->
-            case included of
-                [ author ] ->
-                    Decode.succeed author
-
-                _ ->
-                    Decode.fail "No author included in JSON for proposal"
-        )
-
-
-decodeProposalAndAuthor : Decoder ( Proposal, Participant )
-decodeProposalAndAuthor =
-    Decode.object2
-        (,)
-        decodeProposal
-        decodeProposalIncludedAuthor
-
-
-encodeProposal : ProposalAttr -> String
-encodeProposal proposal =
-    -- http://noredink.github.io/json-to-elm/
+encodeProposalInput : ProposalInput -> String
+encodeProposalInput proposalInput =
     Encode.object
         [ ( "data"
           , Encode.object
                 [ ( "type", Encode.string "proposal" )
                 , ( "attributes"
                   , Encode.object
-                        [ ( "title", Encode.string proposal.title )
-                        , ( "body", Encode.string proposal.body )
+                        [ ( "title", Encode.string proposalInput.title )
+                        , ( "body", Encode.string proposalInput.body )
                         ]
                   )
                 ]
@@ -192,17 +157,17 @@ getMeCmd accessToken wrapMsg =
         |> Cmd.map wrapMsg
 
 
-createProposalCmd : ProposalAttr -> String -> (Msg -> a) -> Cmd a
-createProposalCmd proposal accessToken wrapMsg =
-    postProposal proposal accessToken
-        |> Task.perform ProposalCreationFailed (uncurry ProposalCreated)
+createProposalCmd : ProposalInput -> String -> (Msg -> a) -> Cmd a
+createProposalCmd proposalInput accessToken wrapMsg =
+    postProposal proposalInput accessToken
+        |> Task.perform ProposalCreationFailed ProposalCreated
         |> Cmd.map wrapMsg
 
 
 getProposalCmd : String -> String -> (Msg -> a) -> Cmd a
 getProposalCmd id accessToken wrapMsg =
     getProposal id accessToken
-        |> Task.perform GettingProposalFailed (uncurry GotProposal)
+        |> Task.perform GettingProposalFailed GotProposal
         |> Cmd.map wrapMsg
 
 
@@ -217,21 +182,21 @@ exchangeAuthCodeForToken body =
         |> Http.fromJson decodeToken
 
 
-postProposal : ProposalAttr -> String -> Task Http.Error ( Proposal, Participant )
-postProposal proposal accessToken =
+postProposal : ProposalInput -> String -> Task Http.Error Proposal
+postProposal proposalInput accessToken =
     { verb = "POST"
     , headers =
         [ ( "Authorization", "Bearer " ++ accessToken )
         , ( "Content-Type", "application/vnd.api+json" )
         ]
     , url = newProposalEndpoint
-    , body = Http.string (encodeProposal proposal)
+    , body = Http.string (encodeProposalInput proposalInput)
     }
         |> Http.send Http.defaultSettings
-        |> Http.fromJson decodeProposalAndAuthor
+        |> Http.fromJson decodeProposal
 
 
-getProposal : String -> String -> Task Http.Error {- Maybe -} ( Proposal, Participant )
+getProposal : String -> String -> Task Http.Error {- Maybe -} Proposal
 getProposal id accessToken =
     { verb = "GET"
     , headers =
@@ -242,7 +207,7 @@ getProposal id accessToken =
     , body = Http.empty
     }
         |> Http.send Http.defaultSettings
-        |> Http.fromJson decodeProposalAndAuthor
+        |> Http.fromJson decodeProposal
 
 
 getWithToken : String -> String -> Decoder a -> Task Http.Error a

@@ -6,7 +6,7 @@ type alias Me =
     }
 
 
-type alias ProposalAttr =
+type alias ProposalInput =
     { title : String
     , body : String
     }
@@ -14,34 +14,13 @@ type alias ProposalAttr =
 
 type alias Proposal =
     { id : String
-    , author : String
-    , attr : ProposalAttr
-    }
-
-
-type alias ParticipantAttr =
-    { name : String
+    , title : String
+    , body : String
+    , author : Participant
     }
 
 
 type alias Participant =
     { id : String
-    , attr : ParticipantAttr
+    , name : String
     }
-
-
-
-{-
-   type alias Proposal =
-       { id : String
-       , title : String
-       , body : String
-       , author : Participant
-       }
-
-
-   type alias Participant =
-       { id : String
-       , name : String
-       }
--}
