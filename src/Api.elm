@@ -17,7 +17,6 @@ import JsonApi
 import JsonApi.Decode
 import JsonApi.Resources
 import JsonApi.Documents
-import JsonApi.Http
 import Types exposing (..)
 
 
