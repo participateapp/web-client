@@ -26,6 +26,7 @@ import Navigation
 import UrlParser exposing ((</>))
 import Hop
 import Hop.Types exposing (Config, Address, Query)
+import Types exposing (..)
 import Api
 
 
@@ -125,7 +126,7 @@ type alias Model =
     , address : Address
     , accessToken : String
     , error : Maybe String
-    , me : Api.Me
+    , me : Me
     , form : Form () ProposalAttr
     , mdl : Material.Model
     , proposals : Dict String Proposal
@@ -144,30 +145,6 @@ initialModel accessToken route address =
     , mdl = Material.model
     , proposals = Dict.empty
     , participants = Dict.empty
-    }
-
-
-type alias ProposalAttr =
-    { title : String
-    , body : String
-    }
-
-
-type alias Proposal =
-    { id : String
-    , author : String
-    , attr : ProposalAttr
-    }
-
-
-type alias ParticipantAttr =
-    { name : String
-    }
-
-
-type alias Participant =
-    { id : String
-    , attr : ParticipantAttr
     }
 
 
