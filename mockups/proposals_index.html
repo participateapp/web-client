@@ -1,0 +1,199 @@
+<!doctype html>
+
+<html>
+<head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
+  <link rel="stylesheet" href="styles/style.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script>
+    $(function(){
+      $('.mdl-collapse__content').each(function(){
+        var content = $(this);
+        content.css('margin-top', -content.height());
+      })
+
+      $(document.body).on('click', '.mdl-collapse__button', function(){
+        $(this).parent('.mdl-collapse').toggleClass('mdl-collapse--opened');
+      })
+    })
+  </script>
+</head>
+
+<body class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+  <header class="mdl-layout__header mdl-color--white">
+    <div class="mdl-layout__header-row">
+      <a href="proposals_index.html" class="main-title"><span class="mdl-layout-title mdl-color-text--grey-700">Participate</span></a>
+      <div class="mdl-layout-spacer"></div>
+      <div class="android-search-box mdl-textfield mdl-js-textfield mdl-textfield--expandable mdl-textfield--floating-label mdl-textfield--align-right mdl-textfield--full-width mdl-color-text--grey-700">
+        <label class="mdl-button mdl-js-button mdl-button--icon" for="search-field">
+          <i class="material-icons">search</i>
+        </label>
+        <div class="mdl-textfield__expandable-holder">
+          <input class="mdl-textfield__input" type="text" id="search-field">
+        </div>
+      </div>
+      <nav class="mdl-navigation">
+        <a class="mdl-navigation__link mdl-color-text--grey-700" href="activity.html"><i class="material-icons">notifications</i><span class="mdl-badge" id="top-notify" data-badge="2"></span></a>
+        <button id="user-menu" class="mdl-button mdl-js-button mdl-button--icon"><img class="mdl-chip__contact" src="images/yuna.jpg"></button>
+        <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="user-menu">
+          <li class="mdl-menu__item"><a href="proposal_new.html">New proposal</a></li>
+          <li class="mdl-menu__item">Profile</li>
+          <hr>
+          <li class="mdl-menu__item">Settings</li>
+          <li class="mdl-menu__item">Sign out</li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  
+  <main class="mdl-layout__content mdl-color--grey-200">
+    <div class="content-grid mdl-grid">
+      <div class="mdl-cell mdl-cell--4-col filtering">
+        <h4 class="mdl-typography--title">Filter Proposals</h4>
+
+        <div class="mdl-cell mdl-cell--12-col" style="position: relative;">
+          
+          <div class="mdl-collapse">
+            <a class="mdl-navigation__link mdl-collapse__button">
+              <i class="material-icons mdl-collapse__icon mdl-animation--default">expand_more</i>
+              <span class="mdl-color-text--grey-700">Votes</span>
+            </a>
+            
+            <div class="mdl-collapse__content-wrapper">
+              <div class="mdl-collapse__content mdl-animation--default">
+                <div class="mdl-cell mdl-cell--12-col content-grid mdl-grid">
+                  <div class="mdl-cell mdl-cell--6-col">
+                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-1">
+                      <input type="radio" id="option-1" class="mdl-radio__button" name="options" value="1" checked>
+                      <span class="mdl-radio__label">My votes</span>
+                    </label>
+                    <div><small>Delegated to me</small></div>
+                  </div>
+                  <div class="mdl-cell mdl-cell--6-col">
+                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-2">
+                      <input type="radio" id="option-2" class="mdl-radio__button" name="options" value="2">
+                      <span class="mdl-radio__label">Delegated</span>
+                    </label>
+                    <div><small>Delegated out</small></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mdl-collapse">
+            <a class="mdl-collapse__button">
+              <i class="material-icons mdl-collapse__icon mdl-animation--default">expand_more</i>
+              <span class="mdl-color-text--grey-700">Proposals</span>
+            </a>
+            
+            <div class="mdl-collapse__content-wrapper">
+              <div class="mdl-collapse__content mdl-animation--default">
+                <div class="mdl-cell mdl-cell--12-col content-grid mdl-grid">
+                  <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-1">
+                    <input type="checkbox" id="checkbox-1" class="mdl-checkbox__input" checked>
+                    <span class="mdl-checkbox__label">Proposals supported</span>
+                  </label>
+                  <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-2">
+                    <input type="checkbox" id="checkbox-2" class="mdl-checkbox__input">
+                    <span class="mdl-checkbox__label">My proposals</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      <div class="mdl-cell mdl-cell--8-col">
+        
+        <div class="mdl-cell mdl-card mdl-cell--12-col proposal-list">
+          <div class="mdl-card__title">
+            <a href="proposal_show.html"><h2 class="mdl-card__title-text mdl-color-text--cyan-800">Overturn the Government's decision to allow fracking in Lancashire</h2></a>
+            <span class="mdl-badge proposal-status" data-badge="2"></span>
+          </div>
+          <div class="mdl-card__supporting-text">
+            Theresa May promised to give back control to local councils. However even though Lancashire County Council refused permission for fracking in their county, the Government overruled it.
+          </div>
+          <div class="mdl-card__actions mdl-card--border content-grid mdl-grid mdl-cell--12-col">
+            <span class="mdl-chip mdl-chip--contact">
+              <img class="mdl-chip__contact" src="images/john.jpg"></img>
+              <span class="mdl-chip__text">Aaron Paul</span>
+            </span>
+            <div class="mdl-layout-spacer"></div>
+            <p>2 days ago</p>        
+          </div>
+        </div>
+
+        <div class="mdl-cell mdl-card mdl-cell--12-col proposal-list">
+          <div class="mdl-card__title">
+            <a href="proposal_own.html"><h2 class="mdl-card__title-text mdl-color-text--cyan-800">Shut down the domestic ivory market in the UK</h2></a>
+          </div>
+          <div class="mdl-card__supporting-text">
+            The Conservatives pledged to shut down the UK’s domestic ivory market in their manifesto for the past two elections. From 2009 to 2014, 40% of UK customs seizures were ivory items.
+          </div>
+          <div class="mdl-card__actions mdl-card--border content-grid mdl-grid mdl-cell--12-col">
+            <span class="mdl-chip mdl-chip--contact">
+              <img class="mdl-chip__contact" src="images/yuna.jpg"></img>
+              <span class="mdl-chip__text">Yuna Smith</span>
+            </span>
+            <div class="mdl-layout-spacer"></div>
+            <p>5 days ago</p>    
+          </div>
+        </div>
+
+        <div class="mdl-cell mdl-card mdl-cell--12-col proposal-list">
+          <div class="mdl-card__title">
+            <a href="proposal_show2.html"><h2 class="mdl-card__title-text mdl-color-text--cyan-800">Make British Sign Language part of the curriculum</h2></a>
+            <i class="material-icons proposal-status mdl-color-text--light-green">check_circle</i>
+          </div>
+          <div class="mdl-card__supporting-text">
+            It's compulsory for students in England to take a language to 14 but signing isn't listed along with French, Germany or Mandarin. With one in 60 brits profoundly deaf and 11m others with hearing problems, this is a glaring omission is it not?
+          </div>
+          <div class="mdl-card__actions mdl-card--border content-grid mdl-grid mdl-cell--12-col">
+            <span class="mdl-chip mdl-chip--contact">
+              <img class="mdl-chip__contact" src="images/john.jpg"></img>
+              <span class="mdl-chip__text">Aaron Paul</span>
+            </span>
+            <div class="mdl-layout-spacer"></div>
+            <p>5 days ago</p>       
+          </div>
+        </div>
+
+        <div class="mdl-cell mdl-card mdl-cell--12-col proposal-list">
+          <div class="mdl-card__title">
+            <a href="proposal_show2.html"><h2 class="mdl-card__title-text mdl-color-text--cyan-800">Increase Carers Allowance in line with the Living Wage</h2></a>
+            <i class="material-icons proposal-status mdl-color-text--light-green">check_circle</i>
+          </div>
+          <div class="mdl-card__supporting-text">
+            To receive Carers Allowance from the Government carers need to care for the disabled (at a predetermined level of need) for AT LEAST 35 hours a week. For this they receive less than £2 an hour to help them do this. Sign if you think this should be increased in line with the living wage.
+          </div>
+          <div class="mdl-card__actions mdl-card--border content-grid mdl-grid mdl-cell--12-col">
+            <span class="mdl-chip mdl-chip--contact">
+              <img class="mdl-chip__contact" src="images/john.jpg"></img>
+              <span class="mdl-chip__text">Aaron Paul</span>
+            </span>
+            <div class="mdl-layout-spacer"></div>
+            <p>2 days ago</p>       
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+  <footer class="mdl-mega-footer">
+    <div class="mdl-mega-footer__left-section"></div>
+    <div class="mdl-mega-footer__right-section">
+      <ul class="mdl-mini-footer__link-list">
+        <li><a href="help.html">Help</a></li>
+        <li><a href="#">Privacy &amp; Terms</a></li>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>

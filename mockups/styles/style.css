@@ -1,0 +1,94 @@
+body { color: rgba(0,0,0,.54);}
+.demo-layout-transparent .mdl-layout__header,
+.demo-layout-transparent .mdl-layout__drawer-button {
+  color: black;
+}
+
+a.main-title { text-decoration: none; }
+#top-notify { margin-left: -12px; }
+
+.filtering h4 { margin-top: 6px; }
+
+.mdl-card { min-height: 100px; }
+.proposal-list .mdl-card__title { 
+  padding-bottom: 0;
+  position: relative;
+}
+
+.mdl-card .proposal-status {
+  position: absolute;
+  right: 12px;
+  top: 23px;
+}
+.mdl-card i.proposal-status { top: 10px; }
+
+a.mdl-list__item,
+.mdl-menu__item a,
+.mdl-card__supporting-text a,
+.mdl-card__title a { text-decoration: none; }
+
+a.mdl-list__item:hover { background: #ddd; }
+
+.mdl-card__actions i {
+  color: rgba(0,0,0,.54);
+  line-height: 36px;
+}
+
+.actions__authored,
+.notification__message {
+  color: rgba(0,0,0,.54);
+  font-size: 1rem;
+  line-height: 18px;
+}
+
+.actions__authored img.mdl-chip__contact { float: left; }
+
+.actions__authored .authored {
+  display: block;
+  float: left;
+}
+
+.proposal-support .mdl-badge {
+  float: right;
+  margin-top: 12px;
+}
+
+.proposal-change i {
+  font-size: 36px;
+  padding-top: 16px;
+}
+
+
+a { cursor: pointer; }
+
+.mdl-collapse.mdl-collapse--opened {
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+  margin-top: -1px;
+}
+
+.mdl-collapse.mdl-collapse--opened + .mdl-collapse.mdl-collapse--opened {
+  border-top: none;
+  margin-top: 0;
+}
+
+.mdl-collapse .mdl-collapse__content-wrapper { overflow: hidden; }
+
+.mdl-collapse .mdl-collapse__content {
+  transition-property: margin-top;
+  transition-duration: 0.2s;
+}
+
+.mdl-collapse .mdl-collapse__icon {
+  transition-property: transform;
+  transition-duration: 0.2s;
+  color: rgba(0,0,0,0.3);
+  /* MDL should provide some facility for positioning icons inside list items so I don't have to do this */
+  position: absolute;
+  right: 6px;
+  margin-top: -3px;
+}
+
+.mdl-collapse.mdl-collapse--opened .mdl-collapse__icon { transform: rotate(-180deg); }
+.mdl-collapse.mdl-collapse--opened .mdl-collapse__button { color: teal; }
+.mdl-collapse.mdl-collapse--opened .mdl-collapse__content { margin-top: 0 !important; }
