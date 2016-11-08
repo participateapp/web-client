@@ -79,20 +79,26 @@ urlParser =
 urlUpdate : ( Route, Address ) -> Model -> ( Model, Cmd Msg )
 urlUpdate ( route, address ) model =
   let
-    model1 = { model | route = route, address = address }
+    updatedModel = { model | route = route, address = address }
     _ = Debug.log "urlUpdate" ( route, address )
   in
     case route of
       ProposalRoute id ->
         case Dict.get id model.proposals of
           Nothing ->
-            ( model1
+            ( updatedModel
             , Api.getProposalCmd id model.accessToken ApiMsg
             )
           Just _ ->
-            ( model1, Cmd.none )
+            ( updatedModel, Cmd.none )
+
+      Home ->
+        ( updatedModel
+        , Api.getProposalListCmd model.accessToken ApiMsg
+        )
+
       _ ->
-        ( model1, Cmd.none )
+        ( updatedModel, Cmd.none )
 
 
 checkForAuthCode : Address -> Cmd Msg
@@ -105,7 +111,6 @@ checkForAuthCode address =
         Api.authenticateCmd code ApiMsg
 
       Nothing -> Cmd.none
-
 
 
 
@@ -156,14 +161,22 @@ type alias Proposal =
   , attr: ProposalAttr
   }
 
+
 type alias ParticipantAttr =
   { name : String
   }
+
 
 type alias Participant =
   { id : String
   , attr: ParticipantAttr
   }
+
+
+type alias ProposalList = 
+  List Proposal
+
+
 
 -- UPDATE
 
@@ -226,6 +239,21 @@ update msg model =
         Api.GettingProposalFailed httpError ->
           ({ model | error = Just <| toString httpError }, Cmd.none)
 
+        Api.GotProposalList proposalList ->
+          ( let
+              updatedProposals =
+                Dict.fromList <|
+                  List.map
+                    (\proposal -> (proposal.id, proposal))
+                    proposalList
+            in
+              { model | proposals = updatedProposals }
+          , Cmd.none
+          )
+
+        Api.GettingProposalListFailed httpError ->
+          ({ model | error = Just <| toString httpError }, Cmd.none)
+
     NavigateToPath path ->
       ( model,
         Navigation.newUrl <| Hop.outputFromPath hopConfig path
@@ -275,47 +303,51 @@ view model =
       }
 
 
-
 viewBody : Model -> Html Msg
 viewBody model =
-  case model.route of
-    Home ->
-      if String.isEmpty model.accessToken == True then
+  let
+    _ = case model.error of
+      Nothing -> ""
+      Just error -> Debug.log "model.error" error
+  in
+    case model.route of
+      Home ->
+        if String.isEmpty model.accessToken == True then
+          div []
+            [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
+        else
+          div []
+            [ text <| "Hello, " ++ ( .name model.me )
+            , h3 []
+                [ a [ onClick <| NavigateToPath "/new-proposal" ]
+                    [ text "Create a proposal" ] ]
+            , h3 [] [ text "Existing Proposals" ]
+            , div [] [ viewProposalList model ]
+            ]
+
+      NewProposalRoute ->
         div []
-          [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
-      else
-        div []
-          [ 
-            text <| "Hello, " ++ ( .name model.me )
+          [
+            h2 []
+              [ text <| "New Proposal" ]
             ,
-            h3 []
-              [ a [ onClick <| NavigateToPath "/new-proposal" ]
-                  [ text "Create a proposal" ] ]
+
+            formView model
           ]
 
-    NewProposalRoute ->
-      div []
-        [ 
-          h2 []
-            [ text <| "New Proposal" ]
-          ,
+      ProposalRoute id ->
+        div []
+          [ h2 [] [ text "Proposal" ]
+          , viewProposal model id
+          ]
 
-          formView model
-        ]
+      NotFoundRoute ->
+        div []
+          [ text <| "Not found" ]
 
-    ProposalRoute id ->
-      div []
-        [ h2 [] [ text "Proposal" ]
-        , viewProposal model id
-        ]
-
-    NotFoundRoute ->
-      div []
-        [ text <| "Not found" ]
-
-    FacebookRedirect ->
-      div []
-        [ text <| "Authenticating, please wait..." ]
+      FacebookRedirect ->
+        div []
+          [ text <| "Authenticating, please wait..." ]
 
 
 formView : Model -> Html Msg
@@ -325,7 +357,6 @@ formView model =
       , cell [ size All 12 ] [ bodyField model ]
       , cell [ size All 12 ] [ submitButton model ]
       ]
-
 
 
 titleField : Model -> Html Msg
@@ -436,6 +467,23 @@ viewParticipantName model id =
       div [] [text "Unknown (or uncached) author id: ", text id]
     Just participant ->
       text participant.attr.name
+
+
+viewProposalList : Model -> Html Msg
+viewProposalList model =
+  ul [] <|
+    List.map
+      viewProposalListEntry
+      (Dict.values model.proposals)
+
+
+viewProposalListEntry : Proposal -> Html Msg
+viewProposalListEntry proposal =
+  li []
+    [ a
+        [onClick <| NavigateToPath <| "proposals/" ++ proposal.id]
+        [text proposal.attr.title]
+    ]
 
 
 -- APP

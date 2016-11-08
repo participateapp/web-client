@@ -3,6 +3,7 @@ module Api
     ( facebookAuthUrl
     , Msg(..), Me
     , authenticateCmd, getMeCmd, createProposalCmd, getProposalCmd
+    , getProposalListCmd
     )
 
 
@@ -20,6 +21,8 @@ type Msg
   | ProposalCreationFailed Http.Error
   | GotProposal Proposal Participant
   | GettingProposalFailed Http.Error
+  | GotProposalList ProposalList
+  | GettingProposalListFailed Http.Error
   | GotMe Me
 
 
@@ -27,10 +30,12 @@ type alias Me =
   { name : String
   }
 
+
 type alias ProposalAttr =
   { title : String
   , body : String
   }
+
 
 type alias Proposal =
   { id : String
@@ -38,14 +43,20 @@ type alias Proposal =
   , attr: ProposalAttr
   }
 
+
 type alias ParticipantAttr =
   { name : String
   }
+
 
 type alias Participant =
   { id : String
   , attr: ParticipantAttr
   }
+
+
+type alias ProposalList =
+  List Proposal
 
 
 
@@ -63,12 +74,18 @@ tokenEndpoint = apiUrl ++ "/token"
 meEndpoint : String
 meEndpoint = apiUrl ++ "/me"
 
+
 newProposalEndpoint : String
 newProposalEndpoint = apiUrl ++ "/proposals"
+
 
 getProposalEndpoint : String -> String
 getProposalEndpoint id =
   apiUrl ++ "/proposals/" ++ id
+
+
+proposalListEndpoint : String
+proposalListEndpoint = apiUrl ++ "/proposals"
 
 
 -- TODO: move client_id and redirect_uri into environment variables
@@ -91,14 +108,19 @@ decoderAssertType path expectedType decoder =
           "Expected type \"" ++ expectedType ++ "\", got \"" ++ actualType ++ "\""
 
 
+decodeData : Decoder a -> Decoder a
+decodeData =
+  Decode.at ["data"]
+
+
 decodeToken : Decoder String
 decodeToken =
   Decode.at ["access_token"] Decode.string
-  
+
 
 decodeMe : Decoder Me
 decodeMe =
-  Decode.at ["data"] <|
+  decodeData <|
     decoderAssertType ["type"] "participant" <|
       Decode.object1 Me
         (Decode.at ["attributes", "name"] Decode.string)
@@ -106,19 +128,18 @@ decodeMe =
 
 decodeProposal : Decoder Proposal
 decodeProposal =
-  Decode.at ["data"] <|
-    decoderAssertType ["type"] "proposal" <|
-      Decode.object3
-        Proposal
-        ( Decode.at ["id"] Decode.string )
-        ( Decode.at ["relationships", "author", "data"] <|
-            decoderAssertType ["type"] "participant" <|
-              Decode.at ["id"] Decode.string
-        )
-        ( Decode.object2 ProposalAttr
-            (Decode.at ["attributes", "title"] Decode.string)
-            (Decode.at ["attributes", "body"] Decode.string)
-        )
+  decoderAssertType ["type"] "proposal" <|
+    Decode.object3
+      Proposal
+      ( Decode.at ["id"] Decode.string )
+      ( Decode.at ["relationships", "author", "data"] <|
+          decoderAssertType ["type"] "participant" <|
+            Decode.at ["id"] Decode.string
+      )
+      ( Decode.object2 ProposalAttr
+          (Decode.at ["attributes", "title"] Decode.string)
+          (Decode.at ["attributes", "body"] Decode.string)
+      )
 
 
 decodeProposalIncluded : Decoder (List Participant)
@@ -149,8 +170,13 @@ decodeProposalAndAuthor : Decoder (Proposal, Participant)
 decodeProposalAndAuthor =
   Decode.object2
     (,)
-    decodeProposal
+    ( decodeData decodeProposal )
     decodeProposalIncludedAuthor
+
+decodeProposalList : Decoder ProposalList
+decodeProposalList =
+  decodeData <|
+    Decode.list decodeProposal
 
 
 encodeProposal : ProposalAttr -> String
@@ -210,6 +236,13 @@ getProposalCmd id accessToken wrapMsg =
     |> Cmd.map wrapMsg
 
 
+getProposalListCmd : String -> (Msg -> a) -> Cmd a
+getProposalListCmd accessToken wrapMsg =
+  getProposalList accessToken
+    |> Task.perform GettingProposalListFailed GotProposalList
+    |> Cmd.map wrapMsg
+
+
 
 -- HTTP requests
 
@@ -247,6 +280,20 @@ getProposal id accessToken =
   }
     |> Http.send Http.defaultSettings
     |> Http.fromJson decodeProposalAndAuthor
+
+
+getProposalList : String -> Task Http.Error ProposalList
+getProposalList accessToken =
+  { verb = "GET"
+  , headers =
+      [ ("Authorization", "Bearer " ++ accessToken)
+      , ("Content-Type", "application/vnd.api+json")
+      ]
+  , url = proposalListEndpoint
+  , body = Http.empty
+  }
+    |> Http.send Http.defaultSettings
+    |> Http.fromJson decodeProposalList
 
 
 getWithToken : String -> String -> Decoder a -> Task Http.Error a
