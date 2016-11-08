@@ -1,0 +1,94 @@
+<!doctype html>
+
+<html>
+<head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
+  <link rel="stylesheet" href="styles/style.css">
+  <link rel="stylesheet" href="styles/layout.css">
+</head>
+<body class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+  <header class="mdl-layout__header mdl-color--white">
+    <div class="mdl-layout__header-row">
+      <a href="proposals_index.html" class="main-title"><span class="mdl-layout-title mdl-color-text--primary">Participate!</span></a>
+      <div class="mdl-layout-spacer"></div>
+      <div class="mdl-layout--large-screen-only">
+        <a href="proposal_new.html" id="new-proposal"><button class="mdl-button mdl-js-button mdl-button--colored">New proposal</button></a>
+      </div>
+      <nav class="mdl-navigation">
+        <button id="user-menu" class="mdl-button mdl-js-button mdl-button--icon"><img class="mdl-chip__contact" src="images/yuna.jpg"></button>Yuna Smith
+        <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="user-menu">
+          <span class="mdl-color-text--grey-700" id="current-user">Signed in as<br /><strong>Yuna Smith</strong></span>
+          <hr>
+          <li class="mdl-menu__item"><a href="proposal_new.html" class="mdl-color-text--primary">New proposal</a></li>
+          <li class="mdl-menu__item"><a href="index.html" class="mdl-color-text--primary">Sign out</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  
+  <main class="mdl-layout__content mdl-color--grey-200">
+    <div class="mdl-typography--text-center top-alert">
+      <span class="mdl-chip mdl-chip--deletable mdl-color--light-green-700">
+        <span class="mdl-chip__text mdl-color-text--white">Proposal saved</span>
+        <button type="button" class="mdl-chip__action mdl-color-text--white"><i class="material-icons">cancel</i></button>
+      </span>
+    </div>
+    <div class="content-grid mdl-grid">
+      <div class="mdl-layout-spacer"></div>
+      <div class="mdl-cell mdl-cell--10-col">
+        <div class="mdl-cell mdl-card mdl-cell--12-col proposal-show">
+          <div class="mdl-card__actions content-grid mdl-grid mdl-cell--12-col border-bottom">
+            <span class="actions__authored">
+              <img class="mdl-chip__contact" src="images/yuna.jpg">
+              <span class="authored">
+                Yuna Smith<br />
+                5 days ago
+              </span>
+            </span> 
+            <div class="mdl-layout-spacer"></div>
+            <span class="mdl-chip">
+              <span class="mdl-chip__text">Support count: 10</span>
+            </span> 
+          </div>
+          <div class="mdl-card__title">
+            <span class="mdl-typography--headline mdl-color-text--grey-700">Shut down the domestic ivory market in the UK</span>
+          </div>
+          <div class="mdl-card__supporting-text">
+            <p><strong>The Conservatives pledged to shut down the UK’s domestic ivory market in their manifesto for the past two elections. From 2009 to 2014, 40% of UK customs seizures were ivory items.</strong></p>
+            <p>Many African nations, the US, France and even China have committed to outlawing the markets. There are only around 450,000 African Elephants left, in another six years there will be almost half this amount if governments continue to turn a blind eye; the UK are putting Elephants at risk from extinction. If there were not a market, then the elephants would no longer be in danger. The UK needs to set an example that the only tusks of value are those on a live Elephant, before they cease to exist.</p>
+          </div>
+        </div>
+      </div>
+      <div class="mdl-layout-spacer"></div>
+    </div>
+
+    <footer class="mdl-mega-footer">
+      <div class="mdl-mega-footer__top-section">
+        <div class="mdl-mega-footer__left-section">
+          <ul class="mdl-mini-footer__link-list social-links">
+            <li><a href="https://github.com/oliverbarnes/participate"><img src="images/github-circle.png"></a></li>
+            <li><a href="https://participateapp.slack.com"><img src="images/slack.png"></a></li>
+            <li><a href="https://twitter.com/digiberber"><img src="images/twitter.png"></a></li>
+          </ul>
+        </div>
+
+        <div class="mdl-mega-footer__right-section">
+          <p class="mdl-layout-title">Participate!</p>
+          <p>An open source liquid democracy application.</p>
+        </div>
+      </div>
+
+      <div class="mdl-mega-footer__bottom-section">
+        <ul class="mdl-mini-footer__link-list">
+          <li><a href="https://github.com/oliverbarnes/participate/blob/master/CONTRIBUTING.md">Guide to contributing</a></li>
+          <li><a href="https://github.com/oliverbarnes/participate/wiki/Development-Setup">Wiki</a></li>
+        </ul>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>

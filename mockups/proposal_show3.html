@@ -1,0 +1,86 @@
+<!doctype html>
+
+<html>
+<head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
+  <link rel="stylesheet" href="styles/style.css">
+  <link rel="stylesheet" href="styles/layout.css">
+</head>
+<body class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+  <header class="mdl-layout__header mdl-color--white">
+    <div class="mdl-layout__header-row">
+      <a href="proposals_index.html" class="main-title"><span class="mdl-layout-title mdl-color-text--primary">Participate!</span></a>
+      <div class="mdl-layout-spacer"></div>
+      <div class="mdl-layout--large-screen-only">
+        <a href="proposal_new.html" id="new-proposal"><button class="mdl-button mdl-js-button mdl-button--colored">New proposal</button></a>
+      </div>
+      <nav class="mdl-navigation">
+        <button id="user-menu" class="mdl-button mdl-js-button mdl-button--icon"><img class="mdl-chip__contact" src="images/yuna.jpg"></button>Yuna Smith
+        <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="user-menu">
+          <span class="mdl-color-text--grey-700" id="current-user">Signed in as<br /><strong>Yuna Smith</strong></span>
+          <hr>
+          <li class="mdl-menu__item"><a href="proposal_new.html" class="mdl-color-text--primary">New proposal</a></li>
+          <li class="mdl-menu__item"><a href="index.html" class="mdl-color-text--primary">Sign out</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  
+  <main class="mdl-layout__content mdl-color--grey-200">
+    <div class="content-grid mdl-grid">
+      <div class="mdl-layout-spacer"></div>
+      <div class="mdl-cell mdl-cell--10-col">
+        <div class="mdl-cell mdl-card mdl-cell--12-col proposal-show">
+          <div class="mdl-card__actions content-grid mdl-grid mdl-cell--12-col border-bottom">
+            <span class="actions__authored">
+              <img class="mdl-chip__contact" src="images/john.jpg">
+              <span class="authored">
+                Aaron Paul<br />
+                7 days ago
+              </span>
+            </span> 
+            <div class="mdl-layout-spacer"></div>
+            <a href="proposal_show3_supporting.html"><button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" id="show-delegate">Support Proposal</button></a> 
+          </div>
+          <div class="mdl-card__title">
+            <span class="mdl-typography--headline mdl-color-text--grey-700">Increase Carers Allowance in line with the Living Wage</span>
+          </div>
+          <div class="mdl-card__supporting-text">
+            <p><strong>To receive Carers Allowance from the Government carers need to care for the disabled (at a predetermined level of need) for AT LEAST 35 hours a week. For this they receive less than £2 an hour to help them do this. Sign if you think this should be increased in line with the living wage.</strong></p>
+            <p>Excepteur reprehenderit sint exercitation ipsum consequat qui sit id velit elit. Velit anim eiusmod labore sit amet. Voluptate voluptate irure occaecat deserunt incididunt esse in. Sunt velit aliquip sunt elit ex nulla reprehenderit qui ut eiusmod ipsum do. Duis veniam reprehenderit laborum occaecat id proident nulla veniam. Duis enim deserunt voluptate aute veniam sint pariatur exercitation. Irure mollit est sit labore est deserunt pariatur duis aute laboris cupidatat. Consectetur consequat esse est sit veniam adipisicing ipsum enim irure. Excepteur reprehenderit sint exercitation ipsum consequat qui sit id velit elit.</p>
+          </div>
+        </div>
+      </div>
+      <div class="mdl-layout-spacer"></div>
+    </div>
+
+    <footer class="mdl-mega-footer">
+      <div class="mdl-mega-footer__top-section">
+        <div class="mdl-mega-footer__left-section">
+          <ul class="mdl-mini-footer__link-list social-links">
+            <li><a href="https://github.com/oliverbarnes/participate"><img src="images/github-circle.png"></a></li>
+            <li><a href="https://participateapp.slack.com"><img src="images/slack.png"></a></li>
+            <li><a href="https://twitter.com/digiberber"><img src="images/twitter.png"></a></li>
+          </ul>
+        </div>
+
+        <div class="mdl-mega-footer__right-section">
+          <p class="mdl-layout-title">Participate!</p>
+          <p>An open source liquid democracy application.</p>
+        </div>
+      </div>
+
+      <div class="mdl-mega-footer__bottom-section">
+        <ul class="mdl-mini-footer__link-list">
+          <li><a href="https://github.com/oliverbarnes/participate/blob/master/CONTRIBUTING.md">Guide to contributing</a></li>
+          <li><a href="https://github.com/oliverbarnes/participate/wiki/Development-Setup">Wiki</a></li>
+        </ul>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,116 @@
+body { color: rgba(0,0,0,.54);}
+
+a { cursor: pointer; }
+
+.border-bottom { border-bottom: 1px solid rgba(0,0,0,.1); }
+
+/*   ===============   Navbar   ===============   
+     ==========================================   */
+
+.demo-layout-transparent .mdl-layout__header,
+.demo-layout-transparent .mdl-layout__drawer-button { color: black; }
+
+a.main-title { text-decoration: none; }
+
+a#new-proposal { padding: 0 32px; }
+
+a#new-proposal button { border: 2px solid; }
+
+a#new-proposal button:hover {
+  color: #fff;
+  background: rgb(63,81,181);
+  border: 2px solid rgb(63,81,181);
+}
+
+li.mdl-menu__item a { text-decoration: none; }
+
+#current-user { 
+  padding: 0 16px;
+  display: block; 
+}
+
+/*   ============   Landing Page   ============   
+     ==========================================   */
+
+#landing-pg section { padding: 1.9em 0; }
+section#hero {
+  background: url(../images/top-bg.jpg);
+  background-attachment: fixed !important;
+  background-position: 50% 0px;
+  background-size: cover !important;
+  text-shadow: 1px 1px 2px #fff;
+}
+
+section#main-top p i { font-size: 45px; }
+
+/*   ==============   Proposals   ==============   
+     ===========================================   */
+a.card-link { text-decoration: none; }
+
+.mdl-card { min-height: 100px; }
+
+.proposal-show .mdl-card__title,
+.proposal-list .mdl-card__title { 
+  padding-bottom: 0;
+  position: relative;
+}
+
+.proposal-list .mdl-button.supporting:hover { background: none; }
+
+.proposal-list .mdl-card__supporting-text { 
+  padding-bottom: 0;
+  padding-top: 8px;
+}
+
+.actions__authored .authored {
+  display: block;
+  float: left;
+}
+
+.actions__authored img { 
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  float: left; 
+}
+
+.proposal-show .mdl-card__supporting-text { padding-top: 11px; }
+
+.proposal-show .mdl-card__title { padding-top: 18px; }
+.proposal-list .mdl-card__title { padding-top: 14px; }
+
+.proposal-show .mdl-card__title span,
+.proposal-list .mdl-card__title span { font-weight: 300; }
+
+.proposal-show .mdl-card__actions { padding: 16px 8px; }
+
+
+/*   ============   New Proposals   ============   
+     ===========================================   */
+
+.top-alert { padding-top: 24px; }
+.top-alert .mdl-chip { margin-bottom: 0; }
+
+
+.actions__authored,
+.notification__message {
+  color: rgba(0,0,0,.54);
+  font-size: 1rem;
+  line-height: 18px;
+}
+
+form#new-proposal-form { padding: 16px; }
+
+/*   ================   Footer  ================   
+     ===========================================   */
+
+footer .mdl-mega-footer__top-section { padding-top: 4px; }
+
+/*footer .social-links {
+  padding-top: 12px;
+  padding-bottom: 17px;
+}
+
+footer .mdl-mega-footer__right-section { padding-top: 12px; }*/
+
+
