@@ -40,6 +40,8 @@ Compile and run dev server:
 $ npm run dev
 ```
 
+More details can be found [on the wiki](https://github.com/oliverbarnes/participate/wiki/Development-Setup).
+
 
 ## Want to get involved?
 
