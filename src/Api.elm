@@ -13,6 +13,11 @@ import Task exposing (Task)
 import Json.Decode as Decode
 import Json.Decode exposing (Decoder)
 import Json.Encode as Encode
+import JsonApi
+import JsonApi.Decode
+import JsonApi.Resources
+import JsonApi.Documents
+import JsonApi.Http
 import Types exposing (..)
 
 
