@@ -1,10 +1,13 @@
 module Api
-  exposing
-    ( facebookAuthUrl
-    , Msg(..), Me
-    , authenticateCmd, getMeCmd, createProposalCmd, getProposalCmd
-    )
-
+    exposing
+        ( facebookAuthUrl
+        , Msg(..)
+        , Me
+        , authenticateCmd
+        , getMeCmd
+        , createProposalCmd
+        , getProposalCmd
+        )
 
 import Http
 import Task exposing (Task)
@@ -14,38 +17,42 @@ import Json.Encode as Encode
 
 
 type Msg
-  = GotAccessToken String
-  | AuthFailed Http.Error
-  | ProposalCreated Proposal Participant
-  | ProposalCreationFailed Http.Error
-  | GotProposal Proposal Participant
-  | GettingProposalFailed Http.Error
-  | GotMe Me
+    = GotAccessToken String
+    | AuthFailed Http.Error
+    | ProposalCreated Proposal Participant
+    | ProposalCreationFailed Http.Error
+    | GotProposal Proposal Participant
+    | GettingProposalFailed Http.Error
+    | GotMe Me
 
 
 type alias Me =
-  { name : String
-  }
+    { name : String
+    }
+
 
 type alias ProposalAttr =
-  { title : String
-  , body : String
-  }
+    { title : String
+    , body : String
+    }
+
 
 type alias Proposal =
-  { id : String
-  , author : String
-  , attr: ProposalAttr
-  }
+    { id : String
+    , author : String
+    , attr : ProposalAttr
+    }
+
 
 type alias ParticipantAttr =
-  { name : String
-  }
+    { name : String
+    }
+
 
 type alias Participant =
-  { id : String
-  , attr: ParticipantAttr
-  }
+    { id : String
+    , attr : ParticipantAttr
+    }
 
 
 
@@ -53,27 +60,37 @@ type alias Participant =
 
 
 apiUrl : String
-apiUrl = "http://localhost:4000"
+apiUrl =
+    "http://localhost:4000"
 
 
 tokenEndpoint : String
-tokenEndpoint = apiUrl ++ "/token"
+tokenEndpoint =
+    apiUrl ++ "/token"
 
 
 meEndpoint : String
-meEndpoint = apiUrl ++ "/me"
+meEndpoint =
+    apiUrl ++ "/me"
+
 
 newProposalEndpoint : String
-newProposalEndpoint = apiUrl ++ "/proposals"
+newProposalEndpoint =
+    apiUrl ++ "/proposals"
+
 
 getProposalEndpoint : String -> String
 getProposalEndpoint id =
-  apiUrl ++ "/proposals/" ++ id
+    apiUrl ++ "/proposals/" ++ id
+
 
 
 -- TODO: move client_id and redirect_uri into environment variables
+
+
 facebookAuthUrl : String
-facebookAuthUrl = "https://www.facebook.com/dialog/oauth?client_id=1583083701926004&redirect_uri=http://localhost:3000/facebook_redirect"
+facebookAuthUrl =
+    "https://www.facebook.com/dialog/oauth?client_id=1583083701926004&redirect_uri=http://localhost:3000/facebook_redirect"
 
 
 
@@ -82,94 +99,102 @@ facebookAuthUrl = "https://www.facebook.com/dialog/oauth?client_id=1583083701926
 
 decoderAssertType : List String -> String -> Decoder a -> Decoder a
 decoderAssertType path expectedType decoder =
-  Decode.at path Decode.string
-    `Decode.andThen` \actualType ->
-      if actualType == expectedType then
-        decoder
-      else
-        Decode.fail <|
-          "Expected type \"" ++ expectedType ++ "\", got \"" ++ actualType ++ "\""
+    Decode.at path Decode.string
+        `Decode.andThen`
+            \actualType ->
+                if actualType == expectedType then
+                    decoder
+                else
+                    Decode.fail <|
+                        "Expected type \""
+                            ++ expectedType
+                            ++ "\", got \""
+                            ++ actualType
+                            ++ "\""
 
 
 decodeToken : Decoder String
 decodeToken =
-  Decode.at ["access_token"] Decode.string
-  
+    Decode.at [ "access_token" ] Decode.string
+
 
 decodeMe : Decoder Me
 decodeMe =
-  Decode.at ["data"] <|
-    decoderAssertType ["type"] "participant" <|
-      Decode.object1 Me
-        (Decode.at ["attributes", "name"] Decode.string)
+    Decode.at [ "data" ] <|
+        decoderAssertType [ "type" ] "participant" <|
+            Decode.object1 Me
+                (Decode.at [ "attributes", "name" ] Decode.string)
 
 
 decodeProposal : Decoder Proposal
 decodeProposal =
-  Decode.at ["data"] <|
-    decoderAssertType ["type"] "proposal" <|
-      Decode.object3
-        Proposal
-        ( Decode.at ["id"] Decode.string )
-        ( Decode.at ["relationships", "author", "data"] <|
-            decoderAssertType ["type"] "participant" <|
-              Decode.at ["id"] Decode.string
-        )
-        ( Decode.object2 ProposalAttr
-            (Decode.at ["attributes", "title"] Decode.string)
-            (Decode.at ["attributes", "body"] Decode.string)
-        )
+    Decode.at [ "data" ] <|
+        decoderAssertType [ "type" ] "proposal" <|
+            Decode.object3
+                Proposal
+                (Decode.at [ "id" ] Decode.string)
+                (Decode.at [ "relationships", "author", "data" ] <|
+                    decoderAssertType [ "type" ] "participant" <|
+                        Decode.at [ "id" ] Decode.string
+                )
+                (Decode.object2 ProposalAttr
+                    (Decode.at [ "attributes", "title" ] Decode.string)
+                    (Decode.at [ "attributes", "body" ] Decode.string)
+                )
 
 
 decodeProposalIncluded : Decoder (List Participant)
 decodeProposalIncluded =
-  Decode.at ["included"] <|
-    Decode.list <|
-      decoderAssertType ["type"] "participant" <|
-        Decode.object2
-          Participant
-          ( Decode.at ["id"] Decode.string )
-          ( Decode.object1 ParticipantAttr
-              (Decode.at ["attributes", "name"] Decode.string)
-          )
+    Decode.at [ "included" ] <|
+        Decode.list <|
+            decoderAssertType [ "type" ] "participant" <|
+                Decode.object2
+                    Participant
+                    (Decode.at [ "id" ] Decode.string)
+                    (Decode.object1 ParticipantAttr
+                        (Decode.at [ "attributes", "name" ] Decode.string)
+                    )
 
 
 decodeProposalIncludedAuthor : Decoder Participant
 decodeProposalIncludedAuthor =
-  Decode.andThen
-    decodeProposalIncluded
-    ( \included ->
-        case included of
-          [author] -> Decode.succeed author
-          _ -> Decode.fail "No author included in JSON for proposal"
-    )
+    Decode.andThen
+        decodeProposalIncluded
+        (\included ->
+            case included of
+                [ author ] ->
+                    Decode.succeed author
+
+                _ ->
+                    Decode.fail "No author included in JSON for proposal"
+        )
 
 
-decodeProposalAndAuthor : Decoder (Proposal, Participant)
+decodeProposalAndAuthor : Decoder ( Proposal, Participant )
 decodeProposalAndAuthor =
-  Decode.object2
-    (,)
-    decodeProposal
-    decodeProposalIncludedAuthor
+    Decode.object2
+        (,)
+        decodeProposal
+        decodeProposalIncludedAuthor
 
 
 encodeProposal : ProposalAttr -> String
 encodeProposal proposal =
-  -- http://noredink.github.io/json-to-elm/
-  Encode.object
-    [ ( "data"
-      , Encode.object
-          [ ( "type", Encode.string "proposal" )
-          , ( "attributes"
-            , Encode.object
-              [ ( "title", Encode.string proposal.title )
-              , ( "body", Encode.string proposal.body )
-              ]
-            )
-          ]
-      )
-    ] 
-    |> Encode.encode 0
+    -- http://noredink.github.io/json-to-elm/
+    Encode.object
+        [ ( "data"
+          , Encode.object
+                [ ( "type", Encode.string "proposal" )
+                , ( "attributes"
+                  , Encode.object
+                        [ ( "title", Encode.string proposal.title )
+                        , ( "body", Encode.string proposal.body )
+                        ]
+                  )
+                ]
+          )
+        ]
+        |> Encode.encode 0
 
 
 
@@ -178,36 +203,36 @@ encodeProposal proposal =
 
 authenticateCmd : String -> (Msg -> a) -> Cmd a
 authenticateCmd authCode wrapMsg =
-  let
-    body =
-      "{\"auth_code\": \"" ++ authCode ++ "\"}"
-    
-    requestTask =
-      exchangeAuthCodeForToken body
-  in
-    Task.perform AuthFailed GotAccessToken requestTask
-      |> Cmd.map wrapMsg
+    let
+        body =
+            "{\"auth_code\": \"" ++ authCode ++ "\"}"
+
+        requestTask =
+            exchangeAuthCodeForToken body
+    in
+        Task.perform AuthFailed GotAccessToken requestTask
+            |> Cmd.map wrapMsg
 
 
 getMeCmd : String -> (Msg -> a) -> Cmd a
 getMeCmd accessToken wrapMsg =
-  getWithToken meEndpoint accessToken decodeMe
-    |> Task.perform AuthFailed GotMe
-    |> Cmd.map wrapMsg
+    getWithToken meEndpoint accessToken decodeMe
+        |> Task.perform AuthFailed GotMe
+        |> Cmd.map wrapMsg
 
 
 createProposalCmd : ProposalAttr -> String -> (Msg -> a) -> Cmd a
 createProposalCmd proposal accessToken wrapMsg =
-  postProposal proposal accessToken
-    |> Task.perform ProposalCreationFailed (uncurry ProposalCreated)
-    |> Cmd.map wrapMsg
+    postProposal proposal accessToken
+        |> Task.perform ProposalCreationFailed (uncurry ProposalCreated)
+        |> Cmd.map wrapMsg
 
 
 getProposalCmd : String -> String -> (Msg -> a) -> Cmd a
 getProposalCmd id accessToken wrapMsg =
-  getProposal id accessToken
-    |> Task.perform GettingProposalFailed (uncurry GotProposal)
-    |> Cmd.map wrapMsg
+    getProposal id accessToken
+        |> Task.perform GettingProposalFailed (uncurry GotProposal)
+        |> Cmd.map wrapMsg
 
 
 
@@ -216,48 +241,48 @@ getProposalCmd id accessToken wrapMsg =
 
 exchangeAuthCodeForToken : String -> Task Http.Error String
 exchangeAuthCodeForToken body =
-  { verb = "POST", headers = [("Content-Type", "application/json")], url = tokenEndpoint, body = Http.string body }
-    |> Http.send Http.defaultSettings
-    |> Http.fromJson decodeToken
+    { verb = "POST", headers = [ ( "Content-Type", "application/json" ) ], url = tokenEndpoint, body = Http.string body }
+        |> Http.send Http.defaultSettings
+        |> Http.fromJson decodeToken
 
 
-postProposal : ProposalAttr -> String -> Task Http.Error (Proposal, Participant)
+postProposal : ProposalAttr -> String -> Task Http.Error ( Proposal, Participant )
 postProposal proposal accessToken =
-  { verb = "POST"
-  , headers =
-      [ ("Authorization", "Bearer " ++ accessToken)
-      , ("Content-Type", "application/vnd.api+json")
-      ]
-  , url = newProposalEndpoint
-  , body = Http.string (encodeProposal proposal)
-  }
-    |> Http.send Http.defaultSettings
-    |> Http.fromJson decodeProposalAndAuthor
+    { verb = "POST"
+    , headers =
+        [ ( "Authorization", "Bearer " ++ accessToken )
+        , ( "Content-Type", "application/vnd.api+json" )
+        ]
+    , url = newProposalEndpoint
+    , body = Http.string (encodeProposal proposal)
+    }
+        |> Http.send Http.defaultSettings
+        |> Http.fromJson decodeProposalAndAuthor
 
 
-getProposal : String -> String -> Task Http.Error {- Maybe -} (Proposal, Participant)
+getProposal : String -> String -> Task Http.Error {- Maybe -} ( Proposal, Participant )
 getProposal id accessToken =
-  { verb = "GET"
-  , headers =
-      [ ("Authorization", "Bearer " ++ accessToken)
-      , ("Content-Type", "application/vnd.api+json")
-      ]
-  , url = getProposalEndpoint id
-  , body = Http.empty
-  }
-    |> Http.send Http.defaultSettings
-    |> Http.fromJson decodeProposalAndAuthor
+    { verb = "GET"
+    , headers =
+        [ ( "Authorization", "Bearer " ++ accessToken )
+        , ( "Content-Type", "application/vnd.api+json" )
+        ]
+    , url = getProposalEndpoint id
+    , body = Http.empty
+    }
+        |> Http.send Http.defaultSettings
+        |> Http.fromJson decodeProposalAndAuthor
 
 
 getWithToken : String -> String -> Decoder a -> Task Http.Error a
-getWithToken url accessToken responseDecoder  =
-  { verb = "GET"
-  , headers =
-      [ ("Authorization", "Bearer " ++ accessToken)
-      , ("Content-Type", "application/vnd.api+json")
-      ]
-  , url = url
-  , body = Http.empty
-  }
-  |> Http.send Http.defaultSettings
-  |> Http.fromJson responseDecoder
+getWithToken url accessToken responseDecoder =
+    { verb = "GET"
+    , headers =
+        [ ( "Authorization", "Bearer " ++ accessToken )
+        , ( "Content-Type", "application/vnd.api+json" )
+        ]
+    , url = url
+    , body = Http.empty
+    }
+        |> Http.send Http.defaultSettings
+        |> Http.fromJson responseDecoder
