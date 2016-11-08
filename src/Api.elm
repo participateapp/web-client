@@ -2,7 +2,6 @@ module Api
     exposing
         ( facebookAuthUrl
         , Msg(..)
-        , Me
         , authenticateCmd
         , getMeCmd
         , createProposalCmd
@@ -14,6 +13,7 @@ import Task exposing (Task)
 import Json.Decode as Decode
 import Json.Decode exposing (Decoder)
 import Json.Encode as Encode
+import Types exposing (..)
 
 
 type Msg
@@ -24,35 +24,6 @@ type Msg
     | GotProposal Proposal Participant
     | GettingProposalFailed Http.Error
     | GotMe Me
-
-
-type alias Me =
-    { name : String
-    }
-
-
-type alias ProposalAttr =
-    { title : String
-    , body : String
-    }
-
-
-type alias Proposal =
-    { id : String
-    , author : String
-    , attr : ProposalAttr
-    }
-
-
-type alias ParticipantAttr =
-    { name : String
-    }
-
-
-type alias Participant =
-    { id : String
-    , attr : ParticipantAttr
-    }
 
 
 
