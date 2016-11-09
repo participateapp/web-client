@@ -84,35 +84,11 @@ decodeMe =
             (Decode.at [ "attributes", "name" ] Decode.string)
 
 
-type alias ProposalAttributes =
-    { title : String
-    , body : String
-    }
-
-
-decodeProposalAttributes : Decoder ProposalAttributes
-decodeProposalAttributes =
-    Decode.object2 ProposalAttributes
-        (Decode.at [ "title" ] Decode.string)
-        (Decode.at [ "body" ] Decode.string)
-
-
-type alias ParticipantAttributes =
-    { name : String
-    }
-
-
-decodeParticipantAttributes : Decoder ParticipantAttributes
-decodeParticipantAttributes =
-    Decode.object1 ParticipantAttributes
-        (Decode.at [ "name" ] Decode.string)
-
-
-httpFromJsonApi :
+httpFromJsonApiAssembler :
     (JsonApi.Document -> Result String a)
     -> Task Http.RawError Http.Response
     -> Task Http.Error a
-httpFromJsonApi assembler response =
+httpFromJsonApiAssembler assembler response =
     Http.fromJson
         (Decode.customDecoder JsonApi.Decode.document assembler)
         response
@@ -130,11 +106,11 @@ assembleProposal document =
     JsonApi.Documents.primaryResource document
         :> \proposalResource ->
             JsonApi.Resources.attributes decodeProposalAttributes proposalResource
-                :> \{ title, body } ->
+                :> \( title, body ) ->
                     JsonApi.Resources.relatedResource "author" proposalResource
                         :> \participantResource ->
                             JsonApi.Resources.attributes decodeParticipantAttributes participantResource
-                                :> \{ name } ->
+                                :> \name ->
                                     Ok
                                         { id = JsonApi.Resources.id proposalResource
                                         , title = title
@@ -144,6 +120,18 @@ assembleProposal document =
                                             , name = name
                                             }
                                         }
+
+
+decodeProposalAttributes : Decoder ( String, String )
+decodeProposalAttributes =
+    Decode.object2 (,)
+        (Decode.at [ "title" ] Decode.string)
+        (Decode.at [ "body" ] Decode.string)
+
+
+decodeParticipantAttributes : Decoder String
+decodeParticipantAttributes =
+    Decode.at [ "name" ] Decode.string
 
 
 encodeProposalInput : ProposalInput -> String
@@ -224,7 +212,7 @@ postProposal proposalInput accessToken =
     , body = Http.string (encodeProposalInput proposalInput)
     }
         |> Http.send Http.defaultSettings
-        |> httpFromJsonApi assembleProposal
+        |> httpFromJsonApiAssembler assembleProposal
 
 
 getProposal : String -> String -> Task Http.Error {- Maybe -} Proposal
@@ -238,12 +226,7 @@ getProposal id accessToken =
     , body = Http.empty
     }
         |> Http.send Http.defaultSettings
-        |> httpFromJsonApi assembleProposal
-
-
-
--- |> Http.fromJson JsonApi.Decode.document
--- |>
+        |> httpFromJsonApiAssembler assembleProposal
 
 
 getWithToken : String -> String -> Decoder a -> Task Http.Error a
