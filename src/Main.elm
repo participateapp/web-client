@@ -86,7 +86,7 @@ urlUpdate ( route, address ) model =
                 case Dict.get id model.proposals of
                     Nothing ->
                         ( model1
-                        , Api.getProposalCmd id model.accessToken ApiMsg
+                        , Api.getProposal id model.accessToken ApiMsg
                         )
 
                     Just _ ->
@@ -104,7 +104,7 @@ checkForAuthCode address =
     in
         case authCode of
             Just code ->
-                Api.authenticateCmd code ApiMsg
+                Api.authenticate code ApiMsg
 
             Nothing ->
                 Cmd.none
@@ -172,7 +172,7 @@ update msg model =
                     ( { model | accessToken = accessToken }
                     , Cmd.batch
                         [ storeAccessToken accessToken
-                        , Api.getMeCmd accessToken ApiMsg
+                        , Api.getMe accessToken ApiMsg
                         ]
                     )
 
@@ -209,7 +209,7 @@ update msg model =
         FormMsg formMsg ->
             case ( formMsg, Form.getOutput model.form ) of
                 ( Form.Submit, Just proposalInput ) ->
-                    model ! [ Api.createProposalCmd proposalInput model.accessToken ApiMsg ]
+                    model ! [ Api.createProposal proposalInput model.accessToken ApiMsg ]
 
                 _ ->
                     ( { model | form = Form.update formMsg model.form }, Cmd.none )
