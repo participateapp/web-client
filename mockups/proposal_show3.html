@@ -1,163 +1,155 @@
 <!doctype html>
 
 <html>
-  <head>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
-    <!-- <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.grey-pink.min.css" /> -->
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
-    <link rel="stylesheet" href="styles/style.css">
-    <link rel="stylesheet" href="styles/layout.css">
-  </head>
-  <body class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-    <header class="mdl-layout__header mdl-color--white">
+<head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
+  <link rel="stylesheet" href="styles/style.css">
+  <link rel="stylesheet" href="styles/layout.css">
+</head>
+<body class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+  <header class="mdl-layout__header mdl-color--white">
     <div class="mdl-layout__header-row">
       <a href="proposals_index.html" class="main-title"><span class="mdl-layout-title mdl-color-text--grey-700">Participate</span></a>
       <div class="mdl-layout-spacer"></div>
-      <div class="android-search-box mdl-textfield mdl-js-textfield mdl-textfield--expandable mdl-textfield--floating-label mdl-textfield--align-right mdl-textfield--full-width mdl-color-text--grey-700">
-        <label class="mdl-button mdl-js-button mdl-button--icon" for="search-field">
-          <i class="material-icons">search</i>
-        </label>
-        <div class="mdl-textfield__expandable-holder">
-          <input class="mdl-textfield__input" type="text" id="search-field">
-        </div>
-      </div>
       <nav class="mdl-navigation">
-        <a class="mdl-navigation__link mdl-color-text--grey-700" href="activity.html"><i class="material-icons">notifications</i><span class="mdl-badge" id="top-notify" data-badge="2"></span></a>
         <button id="user-menu" class="mdl-button mdl-js-button mdl-button--icon"><img class="mdl-chip__contact" src="images/yuna.jpg"></button>
         <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="user-menu">
-          <li class="mdl-menu__item"><a href="proposal_new.html">New proposal</a></li>
-          <li class="mdl-menu__item">Profile</li>
+          <li class="mdl-menu__item"><a href="proposal_new.html" class="mdl-color-text--grey-700">New proposal</a></li>
           <hr>
-          <li class="mdl-menu__item">Settings</li>
-          <li class="mdl-menu__item">Sign out</li>
+          <li class="mdl-menu__item"><a href="#" class="mdl-color-text--grey-700">Sign out</a></li>
         </ul>
       </nav>
     </div>
   </header>
-    
-    <main class="mdl-layout__content mdl-color--grey-200">
-      <div class="content-grid mdl-grid">
-        <div class="mdl-cell mdl-cell--8-col">
-          <div class="mdl-cell mdl-cell--12-col">
-            <h4>Make British Sign Language part of the curriculum</h4>
+  
+  <main class="mdl-layout__content mdl-color--grey-200">
+    <div class="content-grid mdl-grid">
+      <div class="mdl-cell mdl-cell--8-col">
+        <div class="mdl-cell mdl-cell--12-col content-grid mdl-grid">
+          <!-- rm chip layout -->
+          <span class="mdl-chip mdl-chip--contact">
+            <img class="mdl-chip__contact" src="images/john.jpg">
+            <span class="mdl-chip__text">Aaron Paul</span>
+          </span>
+          <div class="mdl-layout-spacer"></div>
+          <p>5 days ago</p>
+        </div>
+        <div class="mdl-cell mdl-cell--12-col">
+          <h4>Make British Sign Language part of the curriculum</h4>
+        </div>
+        <div class="mdl-cell mdl-cell--12-col">
+          <div class="mdl__supporting-text">
+            <p><strong>To receive Carers Allowance from the Government carers need to care for the disabled (at a predetermined level of need) for AT LEAST 35 hours a week. For this they receive less than £2 an hour to help them do this. Sign if you think this should be increased in line with the living wage.</strong></p>
+            <p>Carers Allowance is also taxable so carers have to pay for all their own dental treatment, prescriptions etc too. 2016 also saw no increase in the level of Carers Allowance.</p>
           </div>
-          <div class="mdl-cell mdl-cell--12-col">
-            <div class="mdl__supporting-text">
-              <p><strong>To receive Carers Allowance from the Government carers need to care for the disabled (at a predetermined level of need) for AT LEAST 35 hours a week. For this they receive less than £2 an hour to help them do this. Sign if you think this should be increased in line with the living wage.</strong></p>
-              <p>Carers Allowance is also taxable so carers have to pay for all their own dental treatment, prescriptions etc too. 2016 also saw no increase in the level of Carers Allowance.</p>
-            </div>
-            <div class="mdl-card__actions mdl-card--border content-grid mdl-grid">
-              <span class="mdl-chip mdl-chip--contact">
-                <img class="mdl-chip__contact" src="images/john.jpg"></img>
-                <span class="mdl-chip__text">Aaron Paul</span>
-              </span>
-              <div class="mdl-layout-spacer"></div>
-              <p>30 votes</p> 
-              <div class="mdl-layout-spacer"></div>
-              <p>5 days ago</p>   
-            </div>
+          <div class="mdl-card__actions mdl-card--border content-grid mdl-grid">
+            <div class="mdl-layout-spacer"></div>
+            <p>30 votes</p> 
+            <div class="mdl-layout-spacer"></div>   
           </div>
         </div>
-        
-        <div class="mdl-cell mdl-cell--4-col">
-          <div class="mdl-cell mdl-card mdl-cell--12-col proposal-support mdl-shadow--2dp">
-            <div class="mdl-card__supporting-text"> 
-              <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell--10-col" for="switch-2">
-                <input type="checkbox" id="switch-2" class="mdl-switch__input" checked>
-                <span class="mdl-switch__label mdl-card__supporting-text">Supporting</span>
-              </label>
-    
-              <a href="#"><span id="tt2" class="mdl-badge mdl-cell--2-col" data-badge="1"></span></a>   
-              <div class="mdl-tooltip mdl-tooltip" for="tt2">
-                1 delegated vote
+      </div>
+      
+      <div class="mdl-cell mdl-cell--4-col">
+        <div class="mdl-cell mdl-card mdl-cell--12-col proposal-support mdl-shadow--2dp">
+          <div class="mdl-card__supporting-text"> 
+            <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell--10-col" for="switch-2">
+              <input type="checkbox" id="switch-2" class="mdl-switch__input" checked>
+              <span class="mdl-switch__label mdl-card__supporting-text">Supporting</span>
+            </label>
+  
+            <a href="#"><span id="tt2" class="mdl-badge mdl-cell--2-col" data-badge="1"></span></a>   
+            <div class="mdl-tooltip mdl-tooltip" for="tt2">
+              1 delegated vote
+            </div>
+
+            <dialog class="mdl-dialog dialog1">
+              <h4 class="mdl-dialog__title-text">Delegated votes</h4>
+              <div class="mdl-dialog__content content-grid mdl-grid">
+                <ul class="mdl-list mdl-cell mdl-cell--12-col">
+                  <li class="mdl-list__item">
+                    <span class="mdl-list__item-primary-content">
+                      <img class="mdl-list__item-avatar" src="images/jack.jpg">
+                      <span class="notification__message">Bryan Cranston</span>
+                    </span>
+                  </li>
+
+                  <li class="mdl-list__item">
+                    <span class="mdl-list__item-primary-content">
+                      <img class="mdl-list__item-avatar" src="images/tnum.jpg">
+                      <span class="notification__message">Teenum Applegate</span>
+                    </span>
+                  </li>
+                </ul>
               </div>
+              <div class="mdl-dialog__actions">
+                <button type="button" class="mdl-button close">close</button>
+              </div>
+            </dialog>
+          </div>
+          <div class="mdl-card__supporting-text proposal-delegate">
+            <div class="mdl-grid">
+              <div class="mdl-layout-spacer"></div>
+              <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="show-delegate" disabled>Delegate vote</button>
+              <div class="mdl-layout-spacer"></div>
 
-              <dialog class="mdl-dialog dialog1">
-                <h4 class="mdl-dialog__title-text">Delegated votes</h4>
-                <div class="mdl-dialog__content content-grid mdl-grid">
-                  <ul class="mdl-list mdl-cell mdl-cell--12-col">
-                    <li class="mdl-list__item">
-                      <span class="mdl-list__item-primary-content">
-                        <img class="mdl-list__item-avatar" src="images/jack.jpg">
-                        <span class="notification__message">Bryan Cranston</span>
-                      </span>
-                    </li>
-
-                    <li class="mdl-list__item">
-                      <span class="mdl-list__item-primary-content">
-                        <img class="mdl-list__item-avatar" src="images/tnum.jpg">
-                        <span class="notification__message">Teenum Applegate</span>
-                      </span>
-                    </li>
-                  </ul>
-                </div>
+              <dialog class="mdl-dialog dialog2">
+                <p class="mdl-dialog__supporting-text">Who do you want to delegate your vote to?</p>
+                <form action="#">
+                  <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" id="sample1">
+                    <label class="mdl-textfield__label" for="sample1">Username</label>
+                  </div>
+                </form>
                 <div class="mdl-dialog__actions">
+                  <a href="proposal_show_delegated.html"><button type="button" class="mdl-button">Save</button></a>
                   <button type="button" class="mdl-button close">close</button>
                 </div>
               </dialog>
-            </div>
-            <div class="mdl-card__supporting-text proposal-delegate">
-              <div class="mdl-grid">
-                <div class="mdl-layout-spacer"></div>
-                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="show-delegate" disabled>Delegate vote</button>
-                <div class="mdl-layout-spacer"></div>
-
-                <dialog class="mdl-dialog dialog2">
-                  <p class="mdl-dialog__supporting-text">Who do you want to delegate your vote to?</p>
-                  <form action="#">
-                    <div class="mdl-textfield mdl-js-textfield">
-                      <input class="mdl-textfield__input" type="text" id="sample1">
-                      <label class="mdl-textfield__label" for="sample1">Username</label>
-                    </div>
-                  </form>
-                  <div class="mdl-dialog__actions">
-                    <a href="proposal_show_delegated.html"><button type="button" class="mdl-button">Save</button></a>
-                    <button type="button" class="mdl-button close">close</button>
-                  </div>
-                </dialog>
-              </div> 
-            </div>
+            </div> 
           </div>
+        </div>
 
-        </div> 
-      </div>
-    </main>
-    <footer class="mdl-mega-footer">
-      <div class="mdl-mega-footer__left-section"></div>
-      <div class="mdl-mega-footer__right-section">
-        <ul class="mdl-mini-footer__link-list">
-          <li><a href="#">Help</a></li>
-          <li><a href="#">Privacy &amp; Terms</a></li>
-        </ul>
-      </div>
-    </footer>
-      <script>
-        var dialog = document.querySelector('dialog.dialog1');
-        var showDialogButton = document.querySelector('#tt2');
-        if (! dialog.showModal) {
-          dialogPolyfill.registerDialog(dialog);
-        }
-        showDialogButton.addEventListener('click', function() {
-          dialog.showModal();
-        });
-        dialog.querySelector('.close').addEventListener('click', function() {
-          dialog.close();
-        });
+      </div> 
+    </div>
+  </main>
+  <footer class="mdl-mega-footer">
+    <div class="mdl-mega-footer__left-section"></div>
+    <div class="mdl-mega-footer__right-section">
+      <ul class="mdl-mini-footer__link-list">
+        <li><a href="#">Help</a></li>
+        <li><a href="#">Privacy &amp; Terms</a></li>
+      </ul>
+    </div>
+  </footer>
+    <script>
+      var dialog = document.querySelector('dialog.dialog1');
+      var showDialogButton = document.querySelector('#tt2');
+      if (! dialog.showModal) {
+        dialogPolyfill.registerDialog(dialog);
+      }
+      showDialogButton.addEventListener('click', function() {
+        dialog.showModal();
+      });
+      dialog.querySelector('.close').addEventListener('click', function() {
+        dialog.close();
+      });
 
-        var dialog2 = document.querySelector('dialog.dialog2');
-        var showDialogButton = document.querySelector('#show-delegate');
-        if (! dialog.showModal) {
-          dialogPolyfill.registerDialog(dialog2);
-        }
-        showDialogButton.addEventListener('click', function() {
-          dialog2.showModal();
-        });
-        dialog2.querySelector('.close').addEventListener('click', function() {
-          dialog2.close();
-        });
-    </script>
-  </body>
+      var dialog2 = document.querySelector('dialog.dialog2');
+      var showDialogButton = document.querySelector('#show-delegate');
+      if (! dialog.showModal) {
+        dialogPolyfill.registerDialog(dialog2);
+      }
+      showDialogButton.addEventListener('click', function() {
+        dialog2.showModal();
+      });
+      dialog2.querySelector('.close').addEventListener('click', function() {
+        dialog2.close();
+      });
+  </script>
+</body>
 </html>

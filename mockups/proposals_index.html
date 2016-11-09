@@ -29,23 +29,12 @@
     <div class="mdl-layout__header-row">
       <a href="proposals_index.html" class="main-title"><span class="mdl-layout-title mdl-color-text--grey-700">Participate</span></a>
       <div class="mdl-layout-spacer"></div>
-      <div class="android-search-box mdl-textfield mdl-js-textfield mdl-textfield--expandable mdl-textfield--floating-label mdl-textfield--align-right mdl-textfield--full-width mdl-color-text--grey-700">
-        <label class="mdl-button mdl-js-button mdl-button--icon" for="search-field">
-          <i class="material-icons">search</i>
-        </label>
-        <div class="mdl-textfield__expandable-holder">
-          <input class="mdl-textfield__input" type="text" id="search-field">
-        </div>
-      </div>
       <nav class="mdl-navigation">
-        <a class="mdl-navigation__link mdl-color-text--grey-700" href="activity.html"><i class="material-icons">notifications</i><span class="mdl-badge" id="top-notify" data-badge="2"></span></a>
         <button id="user-menu" class="mdl-button mdl-js-button mdl-button--icon"><img class="mdl-chip__contact" src="images/yuna.jpg"></button>
         <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="user-menu">
-          <li class="mdl-menu__item"><a href="proposal_new.html">New proposal</a></li>
-          <li class="mdl-menu__item">Profile</li>
+          <li class="mdl-menu__item"><a href="proposal_new.html" class="mdl-color-text--grey-700">New proposal</a></li>
           <hr>
-          <li class="mdl-menu__item">Settings</li>
-          <li class="mdl-menu__item">Sign out</li>
+          <li class="mdl-menu__item"><a href="#" class="mdl-color-text--grey-700">Sign out</a></li>
         </ul>
       </nav>
     </div>
@@ -54,61 +43,6 @@
   <main class="mdl-layout__content mdl-color--grey-200">
     <div class="content-grid mdl-grid">
       <div class="mdl-cell mdl-cell--4-col filtering">
-        <h4 class="mdl-typography--title">Filter Proposals</h4>
-
-        <div class="mdl-cell mdl-cell--12-col" style="position: relative;">
-          
-          <div class="mdl-collapse">
-            <a class="mdl-navigation__link mdl-collapse__button">
-              <i class="material-icons mdl-collapse__icon mdl-animation--default">expand_more</i>
-              <span class="mdl-color-text--grey-700">Votes</span>
-            </a>
-            
-            <div class="mdl-collapse__content-wrapper">
-              <div class="mdl-collapse__content mdl-animation--default">
-                <div class="mdl-cell mdl-cell--12-col content-grid mdl-grid">
-                  <div class="mdl-cell mdl-cell--6-col">
-                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-1">
-                      <input type="radio" id="option-1" class="mdl-radio__button" name="options" value="1" checked>
-                      <span class="mdl-radio__label">My votes</span>
-                    </label>
-                    <div><small>Delegated to me</small></div>
-                  </div>
-                  <div class="mdl-cell mdl-cell--6-col">
-                    <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-2">
-                      <input type="radio" id="option-2" class="mdl-radio__button" name="options" value="2">
-                      <span class="mdl-radio__label">Delegated</span>
-                    </label>
-                    <div><small>Delegated out</small></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mdl-collapse">
-            <a class="mdl-collapse__button">
-              <i class="material-icons mdl-collapse__icon mdl-animation--default">expand_more</i>
-              <span class="mdl-color-text--grey-700">Proposals</span>
-            </a>
-            
-            <div class="mdl-collapse__content-wrapper">
-              <div class="mdl-collapse__content mdl-animation--default">
-                <div class="mdl-cell mdl-cell--12-col content-grid mdl-grid">
-                  <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-1">
-                    <input type="checkbox" id="checkbox-1" class="mdl-checkbox__input" checked>
-                    <span class="mdl-checkbox__label">Proposals supported</span>
-                  </label>
-                  <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-2">
-                    <input type="checkbox" id="checkbox-2" class="mdl-checkbox__input">
-                    <span class="mdl-checkbox__label">My proposals</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-        </div>
       </div>
       <div class="mdl-cell mdl-cell--8-col">
         
