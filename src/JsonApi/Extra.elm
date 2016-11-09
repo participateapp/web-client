@@ -7,6 +7,8 @@ import JsonApi
 import JsonApi.Decode
 
 
+{-| Insert a header field into a Http request
+-}
 httpWithHeader : String -> String -> Http.Request -> Http.Request
 httpWithHeader field value request =
     { request | headers = ( field, value ) :: request.headers }
