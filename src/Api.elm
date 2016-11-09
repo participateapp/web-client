@@ -77,28 +77,26 @@ decodeToken =
     Decode.at [ "access_token" ] Decode.string
 
 
-decodeMe : Decoder Me
-decodeMe =
-    Decode.at [ "data" ] <|
-        Decode.object1 Me
-            (Decode.at [ "attributes", "name" ] Decode.string)
-
-
-httpFromJsonApiAssembler :
-    (JsonApi.Document -> Result String a)
-    -> Task Http.RawError Http.Response
-    -> Task Http.Error a
-httpFromJsonApiAssembler assembler response =
-    Http.fromJson
-        (Decode.customDecoder JsonApi.Decode.document assembler)
-        response
-
-
-infixl 0 |:
-
-
+{-| Infix notation for Result.andThen. Makes andThen-chains look nicer.
+-}
+infixl 0 :>
+(:>) : Result x a -> (a -> Result x b) -> Result x b
 (:>) =
     Result.andThen
+
+
+assembleMe : JsonApi.Document -> Result String Me
+assembleMe document =
+    JsonApi.Documents.primaryResource document
+        :> \meResource ->
+            JsonApi.Resources.attributes decodeMeAttributes meResource
+                :> \name ->
+                    Ok { name = name }
+
+
+decodeMeAttributes : Decoder String
+decodeMeAttributes =
+    Decode.at [ "name" ] Decode.string
 
 
 assembleProposal : JsonApi.Document -> Result String Proposal
@@ -171,7 +169,7 @@ authenticateCmd authCode wrapMsg =
 
 getMeCmd : String -> (Msg -> a) -> Cmd a
 getMeCmd accessToken wrapMsg =
-    getWithToken meEndpoint accessToken decodeMe
+    getMe accessToken
         |> Task.perform AuthFailed GotMe
         |> Cmd.map wrapMsg
 
@@ -194,50 +192,88 @@ getProposalCmd id accessToken wrapMsg =
 -- HTTP requests
 
 
+httpWithHeader : String -> String -> Http.Request -> Http.Request
+httpWithHeader field value request =
+    { request | headers = ( field, value ) :: request.headers }
+
+
+withAccessToken : String -> Http.Request -> Http.Request
+withAccessToken accessToken =
+    httpWithHeader "Authorization" ("Bearer " ++ accessToken)
+
+
+requestGet : String -> String -> Http.Request
+requestGet accessToken url =
+    withAccessToken accessToken
+        { verb = "GET"
+        , headers = []
+        , url = url
+        , body = Http.empty
+        }
+
+
+requestPost : String -> String -> String -> Http.Request
+requestPost accessToken url body =
+    withAccessToken accessToken
+        { verb = "POST"
+        , headers = []
+        , url = url
+        , body = Http.string body
+        }
+
+
+sendJsonApi :
+    (JsonApi.Document -> Result String a)
+    -> Http.Request
+    -> Task Http.Error a
+sendJsonApi assembleResponse request =
+    httpSendJsonApi assembleResponse Http.defaultSettings request
+
+
+{-| Send a Http request and decode the response from a JSON API document
+-}
+httpSendJsonApi :
+    (JsonApi.Document -> Result String a)
+    -> Http.Settings
+    -> Http.Request
+    -> Task Http.Error a
+httpSendJsonApi assembleResponse settings request =
+    Http.send settings
+        (request
+            |> httpWithHeader "Content-Type" "application/vnd.api+json"
+            |> httpWithHeader "Accept" "application/vnd.api+json"
+        )
+        |> Http.fromJson
+            (Decode.customDecoder JsonApi.Decode.document assembleResponse)
+
+
 exchangeAuthCodeForToken : String -> Task Http.Error String
 exchangeAuthCodeForToken body =
-    { verb = "POST", headers = [ ( "Content-Type", "application/json" ) ], url = tokenEndpoint, body = Http.string body }
+    { verb = "POST"
+    , headers = [ ( "Content-Type", "application/json" ) ]
+    , url = tokenEndpoint
+    , body = Http.string body
+    }
         |> Http.send Http.defaultSettings
         |> Http.fromJson decodeToken
 
 
 postProposal : ProposalInput -> String -> Task Http.Error Proposal
 postProposal proposalInput accessToken =
-    { verb = "POST"
-    , headers =
-        [ ( "Authorization", "Bearer " ++ accessToken )
-        , ( "Content-Type", "application/vnd.api+json" )
-        ]
-    , url = newProposalEndpoint
-    , body = Http.string (encodeProposalInput proposalInput)
-    }
-        |> Http.send Http.defaultSettings
-        |> httpFromJsonApiAssembler assembleProposal
+    encodeProposalInput proposalInput
+        |> requestPost accessToken newProposalEndpoint
+        |> sendJsonApi assembleProposal
 
 
 getProposal : String -> String -> Task Http.Error {- Maybe -} Proposal
 getProposal id accessToken =
-    { verb = "GET"
-    , headers =
-        [ ( "Authorization", "Bearer " ++ accessToken )
-        , ( "Content-Type", "application/vnd.api+json" )
-        ]
-    , url = getProposalEndpoint id
-    , body = Http.empty
-    }
-        |> Http.send Http.defaultSettings
-        |> httpFromJsonApiAssembler assembleProposal
+    getProposalEndpoint id
+        |> requestGet accessToken
+        |> sendJsonApi assembleProposal
 
 
-getWithToken : String -> String -> Decoder a -> Task Http.Error a
-getWithToken url accessToken responseDecoder =
-    { verb = "GET"
-    , headers =
-        [ ( "Authorization", "Bearer " ++ accessToken )
-        , ( "Content-Type", "application/vnd.api+json" )
-        ]
-    , url = url
-    , body = Http.empty
-    }
-        |> Http.send Http.defaultSettings
-        |> Http.fromJson responseDecoder
+getMe : String -> Task Http.Error Me
+getMe accessToken =
+    meEndpoint
+        |> requestGet accessToken
+        |> sendJsonApi assembleMe
