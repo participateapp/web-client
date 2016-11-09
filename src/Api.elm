@@ -17,8 +17,8 @@ import JsonApi
 import JsonApi.Resources
 import JsonApi.Documents
 import JsonApi.Extra
-import Types exposing (..)
 import Api.Util exposing ((:>))
+import Types exposing (..)
 
 
 type Msg
@@ -149,9 +149,7 @@ encodeProposalInput proposalInput =
 
 authenticate : String -> (Msg -> a) -> Cmd a
 authenticate authCode wrapMsg =
-    "{\"auth_code\": \""
-        ++ authCode
-        ++ "\"}"
+    ("{\"auth_code\": \"" ++ authCode ++ "\"}")
         |> Api.Util.requestPost tokenEndpoint
         |> JsonApi.Extra.withHeader "Content-Type" "application/json"
         |> Http.send Http.defaultSettings
