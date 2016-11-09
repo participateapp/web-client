@@ -1,6 +1,7 @@
 module JsonApi.Extra exposing (..)
 
 import Json.Decode as Decode
+import Json.Encode as Encode
 import Task exposing (Task)
 import Http
 import JsonApi
@@ -29,3 +30,16 @@ sendJsonApi assembleResponse settings request =
         )
         |> Http.fromJson
             (Decode.customDecoder JsonApi.Decode.document assembleResponse)
+
+
+encodeDocument : String -> Encode.Value -> String
+encodeDocument resourceType attributes =
+    Encode.object
+        [ ( "data"
+          , Encode.object
+                [ ( "type", Encode.string resourceType )
+                , ( "attributes", attributes )
+                ]
+          )
+        ]
+        |> Encode.encode 0
