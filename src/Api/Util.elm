@@ -18,39 +18,37 @@ infixl 0 :>
 -}
 withAccessToken : String -> Http.Request -> Http.Request
 withAccessToken accessToken =
-    JsonApi.Extra.httpWithHeader "Authorization" ("Bearer " ++ accessToken)
+    JsonApi.Extra.withHeader "Authorization" ("Bearer " ++ accessToken)
 
 
-{-| Build a GET request with an accessToken
+{-| Build a GET request
 -}
-requestGet : String -> String -> Http.Request
-requestGet accessToken url =
-    withAccessToken accessToken
-        { verb = "GET"
-        , headers = []
-        , url = url
-        , body = Http.empty
-        }
+requestGet : String -> Http.Request
+requestGet url =
+    { verb = "GET"
+    , headers = []
+    , url = url
+    , body = Http.empty
+    }
 
 
-{-| Build a POST request with an accessToken
+{-| Build a POST request
 -}
-requestPost : String -> String -> String -> Http.Request
-requestPost accessToken url body =
-    withAccessToken accessToken
-        { verb = "POST"
-        , headers = []
-        , url = url
-        , body = Http.string body
-        }
+requestPost : String -> String -> Http.Request
+requestPost url body =
+    { verb = "POST"
+    , headers = []
+    , url = url
+    , body = Http.string body
+    }
 
 
 {-| Send a Http request with default settings
 and decode the response from a JSON API document
 -}
-sendJsonApi :
+sendDefJsonApi :
     (JsonApi.Document -> Result String a)
     -> Http.Request
     -> Task Http.Error a
-sendJsonApi assembleResponse request =
-    JsonApi.Extra.httpSendJsonApi assembleResponse Http.defaultSettings request
+sendDefJsonApi assembleResponse request =
+    JsonApi.Extra.sendJsonApi assembleResponse Http.defaultSettings request
