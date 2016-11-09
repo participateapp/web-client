@@ -14,10 +14,11 @@ import Json.Decode as Decode
 import Json.Decode exposing (Decoder)
 import Json.Encode as Encode
 import JsonApi
-import JsonApi.Decode
 import JsonApi.Resources
 import JsonApi.Documents
+import JsonApi.Extra
 import Types exposing (..)
+import Api.Util exposing ((:>))
 
 
 type Msg
@@ -75,14 +76,6 @@ facebookAuthUrl =
 decodeToken : Decoder String
 decodeToken =
     Decode.at [ "access_token" ] Decode.string
-
-
-{-| Infix notation for Result.andThen. Makes andThen-chains look nicer.
--}
-infixl 0 :>
-(:>) : Result x a -> (a -> Result x b) -> Result x b
-(:>) =
-    Result.andThen
 
 
 assembleMe : JsonApi.Document -> Result String Me
@@ -192,61 +185,6 @@ getProposalCmd id accessToken wrapMsg =
 -- HTTP requests
 
 
-httpWithHeader : String -> String -> Http.Request -> Http.Request
-httpWithHeader field value request =
-    { request | headers = ( field, value ) :: request.headers }
-
-
-withAccessToken : String -> Http.Request -> Http.Request
-withAccessToken accessToken =
-    httpWithHeader "Authorization" ("Bearer " ++ accessToken)
-
-
-requestGet : String -> String -> Http.Request
-requestGet accessToken url =
-    withAccessToken accessToken
-        { verb = "GET"
-        , headers = []
-        , url = url
-        , body = Http.empty
-        }
-
-
-requestPost : String -> String -> String -> Http.Request
-requestPost accessToken url body =
-    withAccessToken accessToken
-        { verb = "POST"
-        , headers = []
-        , url = url
-        , body = Http.string body
-        }
-
-
-sendJsonApi :
-    (JsonApi.Document -> Result String a)
-    -> Http.Request
-    -> Task Http.Error a
-sendJsonApi assembleResponse request =
-    httpSendJsonApi assembleResponse Http.defaultSettings request
-
-
-{-| Send a Http request and decode the response from a JSON API document
--}
-httpSendJsonApi :
-    (JsonApi.Document -> Result String a)
-    -> Http.Settings
-    -> Http.Request
-    -> Task Http.Error a
-httpSendJsonApi assembleResponse settings request =
-    Http.send settings
-        (request
-            |> httpWithHeader "Content-Type" "application/vnd.api+json"
-            |> httpWithHeader "Accept" "application/vnd.api+json"
-        )
-        |> Http.fromJson
-            (Decode.customDecoder JsonApi.Decode.document assembleResponse)
-
-
 exchangeAuthCodeForToken : String -> Task Http.Error String
 exchangeAuthCodeForToken body =
     { verb = "POST"
@@ -261,19 +199,19 @@ exchangeAuthCodeForToken body =
 postProposal : ProposalInput -> String -> Task Http.Error Proposal
 postProposal proposalInput accessToken =
     encodeProposalInput proposalInput
-        |> requestPost accessToken newProposalEndpoint
-        |> sendJsonApi assembleProposal
+        |> Api.Util.requestPost accessToken newProposalEndpoint
+        |> Api.Util.sendJsonApi assembleProposal
 
 
 getProposal : String -> String -> Task Http.Error {- Maybe -} Proposal
 getProposal id accessToken =
     getProposalEndpoint id
-        |> requestGet accessToken
-        |> sendJsonApi assembleProposal
+        |> Api.Util.requestGet accessToken
+        |> Api.Util.sendJsonApi assembleProposal
 
 
 getMe : String -> Task Http.Error Me
 getMe accessToken =
     meEndpoint
-        |> requestGet accessToken
-        |> sendJsonApi assembleMe
+        |> Api.Util.requestGet accessToken
+        |> Api.Util.sendJsonApi assembleMe
