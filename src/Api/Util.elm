@@ -1,6 +1,7 @@
 module Api.Util exposing (..)
 
 import Task exposing (Task)
+import Json.Decode as Decode
 import Http
 import JsonApi
 import JsonApi.Extra
@@ -52,3 +53,16 @@ sendDefJsonApi :
     -> Task Http.Error a
 sendDefJsonApi assembleResponse request =
     JsonApi.Extra.sendJsonApi assembleResponse Http.defaultSettings request
+
+
+{-| Send a Http request with default settings
+and decode the response from JSON
+-}
+sendDefJson :
+    Decode.Decoder a
+    -> Http.Request
+    -> Task Http.Error a
+sendDefJson decodeResponse request =
+    request
+        |> Http.send Http.defaultSettings
+        |> Http.fromJson decodeResponse

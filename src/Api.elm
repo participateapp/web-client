@@ -143,8 +143,7 @@ authenticate authCode wrapMsg =
     ("{\"auth_code\": \"" ++ authCode ++ "\"}")
         |> Api.Util.requestPost tokenEndpoint
         |> JsonApi.Extra.withHeader "Content-Type" "application/json"
-        |> Http.send Http.defaultSettings
-        |> Http.fromJson decodeToken
+        |> Api.Util.sendDefJson decodeToken
         |> Task.perform AuthFailed GotAccessToken
         |> Cmd.map wrapMsg
 
