@@ -2,10 +2,10 @@ module Api
     exposing
         ( facebookAuthUrl
         , Msg(..)
-        , authenticateCmd
-        , getMeCmd
-        , createProposalCmd
-        , getProposalCmd
+        , authenticate
+        , getMe
+        , createProposal
+        , getProposal
         )
 
 import Http
@@ -147,71 +147,44 @@ encodeProposalInput proposalInput =
 -- COMMANDS
 
 
-authenticateCmd : String -> (Msg -> a) -> Cmd a
-authenticateCmd authCode wrapMsg =
-    let
-        body =
-            "{\"auth_code\": \"" ++ authCode ++ "\"}"
+authenticate : String -> (Msg -> a) -> Cmd a
+authenticate authCode wrapMsg =
+    "{\"auth_code\": \""
+        ++ authCode
+        ++ "\"}"
+        |> Api.Util.requestPost tokenEndpoint
+        |> JsonApi.Extra.withHeader "Content-Type" "application/json"
+        |> Http.send Http.defaultSettings
+        |> Http.fromJson decodeToken
+        |> Task.perform AuthFailed GotAccessToken
+        |> Cmd.map wrapMsg
 
-        requestTask =
-            exchangeAuthCodeForToken body
-    in
-        Task.perform AuthFailed GotAccessToken requestTask
-            |> Cmd.map wrapMsg
 
-
-getMeCmd : String -> (Msg -> a) -> Cmd a
-getMeCmd accessToken wrapMsg =
-    getMe accessToken
+getMe : String -> (Msg -> a) -> Cmd a
+getMe accessToken wrapMsg =
+    meEndpoint
+        |> Api.Util.requestGet
+        |> Api.Util.withAccessToken accessToken
+        |> Api.Util.sendDefJsonApi assembleMe
         |> Task.perform AuthFailed GotMe
         |> Cmd.map wrapMsg
 
 
-createProposalCmd : ProposalInput -> String -> (Msg -> a) -> Cmd a
-createProposalCmd proposalInput accessToken wrapMsg =
-    postProposal proposalInput accessToken
+createProposal : ProposalInput -> String -> (Msg -> a) -> Cmd a
+createProposal proposalInput accessToken wrapMsg =
+    encodeProposalInput proposalInput
+        |> Api.Util.requestPost newProposalEndpoint
+        |> Api.Util.withAccessToken accessToken
+        |> Api.Util.sendDefJsonApi assembleProposal
         |> Task.perform ProposalCreationFailed ProposalCreated
         |> Cmd.map wrapMsg
 
 
-getProposalCmd : String -> String -> (Msg -> a) -> Cmd a
-getProposalCmd id accessToken wrapMsg =
-    getProposal id accessToken
+getProposal : String -> String -> (Msg -> a) -> Cmd a
+getProposal id accessToken wrapMsg =
+    getProposalEndpoint id
+        |> Api.Util.requestGet
+        |> Api.Util.withAccessToken accessToken
+        |> Api.Util.sendDefJsonApi assembleProposal
         |> Task.perform GettingProposalFailed GotProposal
         |> Cmd.map wrapMsg
-
-
-
--- HTTP requests
-
-
-exchangeAuthCodeForToken : String -> Task Http.Error String
-exchangeAuthCodeForToken body =
-    { verb = "POST"
-    , headers = [ ( "Content-Type", "application/json" ) ]
-    , url = tokenEndpoint
-    , body = Http.string body
-    }
-        |> Http.send Http.defaultSettings
-        |> Http.fromJson decodeToken
-
-
-postProposal : ProposalInput -> String -> Task Http.Error Proposal
-postProposal proposalInput accessToken =
-    encodeProposalInput proposalInput
-        |> Api.Util.requestPost accessToken newProposalEndpoint
-        |> Api.Util.sendJsonApi assembleProposal
-
-
-getProposal : String -> String -> Task Http.Error {- Maybe -} Proposal
-getProposal id accessToken =
-    getProposalEndpoint id
-        |> Api.Util.requestGet accessToken
-        |> Api.Util.sendJsonApi assembleProposal
-
-
-getMe : String -> Task Http.Error Me
-getMe accessToken =
-    meEndpoint
-        |> Api.Util.requestGet accessToken
-        |> Api.Util.sendJsonApi assembleMe
