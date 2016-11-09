@@ -72,22 +72,6 @@ facebookAuthUrl =
 -- DECODERS & ENCODERS
 
 
-decoderAssertType : List String -> String -> Decoder a -> Decoder a
-decoderAssertType path expectedType decoder =
-    Decode.at path Decode.string
-        `Decode.andThen`
-            \actualType ->
-                if actualType == expectedType then
-                    decoder
-                else
-                    Decode.fail <|
-                        "Expected type \""
-                            ++ expectedType
-                            ++ "\", got \""
-                            ++ actualType
-                            ++ "\""
-
-
 decodeToken : Decoder String
 decodeToken =
     Decode.at [ "access_token" ] Decode.string
@@ -96,27 +80,70 @@ decodeToken =
 decodeMe : Decoder Me
 decodeMe =
     Decode.at [ "data" ] <|
-        decoderAssertType [ "type" ] "participant" <|
-            Decode.object1 Me
-                (Decode.at [ "attributes", "name" ] Decode.string)
+        Decode.object1 Me
+            (Decode.at [ "attributes", "name" ] Decode.string)
 
 
-decodeProposal : Decoder Proposal
-decodeProposal =
-    decoderAssertType [ "data", "type" ] "proposal" <|
-        Decode.object4
-            Proposal
-            (Decode.at [ "data", "id" ] Decode.string)
-            (Decode.at [ "data", "attributes", "title" ] Decode.string)
-            (Decode.at [ "data", "attributes", "body" ] Decode.string)
-            (Decode.at [ "data", "relationships", "author", "data" ] <|
-                decoderAssertType [ "type" ] "participant" <|
-                    Decode.object2
-                        Participant
-                        (Decode.at [ "id" ] Decode.string)
-                        (Decode.succeed "author-lookup-not-yet-implemented")
-             -- will be done by elm-jsonapi
-            )
+type alias ProposalAttributes =
+    { title : String
+    , body : String
+    }
+
+
+decodeProposalAttributes : Decoder ProposalAttributes
+decodeProposalAttributes =
+    Decode.object2 ProposalAttributes
+        (Decode.at [ "title" ] Decode.string)
+        (Decode.at [ "body" ] Decode.string)
+
+
+type alias ParticipantAttributes =
+    { name : String
+    }
+
+
+decodeParticipantAttributes : Decoder ParticipantAttributes
+decodeParticipantAttributes =
+    Decode.object1 ParticipantAttributes
+        (Decode.at [ "name" ] Decode.string)
+
+
+httpFromJsonApi :
+    (JsonApi.Document -> Result String a)
+    -> Task Http.RawError Http.Response
+    -> Task Http.Error a
+httpFromJsonApi assembler response =
+    Http.fromJson
+        (Decode.customDecoder JsonApi.Decode.document assembler)
+        response
+
+
+infixl 0 |:
+
+
+(:>) =
+    Result.andThen
+
+
+assembleProposal : JsonApi.Document -> Result String Proposal
+assembleProposal document =
+    JsonApi.Documents.primaryResource document
+        :> \proposalResource ->
+            JsonApi.Resources.attributes decodeProposalAttributes proposalResource
+                :> \{ title, body } ->
+                    JsonApi.Resources.relatedResource "author" proposalResource
+                        :> \participantResource ->
+                            JsonApi.Resources.attributes decodeParticipantAttributes participantResource
+                                :> \{ name } ->
+                                    Ok
+                                        { id = JsonApi.Resources.id proposalResource
+                                        , title = title
+                                        , body = body
+                                        , author =
+                                            { id = JsonApi.Resources.id participantResource
+                                            , name = name
+                                            }
+                                        }
 
 
 encodeProposalInput : ProposalInput -> String
@@ -197,7 +224,7 @@ postProposal proposalInput accessToken =
     , body = Http.string (encodeProposalInput proposalInput)
     }
         |> Http.send Http.defaultSettings
-        |> Http.fromJson decodeProposal
+        |> httpFromJsonApi assembleProposal
 
 
 getProposal : String -> String -> Task Http.Error {- Maybe -} Proposal
@@ -211,7 +238,12 @@ getProposal id accessToken =
     , body = Http.empty
     }
         |> Http.send Http.defaultSettings
-        |> Http.fromJson decodeProposal
+        |> httpFromJsonApi assembleProposal
+
+
+
+-- |> Http.fromJson JsonApi.Decode.document
+-- |>
 
 
 getWithToken : String -> String -> Decoder a -> Task Http.Error a
