@@ -125,7 +125,7 @@ decodeParticipantAttributes =
     Decode.at [ "name" ] Decode.string
 
 
-encodeProposalInput : ProposalInput -> String
+encodeProposalInput : NewProposal -> String
 encodeProposalInput proposalInput =
     JsonApi.Extra.encodeDocument "proposal" <|
         Encode.object
@@ -158,7 +158,7 @@ getMe accessToken wrapMsg =
         |> Cmd.map wrapMsg
 
 
-createProposal : ProposalInput -> String -> (Msg -> a) -> Cmd a
+createProposal : NewProposal -> String -> (Msg -> a) -> Cmd a
 createProposal proposalInput accessToken wrapMsg =
     encodeProposalInput proposalInput
         |> Api.Util.requestPost newProposalEndpoint

@@ -6,7 +6,7 @@ type alias Me =
     }
 
 
-type alias ProposalInput =
+type alias NewProposal =
     { title : String
     , body : String
     }
