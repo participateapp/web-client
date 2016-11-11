@@ -127,7 +127,7 @@ type alias Model =
     , accessToken : String
     , error : Maybe String
     , me : Me
-    , form : Form () ProposalInput
+    , form : Form () NewProposal
     , mdl : Material.Model
     , proposals : Dict String Proposal
     }
@@ -221,9 +221,9 @@ update msg model =
             Material.update msg' model
 
 
-validate : Validation () ProposalInput
+validate : Validation () NewProposal
 validate =
-    form2 ProposalInput
+    form2 NewProposal
         (get "title" string)
         (get "body" string)
 
