@@ -4,16 +4,22 @@ body { color: rgba(0,0,0,.54);}
   color: black;
 }
 
+a.card-link,
 a.main-title { text-decoration: none; }
+
 #top-notify { margin-left: -12px; }
 
 .filtering h4 { margin-top: 6px; }
 
 .mdl-card { min-height: 100px; }
+
+.proposal-show .mdl-card__title,
 .proposal-list .mdl-card__title { 
   padding-bottom: 0;
   position: relative;
 }
+
+.proposal-list p { margin-bottom: 0; }
 
 .mdl-card .proposal-status {
   position: absolute;
@@ -58,6 +64,7 @@ a.mdl-list__item:hover { background: #ddd; }
   padding-top: 16px;
 }
 
+.border-bottom { border-bottom: 1px solid rgba(0,0,0,.1); }
 
 a { cursor: pointer; }
 
