@@ -7,7 +7,14 @@ body { color: rgba(0,0,0,.54);}
 a.card-link,
 a.main-title { text-decoration: none; }
 
-#top-notify { margin-left: -12px; }
+/*#top-notify { margin-left: -12px; }*/
+#user-name { 
+  padding: 0 16px;
+  display: block; 
+}
+
+#new-proposal { padding: 0 32px; }
+/*#new-proposal a*/ 
 
 .filtering h4 { margin-top: 6px; }
 

@@ -10,64 +10,54 @@
   <link rel="stylesheet" href="styles/style.css">
   <link rel="stylesheet" href="styles/layout.css">
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-  <script>
-    $(function(){
-      $('.mdl-collapse__content').each(function(){
-        var content = $(this);
-        content.css('margin-top', -content.height());
-      })
-
-      $(document.body).on('click', '.mdl-collapse__button', function(){
-        $(this).parent('.mdl-collapse').toggleClass('mdl-collapse--opened');
-      })
-    })
-  </script>
 </head>
 
 <body class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-  <header class="mdl-layout__header mdl-color--white">
-    <div class="mdl-layout__header-row">
-      <a href="#" class="main-title"><span class="mdl-layout-title mdl-color-text--grey-700">Participate</span></a>
-      <div class="mdl-layout-spacer"></div>
-      <a href="proposals_index.html"><img style="width: 200px;" src="images/facebook-sign-in.png"></a>
-    </div>
-  </header>
+<header class="mdl-layout__header mdl-color--white">
+  <div class="mdl-layout__header-row">
+    <a href="#" class="main-title"><span class="mdl-layout-title mdl-color-text--grey-700">Participate</span></a>
+    <div class="mdl-layout-spacer"></div>
+    <a href="proposals_index.html"><img style="width: 200px;" src="images/facebook-sign-in.png"></a>
+  </div>
+</header>
   
-  <main class="mdl-layout__content mdl-color--grey-200">
-    <div class="content-grid mdl-grid">
-      <div class="mdl-cell mdl-cell--12-col">
-        <div class="content-grid mdl-grid">
-          <div class="mdl-cell mdl-cell--6-col"></div>
-          <div class="mdl-cell mdl-cell--6-col">
-            <h1 class="mdl-typography--headline">Participate!</h1>
-            <h1 class="mdl-layout-title">Participate!</h1>
-            <p>An app for democratic decision-making.</p>
-            <p>Participate! aims to improve citizen participation in public issues, and participation in general at any organization interested in shared, democratic management.</p>
-          </div>
+<main class="mdl-layout__content mdl-color--grey-200">
+  <div class="content-grid mdl-grid">
+    <div class="mdl-cell mdl-cell--12-col">
+      <div class="content-grid mdl-grid">
+        <div class="mdl-cell mdl-cell--6-col"></div>
+        <div class="mdl-cell mdl-cell--6-col">
+          <h1 class="mdl-typography--headline">Participate!</h1>
+          <p>An app for democratic decision-making.</p>
+          <p>Participate! aims to improve citizen participation in public issues, and participation in general at any organization interested in shared, democratic management.</p>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="content-grid mdl-grid">
-      <div class="mdl-cell mdl-cell--12-col">
-        <div class="content-grid mdl-grid">
-          <div class="mdl-layout-spacer"></div>
-          <div class="mdl-cell mdl-cell--6-col">
-            <p style="text-align: center;">Participate! aims to improve citizen participation in public issues, and participation in general at any organization interested in shared, democratic management.</p>
-          </div>
-          <div class="mdl-layout-spacer"></div>
+  <div class="content-grid mdl-grid">
+    <div class="mdl-cell mdl-cell--12-col">
+      <div class="content-grid mdl-grid">
+        <div class="mdl-layout-spacer"></div>
+        <div class="mdl-cell mdl-cell--6-col">
+          <p style="text-align: center;">It does so by focusing on concrete proposals rather than noisy and many times unproductive debate.</p>
+          <p style="text-align: center;">A participant makes a proposal and gathers support for it. Other participants can collaborate on it if they support it in principle. Dissenters have to make a counter-proposal, and gather support for it as well, to be heard.</p>
+
+          <p style="text-align: center;">Representation is ensured for participants who are less involved (be it for lack of time, inclination or of knowledge) through fluid delegation of support, in a liquid democracy.</p>
         </div>
+        <div class="mdl-layout-spacer"></div>
       </div>
     </div>
-  </main>
-  <footer class="mdl-mega-footer">
-    <div class="mdl-mega-footer__left-section"></div>
-    <div class="mdl-mega-footer__right-section">
-      <ul class="mdl-mini-footer__link-list">
-        <li><a href="help.html">Help</a></li>
-        <li><a href="#">Privacy &amp; Terms</a></li>
-      </ul>
-    </div>
-  </footer>
+  </div>
+</main>
+<footer class="mdl-mega-footer">
+  <div class="mdl-mega-footer__left-section"></div>
+  <div class="mdl-mega-footer__right-section">
+    <ul class="mdl-mini-footer__link-list">
+      <li><a href="help.html">Help</a></li>
+      <li><a href="#">Privacy &amp; Terms</a></li>
+    </ul>
+  </div>
+</footer>
 </body>
 </html>

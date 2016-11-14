@@ -29,13 +29,15 @@
     <div class="mdl-layout__header-row">
       <a href="proposals_index.html" class="main-title"><span class="mdl-layout-title mdl-color-text--grey-700">Participate</span></a>
       <div class="mdl-layout-spacer"></div>
+      <a href="proposal_new.html" id="new-proposal"><button class="mdl-button mdl-js-button mdl-button--accent">
+        New proposal
+      </button></a>
       <nav class="mdl-navigation">
-        <button id="user-menu" class="mdl-button mdl-js-button mdl-button--icon"><img class="mdl-chip__contact" src="images/yuna.jpg"></button>
+        <button id="user-menu" class="mdl-button mdl-js-button mdl-button--icon"><img class="mdl-chip__contact" src="images/yuna.jpg"></button>Yuna Smith
         <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="user-menu">
-          <!-- <li class="mdl-menu__item mdl-color-text--grey-700">Signed in as <strong>Yuna Smith</strong></li> -->
+          <span class="mdl-color-text--cyan-800" id="user-name">Signed in as<br /><strong>Yuna Smith</strong></span>
           <hr>
           <li class="mdl-menu__item"><a href="proposal_new.html" class="mdl-color-text--grey-700">New proposal</a></li>
-          <hr>
           <li class="mdl-menu__item"><a href="#" class="mdl-color-text--grey-700">Sign out</a></li>
         </ul>
       </nav>
@@ -83,7 +85,7 @@
             </div>
             <div class="mdl-card__actions mdl-card--border content-grid mdl-grid mdl-cell--12-col">
               <span class="actions__authored">
-                <img class="mdl-chip__contact" src="images/john.jpg">
+                <img class="mdl-chip__contact" src="images/yuna.jpg">
                 <span class="authored">
                   Yuna Smith<br />
                   5 days ago
