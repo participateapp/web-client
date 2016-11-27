@@ -6,8 +6,10 @@ module Api
         , getMe
         , createProposal
         , getProposal
+        , getProposalList
         )
 
+import Result.Extra
 import Http
 import Task exposing (Task)
 import Json.Decode as Decode
@@ -28,6 +30,8 @@ type Msg
     | ProposalCreationFailed Http.Error
     | GotProposal Proposal
     | GettingProposalFailed Http.Error
+    | GotProposalList ProposalList
+    | GettingProposalListFailed Http.Error
     | GotMe Me
 
 
@@ -58,6 +62,11 @@ newProposalEndpoint =
 getProposalEndpoint : String -> String
 getProposalEndpoint id =
     apiUrl ++ "/proposals/" ++ id
+
+
+getProposalListEndpoint : String
+getProposalListEndpoint =
+    apiUrl ++ "/proposals"
 
 
 
@@ -95,22 +104,36 @@ decodeMeAttributes =
 assembleProposal : JsonApi.Document -> Result String Proposal
 assembleProposal document =
     JsonApi.Documents.primaryResource document
-        :> \proposalResource ->
-            JsonApi.Resources.attributes decodeProposalAttributes proposalResource
-                :> \( title, body ) ->
-                    JsonApi.Resources.relatedResource "author" proposalResource
-                        :> \participantResource ->
-                            JsonApi.Resources.attributes decodeParticipantAttributes participantResource
-                                :> \name ->
-                                    Ok
-                                        { id = JsonApi.Resources.id proposalResource
-                                        , title = title
-                                        , body = body
-                                        , author =
-                                            { id = JsonApi.Resources.id participantResource
-                                            , name = name
-                                            }
-                                        }
+        :> assembleProposalFromResource
+
+
+assembleProposalList : JsonApi.Document -> Result String ProposalList
+assembleProposalList document =
+    JsonApi.Documents.primaryResourceCollection document
+        :> \proposalResourceList ->
+            List.map
+                assembleProposalFromResource
+                proposalResourceList
+                |> Result.Extra.combine
+
+
+assembleProposalFromResource : JsonApi.Resource -> Result String Proposal
+assembleProposalFromResource proposalResource =
+    JsonApi.Resources.attributes decodeProposalAttributes proposalResource
+        :> \( title, body ) ->
+            JsonApi.Resources.relatedResource "author" proposalResource
+                :> \participantResource ->
+                    JsonApi.Resources.attributes decodeParticipantAttributes participantResource
+                        :> \name ->
+                            Ok
+                                { id = JsonApi.Resources.id proposalResource
+                                , title = title
+                                , body = body
+                                , author =
+                                    { id = JsonApi.Resources.id participantResource
+                                    , name = name
+                                    }
+                                }
 
 
 decodeProposalAttributes : Decoder ( String, String )
@@ -175,4 +198,14 @@ getProposal id accessToken wrapMsg =
         |> Api.Util.withAccessToken accessToken
         |> Api.Util.sendDefJsonApi assembleProposal
         |> Task.perform GettingProposalFailed GotProposal
+        |> Cmd.map wrapMsg
+
+
+getProposalList : String -> (Msg -> a) -> Cmd a
+getProposalList accessToken wrapMsg =
+    getProposalListEndpoint
+        |> Api.Util.requestGet
+        |> Api.Util.withAccessToken accessToken
+        |> Api.Util.sendDefJsonApi assembleProposalList
+        |> Task.perform GettingProposalListFailed GotProposalList
         |> Cmd.map wrapMsg

@@ -20,6 +20,10 @@ type alias Proposal =
     }
 
 
+type alias ProposalList =
+    List Proposal
+
+
 type alias Participant =
     { id : String
     , name : String
