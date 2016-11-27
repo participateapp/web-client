@@ -92,6 +92,11 @@ urlUpdate ( route, address ) model =
                     Just _ ->
                         ( model1, Cmd.none )
 
+            Home ->
+                ( model1
+                , Api.getProposalList model.accessToken ApiMsg
+                )
+
             _ ->
                 ( model1, Cmd.none )
 
@@ -163,6 +168,11 @@ addProposal proposal model =
     { model | proposals = Dict.insert proposal.id proposal model.proposals }
 
 
+addProposalList : ProposalList -> Model -> Model
+addProposalList proposalList model =
+    List.foldl addProposal model proposalList
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -199,6 +209,15 @@ update msg model =
                     )
 
                 Api.GettingProposalFailed httpError ->
+                    ( { model | error = Just <| toString httpError }, Cmd.none )
+
+                Api.GotProposalList proposalList ->
+                    ( model
+                        |> addProposalList proposalList
+                    , Cmd.none
+                    )
+
+                Api.GettingProposalListFailed httpError ->
                     ( { model | error = Just <| toString httpError }, Cmd.none )
 
         NavigateToPath path ->
@@ -264,6 +283,8 @@ viewBody model =
                         [ a [ onClick <| NavigateToPath "/new-proposal" ]
                             [ text "Create a proposal" ]
                         ]
+                    , h3 [] [ text "Existing Proposals" ]
+                    , div [] [ viewProposalList model ]
                     ]
 
         NewProposalRoute ->
@@ -397,6 +418,25 @@ viewProposal model id =
                 , div [] [ text "Author: ", text proposal.author.name ]
                 , div [] [ text "Body: ", text proposal.body ]
                 ]
+
+
+viewProposalList : Model -> Html Msg
+viewProposalList model =
+    ul [] <|
+        List.map
+            viewProposalListEntry
+            (Dict.values model.proposals)
+
+
+viewProposalListEntry : Proposal -> Html Msg
+viewProposalListEntry proposal =
+    li []
+        [ i [] [ text proposal.author.name ]
+        , text ": "
+        , a
+            [ onClick <| NavigateToPath <| "proposals/" ++ proposal.id ]
+            [ text proposal.title ]
+        ]
 
 
 
