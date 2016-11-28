@@ -414,9 +414,10 @@ viewProposal model id =
 
         Just proposal ->
             div []
-                [ div [] [ text "Titel: ", text proposal.title ]
+                [ div [] [ text "Title: ", text proposal.title ]
                 , div [] [ text "Author: ", text proposal.author.name ]
                 , div [] [ text "Body: ", text proposal.body ]
+                , div [] [ text "Support Count: ", text <| toString proposal.supportCount ]
                 ]
 
 

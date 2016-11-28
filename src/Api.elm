@@ -120,7 +120,7 @@ assembleProposalList document =
 assembleProposalFromResource : JsonApi.Resource -> Result String Proposal
 assembleProposalFromResource proposalResource =
     JsonApi.Resources.attributes decodeProposalAttributes proposalResource
-        :> \( title, body ) ->
+        :> \( title, body, supportCount ) ->
             JsonApi.Resources.relatedResource "author" proposalResource
                 :> \participantResource ->
                     JsonApi.Resources.attributes decodeParticipantAttributes participantResource
@@ -133,14 +133,16 @@ assembleProposalFromResource proposalResource =
                                     { id = JsonApi.Resources.id participantResource
                                     , name = name
                                     }
+                                , supportCount = supportCount
                                 }
 
 
-decodeProposalAttributes : Decoder ( String, String )
+decodeProposalAttributes : Decoder ( String, String, Int )
 decodeProposalAttributes =
-    Decode.object2 (,)
+    Decode.object3 (,,)
         (Decode.at [ "title" ] Decode.string)
         (Decode.at [ "body" ] Decode.string)
+        (Decode.at [ "support-count" ] Decode.int)
 
 
 decodeParticipantAttributes : Decoder String

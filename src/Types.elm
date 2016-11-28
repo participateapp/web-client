@@ -17,6 +17,7 @@ type alias Proposal =
     , title : String
     , body : String
     , author : Participant
+    , supportCount : Int
     }
 
 
