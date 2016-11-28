@@ -21,6 +21,7 @@ import Form.Input
 import Form.Error
 import Form.Validate exposing (Validation, form1, form2, get, string)
 import Dict exposing (Dict)
+import Set exposing (Set)
 import String
 import Navigation
 import UrlParser exposing ((</>))
@@ -135,6 +136,7 @@ type alias Model =
     , form : Form () NewProposal
     , mdl : Material.Model
     , proposals : Dict String Proposal
+    , supportedByMe : Set String
     }
 
 
@@ -148,6 +150,7 @@ initialModel accessToken route address =
     , form = Form.initial [] validate
     , mdl = Material.model
     , proposals = Dict.empty
+    , supportedByMe = Set.empty
     }
 
 
@@ -161,6 +164,7 @@ type Msg
     | FormMsg Form.Msg
     | NoOp
     | Mdl (Material.Msg Msg)
+    | SupportProposal String
 
 
 addProposal : Proposal -> Model -> Model
@@ -202,6 +206,15 @@ update msg model =
                 Api.ProposalCreationFailed httpError ->
                     ( { model | error = Just <| toString httpError }, Cmd.none )
 
+                Api.ProposalSupported id ->
+                    ( { model | supportedByMe = Set.insert id model.supportedByMe }
+                    , Navigation.newUrl <|
+                        Hop.output hopConfig { path = [ "proposals", id ], query = Dict.empty }
+                    )
+
+                Api.SupportProposalFailed httpError ->
+                    ( { model | error = Just <| toString httpError }, Cmd.none )
+
                 Api.GotProposal proposal ->
                     ( model
                         |> addProposal proposal
@@ -238,6 +251,11 @@ update msg model =
 
         Mdl msg' ->
             Material.update msg' model
+
+        SupportProposal id ->
+            ( model
+            , Api.supportProposal id model.accessToken ApiMsg
+            )
 
 
 validate : Validation () NewProposal
@@ -418,6 +436,13 @@ viewProposal model id =
                 , div [] [ text "Author: ", text proposal.author.name ]
                 , div [] [ text "Body: ", text proposal.body ]
                 , div [] [ text "Support Count: ", text <| toString proposal.supportCount ]
+                , button [ onClick <| SupportProposal id ]
+                    [ text <|
+                        if Set.member id model.supportedByMe then
+                            "Unsupport this proposal"
+                        else
+                            "Support this proposal"
+                    ]
                 ]
 
 
