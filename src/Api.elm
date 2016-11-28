@@ -5,6 +5,7 @@ module Api
         , authenticate
         , getMe
         , createProposal
+        , supportProposal
         , getProposal
         , getProposalList
         )
@@ -28,6 +29,8 @@ type Msg
     | AuthFailed Http.Error
     | ProposalCreated Proposal
     | ProposalCreationFailed Http.Error
+    | ProposalSupported String
+    | SupportProposalFailed Http.Error
     | GotProposal Proposal
     | GettingProposalFailed Http.Error
     | GotProposalList ProposalList
@@ -57,6 +60,11 @@ meEndpoint =
 newProposalEndpoint : String
 newProposalEndpoint =
     apiUrl ++ "/proposals"
+
+
+supportProposalEndpoint : String
+supportProposalEndpoint =
+    apiUrl ++ "/supports"
 
 
 getProposalEndpoint : String -> String
@@ -159,6 +167,25 @@ encodeProposalInput proposalInput =
             ]
 
 
+encodeSupportProposal : String -> String
+encodeSupportProposal id =
+    """
+{
+  "data": {
+    "type": "support",
+    "relationships": {
+      "proposal": {
+        "data": {
+          "id": "31",
+          "type": "proposal"
+        }
+      }
+    }
+  }
+}
+    """
+
+
 
 -- COMMANDS
 
@@ -190,6 +217,16 @@ createProposal proposalInput accessToken wrapMsg =
         |> Api.Util.withAccessToken accessToken
         |> Api.Util.sendDefJsonApi assembleProposal
         |> Task.perform ProposalCreationFailed ProposalCreated
+        |> Cmd.map wrapMsg
+
+
+supportProposal : String -> String -> (Msg -> a) -> Cmd a
+supportProposal id accessToken wrapMsg =
+    encodeSupportProposal id
+        |> Api.Util.requestPost supportProposalEndpoint
+        |> Api.Util.withAccessToken accessToken
+        |> Api.Util.sendDefJsonApi (always (Ok ()))
+        |> Task.perform SupportProposalFailed (always (ProposalSupported id))
         |> Cmd.map wrapMsg
 
 
