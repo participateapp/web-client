@@ -47,16 +47,30 @@ type ResourceLinkage
     | ResourceLinkageMany (List ( String, String ))
 
 
+{-| Build a to-one resource linkage by type and id
+of the related resource
+-}
 resourceLinkage : Maybe ( String, String ) -> ResourceLinkage
 resourceLinkage =
     ResourceLinkageOne
 
 
+{-| Build a to-many resource linkage from a list of type-id-pairs
+-}
 resourceLinkageCollection : List ( String, String ) -> ResourceLinkage
 resourceLinkageCollection =
     ResourceLinkageMany
 
 
+{-| Encode a resource object for request to create or update a resource.
+
+The resource is specified by:
+- a resource type
+- a list of attributes
+- a list of relationships
+
+Returns JSON as a string suitable for a POST or PATCH request.
+-}
 encodeDocument :
     String
     -> List ( String, Encode.Value )
