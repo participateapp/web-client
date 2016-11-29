@@ -1,4 +1,12 @@
-module JsonApi.Extra exposing (..)
+module JsonApi.Extra
+    exposing
+        ( withHeader
+        , sendJsonApi
+        , ResourceLinkage
+        , resourceLinkage
+        , resourceLinkageCollection
+        , encodeDocument
+        )
 
 import Json.Decode as Decode
 import Json.Encode as Encode
@@ -32,14 +40,76 @@ sendJsonApi assembleResponse settings request =
             (Decode.customDecoder JsonApi.Decode.document assembleResponse)
 
 
-encodeDocument : String -> Encode.Value -> String
-encodeDocument resourceType attributes =
-    Encode.object
-        [ ( "data"
-          , Encode.object
-                [ ( "type", Encode.string resourceType )
-                , ( "attributes", attributes )
-                ]
-          )
-        ]
-        |> Encode.encode 0
+{-| Represents a resource linkage
+-}
+type ResourceLinkage
+    = ResourceLinkageOne (Maybe ( String, String ))
+    | ResourceLinkageMany (List ( String, String ))
+
+
+resourceLinkage : Maybe ( String, String ) -> ResourceLinkage
+resourceLinkage =
+    ResourceLinkageOne
+
+
+resourceLinkageCollection : List ( String, String ) -> ResourceLinkage
+resourceLinkageCollection =
+    ResourceLinkageMany
+
+
+encodeDocument :
+    String
+    -> List ( String, Encode.Value )
+    -> List ( String, ResourceLinkage )
+    -> String
+encodeDocument resourceType attributes relationships =
+    let
+        encodedType : ( String, Encode.Value )
+        encodedType =
+            ( "type", Encode.string resourceType )
+
+        encodedAttributes : Maybe ( String, Encode.Value )
+        encodedAttributes =
+            if List.isEmpty attributes then
+                Nothing
+            else
+                Just ( "attributes", Encode.object attributes )
+
+        encodedRelationships : Maybe ( String, Encode.Value )
+        encodedRelationships =
+            if List.isEmpty relationships then
+                Nothing
+            else
+                Just ( "relationships", Encode.object <| List.map encodeRelationship relationships )
+
+        encodeRelationship : ( String, ResourceLinkage ) -> ( String, Encode.Value )
+        encodeRelationship ( name, linkage ) =
+            ( name, Encode.object [ ( "data", encodeLinkage linkage ) ] )
+
+        encodeLinkage : ResourceLinkage -> Encode.Value
+        encodeLinkage linkage =
+            case linkage of
+                ResourceLinkageOne Nothing ->
+                    Encode.null
+
+                ResourceLinkageOne (Just typeAndId) ->
+                    encodeIdentifier typeAndId
+
+                ResourceLinkageMany list ->
+                    Encode.list <| List.map encodeIdentifier list
+
+        encodeIdentifier : ( String, String ) -> Encode.Value
+        encodeIdentifier ( linkageType, linkageId ) =
+            Encode.object [ ( "type", Encode.string linkageType ), ( "id", Encode.string linkageId ) ]
+    in
+        Encode.object
+            [ ( "data"
+              , Encode.object <|
+                    List.filterMap identity <|
+                        [ Just encodedType
+                        , encodedAttributes
+                        , encodedRelationships
+                        ]
+              )
+            ]
+            |> Encode.encode 0
