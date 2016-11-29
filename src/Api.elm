@@ -160,7 +160,9 @@ decodeParticipantAttributes =
 
 encodeProposalInput : NewProposal -> String
 encodeProposalInput proposalInput =
-    JsonApi.Extra.encodeDocument "proposal"
+    JsonApi.Extra.encodeDocument
+        "proposal"
+        Nothing
         [ ( "title", Encode.string proposalInput.title )
         , ( "body", Encode.string proposalInput.body )
         ]
@@ -169,7 +171,9 @@ encodeProposalInput proposalInput =
 
 encodeSupportProposal : String -> String
 encodeSupportProposal id =
-    JsonApi.Extra.encodeDocument "support"
+    JsonApi.Extra.encodeDocument
+        "support"
+        Nothing
         []
         [ ( "proposal"
           , JsonApi.Extra.resourceLinkage <|

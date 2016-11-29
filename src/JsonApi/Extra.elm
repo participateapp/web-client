@@ -66,6 +66,7 @@ resourceLinkageCollection =
 
 The resource is specified by:
 - a resource type
+- an optional client-generated id
 - a list of attributes
 - a list of relationships
 
@@ -73,14 +74,21 @@ Returns JSON as a string suitable for a POST or PATCH request.
 -}
 encodeDocument :
     String
+    -> Maybe String
     -> List ( String, Encode.Value )
     -> List ( String, ResourceLinkage )
     -> String
-encodeDocument resourceType attributes relationships =
+encodeDocument resourceType optionalId attributes relationships =
     let
         encodedType : ( String, Encode.Value )
         encodedType =
             ( "type", Encode.string resourceType )
+
+        encodedId : Maybe ( String, Encode.Value )
+        encodedId =
+            Maybe.map
+                (\id -> ( "id", Encode.string id ))
+                optionalId
 
         encodedAttributes : Maybe ( String, Encode.Value )
         encodedAttributes =
@@ -120,7 +128,9 @@ encodeDocument resourceType attributes relationships =
             [ ( "data"
               , Encode.object <|
                     List.filterMap identity <|
+                        -- skips unused elements
                         [ Just encodedType
+                        , encodedId
                         , encodedAttributes
                         , encodedRelationships
                         ]
