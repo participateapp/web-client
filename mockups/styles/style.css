@@ -1,20 +1,39 @@
 body { color: rgba(0,0,0,.54);}
+
+/*   =========   Navbar   =========   
+     ==============================   */
+.mdl-layout__header-row {
+  height: 75px;
+}
+
 .demo-layout-transparent .mdl-layout__header,
 .demo-layout-transparent .mdl-layout__drawer-button {
   color: black;
 }
 
+/*   ======   Landing Page   ======   
+     ==============================   */
+
+#landing-pg section { padding: 1.9em 0; }
+section#hero {
+  background: url(../images/top-bg.jpg);
+  background-attachment: fixed !important;
+  background-position: 50% 0px;
+  background-size: cover !important;
+  text-shadow: 1px 1px 2px #fff;
+}
+
+section#main-top p i { font-size: 45px; }
+
 a.card-link,
 a.main-title { text-decoration: none; }
 
-/*#top-notify { margin-left: -12px; }*/
 #user-name { 
   padding: 0 16px;
   display: block; 
 }
 
 #new-proposal { padding: 0 32px; }
-/*#new-proposal a*/ 
 
 .filtering h4 { margin-top: 6px; }
 
