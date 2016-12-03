@@ -13,11 +13,9 @@
 <body class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
   <header class="mdl-layout__header mdl-color--white">
     <div class="mdl-layout__header-row">
-      <a href="proposals_index.html" class="main-title"><span class="mdl-layout-title mdl-color-text--grey-700">Participate</span></a>
+      <a href="proposals_index.html" class="main-title"><span class="mdl-layout-title mdl-color-text--primary">Participate!</span></a>
       <div class="mdl-layout-spacer"></div>
-      <a href="proposal_new.html" id="new-proposal"><button class="mdl-button mdl-js-button mdl-button--accent">
-        New proposal
-      </button></a>
+      <a href="proposal_new.html" id="new-proposal"><button class="mdl-button mdl-js-button mdl-button--colored">New proposal</button></a>
       <nav class="mdl-navigation">
         <button id="user-menu" class="mdl-button mdl-js-button mdl-button--icon"><img class="mdl-chip__contact" src="images/yuna.jpg"></button>Yuna Smith
         <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="user-menu">
@@ -32,8 +30,8 @@
   
   <main class="mdl-layout__content mdl-color--grey-200">
     <div class="content-grid mdl-grid">
-      <div class="mdl-cell mdl-cell--8-col">
-
+      <div class="mdl-layout-spacer"></div>
+      <div class="mdl-cell mdl-cell--10-col">
         <div class="mdl-cell mdl-card mdl-cell--12-col proposal-show">
           <div class="mdl-card__actions content-grid mdl-grid mdl-cell--12-col border-bottom">
             <span class="actions__authored">
@@ -42,14 +40,12 @@
                 Aaron Paul<br />
                 2 days ago
               </span>
-            </span>
+            </span> 
             <div class="mdl-layout-spacer"></div>
-            <span class="mdl-chip mdl-color--cyan-800">
-              <span class="mdl-chip__text mdl-color-text--white">30 votes</span>
-            </span>    
+            <a href="proposal_show_supporting.html"><button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" id="show-delegate">Support Proposal</button></a> 
           </div>
           <div class="mdl-card__title">
-            <h2 class="mdl-card__title-text mdl-color-text--grey-700">Overturn the Government's decision to allow fracking in Lancashire</h2>
+            <span class="mdl-typography--headline mdl-color-text--grey-700">Overturn the Government's decision to allow fracking in Lancashire</span>
           </div>
           <div class="mdl-card__supporting-text">
             <p><strong>Theresa May promised to give back control to local councils. However even though Lancashire County Council refused permission for fracking in their county, the Government overruled it.</strong></p>
@@ -57,72 +53,7 @@
           </div>
         </div>
       </div>
-      
-      <div class="mdl-cell mdl-cell--4-col">
-
-        <div class="mdl-cell mdl-card mdl-cell--12-col proposal-support mdl-shadow--2dp">
-          <div class="mdl-card__title mdl-color--cyan-800">
-            <h2 class="mdl-card__title-text mdl-color-text--white">Support Proposal</h2>
-          </div>
-          <div class="mdl-card__supporting-text"> 
-            <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell--10-col" for="switch-2">
-              <input type="checkbox" id="switch-2" class="mdl-switch__input">
-              <span class="mdl-switch__label mdl-card__supporting-text mdl-color-text--grey-400">Supporting</span>
-            </label>
-  
-            <a href="#"><span id="tt2" class="mdl-badge mdl-cell--2-col" data-badge="2"></span></a>   
-            <div class="mdl-tooltip mdl-tooltip" for="tt2">
-              2 delegated votes
-            </div>
-
-            <dialog class="mdl-dialog dialog1">
-              <h4 class="mdl-dialog__title-text">Delegated votes</h4>
-              <div class="mdl-dialog__content content-grid mdl-grid">
-                <ul class="mdl-list mdl-cell mdl-cell--12-col">
-                  <li class="mdl-list__item">
-                    <span class="mdl-list__item-primary-content">
-                      <img class="mdl-list__item-avatar" src="images/jack.jpg">
-                      <span class="notification__message">Bryan Cranston</span>
-                    </span>
-                  </li>
-
-                  <li class="mdl-list__item">
-                    <span class="mdl-list__item-primary-content">
-                      <img class="mdl-list__item-avatar" src="images/tnum.jpg">
-                      <span class="notification__message">Teenum Applegate</span>
-                    </span>
-                  </li>
-                </ul>
-              </div>
-              <div class="mdl-dialog__actions">
-                <button type="button" class="mdl-button close">close</button>
-              </div>
-            </dialog>
-          </div>
-          <div class="mdl-card__supporting-text proposal-delegate">
-            <div class="mdl-grid">
-              <div class="mdl-layout-spacer"></div>
-              <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-color--cyan-800 mdl-color-text--white" id="show-delegate">Delegate vote</button>
-              <div class="mdl-layout-spacer"></div>
-
-              <dialog class="mdl-dialog dialog2">
-                <p class="mdl-dialog__supporting-text">Who do you want to delegate your vote to?</p>
-                <form action="#">
-                  <div class="mdl-textfield mdl-js-textfield">
-                    <input class="mdl-textfield__input" type="text" id="sample1">
-                    <label class="mdl-textfield__label" for="sample1">Username</label>
-                  </div>
-                </form>
-                <div class="mdl-dialog__actions">
-                  <a href="proposal_show_delegated.html"><button type="button" class="mdl-button">Save</button></a>
-                  <button type="button" class="mdl-button close">close</button>
-                </div>
-              </dialog>
-            </div> 
-          </div>
-        </div>
-
-      </div> 
+      <div class="mdl-layout-spacer"></div>
     </div>
   </main>
   <footer class="mdl-mega-footer">
@@ -134,30 +65,5 @@
       </ul>
     </div>
   </footer>
-    <script>
-      var dialog = document.querySelector('dialog.dialog1');
-      var showDialogButton = document.querySelector('#tt2');
-      if (! dialog.showModal) {
-        dialogPolyfill.registerDialog(dialog);
-      }
-      showDialogButton.addEventListener('click', function() {
-        dialog.showModal();
-      });
-      dialog.querySelector('.close').addEventListener('click', function() {
-        dialog.close();
-      });
-
-      var dialog2 = document.querySelector('dialog.dialog2');
-      var showDialogButton = document.querySelector('#show-delegate');
-      if (! dialog.showModal) {
-        dialogPolyfill.registerDialog(dialog2);
-      }
-      showDialogButton.addEventListener('click', function() {
-        dialog2.showModal();
-      });
-      dialog2.querySelector('.close').addEventListener('click', function() {
-        dialog2.close();
-      });
-  </script>
 </body>
 </html>

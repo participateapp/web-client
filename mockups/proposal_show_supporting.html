@@ -13,11 +13,9 @@
 <body class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
   <header class="mdl-layout__header mdl-color--white">
     <div class="mdl-layout__header-row">
-      <a href="proposals_index.html" class="main-title"><span class="mdl-layout-title mdl-color-text--grey-700">Participate</span></a>
+      <a href="proposals_index.html" class="main-title"><span class="mdl-layout-title mdl-color-text--primary">Participate!</span></a>
       <div class="mdl-layout-spacer"></div>
-      <a href="proposal_new.html" id="new-proposal"><button class="mdl-button mdl-js-button mdl-button--accent">
-        New proposal
-      </button></a>
+      <a href="proposal_new.html" id="new-proposal"><button class="mdl-button mdl-js-button mdl-button--colored">New proposal</button></a>
       <nav class="mdl-navigation">
         <button id="user-menu" class="mdl-button mdl-js-button mdl-button--icon"><img class="mdl-chip__contact" src="images/yuna.jpg"></button>Yuna Smith
         <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="user-menu">
@@ -32,8 +30,8 @@
   
   <main class="mdl-layout__content mdl-color--grey-200">
     <div class="content-grid mdl-grid">
-      <div class="mdl-cell mdl-cell--8-col">
-
+      <div class="mdl-layout-spacer"></div>
+      <div class="mdl-cell mdl-cell--10-col">
         <div class="mdl-cell mdl-card mdl-cell--12-col proposal-show">
           <div class="mdl-card__actions content-grid mdl-grid mdl-cell--12-col border-bottom">
             <span class="actions__authored">
@@ -42,51 +40,20 @@
                 Aaron Paul<br />
                 2 days ago
               </span>
-            </span>
+            </span> 
             <div class="mdl-layout-spacer"></div>
-            <span class="mdl-chip mdl-color--cyan-800">
-              <span class="mdl-chip__text mdl-color-text--white">30 votes</span>
-            </span>    
+            <a href="proposal_show.html"><button class="mdl-button mdl-js-button mdl-button--primary mdl-color-text--light-green">Supporting</button></a>
           </div>
           <div class="mdl-card__title">
-            <h2 class="mdl-card__title-text mdl-color-text--grey-700">Overturn the Government's decision to allow fracking in Lancashire</h2>
+            <span class="mdl-typography--headline mdl-color-text--grey-700">Overturn the Government's decision to allow fracking in Lancashire</span>
           </div>
           <div class="mdl-card__supporting-text">
             <p><strong>Theresa May promised to give back control to local councils. However even though Lancashire County Council refused permission for fracking in their county, the Government overruled it.</strong></p>
             <p>Excepteur reprehenderit sint exercitation ipsum consequat qui sit id velit elit. Velit anim eiusmod labore sit amet. Voluptate voluptate irure occaecat deserunt incididunt esse in. Sunt velit aliquip sunt elit ex nulla reprehenderit qui ut eiusmod ipsum do. Duis veniam reprehenderit laborum occaecat id proident nulla veniam. Duis enim deserunt voluptate aute veniam sint pariatur exercitation. Irure mollit est sit labore est deserunt pariatur duis aute laboris cupidatat. Consectetur consequat esse est sit veniam adipisicing ipsum enim irure. Excepteur reprehenderit sint exercitation ipsum consequat qui sit id velit elit. Velit anim eiusmod labore sit amet. Voluptate voluptate irure occaecat deserunt incididunt esse in. Sunt velit aliquip sunt elit ex nulla reprehenderit qui ut eiusmod ipsum do. Duis veniam reprehenderit laborum occaecat id proident nulla veniam. Duis enim deserunt voluptate aute veniam sint pariatur exercitation. Irure mollit est sit labore est deserunt pariatur duis aute laboris cupidatat. Consectetur consequat esse est sit veniam adipisicing ipsum enim irure.</p>
           </div>
         </div>
-
       </div>
-      
-      <div class="mdl-cell mdl-cell--4-col">
-
-        <div class="mdl-cell mdl-card mdl-cell--12-col proposal-support mdl-shadow--2dp">
-          <div class="mdl-card__title mdl-color--cyan-800">
-            <h2 class="mdl-card__title-text mdl-color-text--white">Support Proposal</h2>
-          </div>
-          <div class="mdl-card__supporting-text"> 
-            <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell--10-col" for="switch-2">
-              <input type="checkbox" id="switch-2" class="mdl-switch__input" disabled>
-              <span class="mdl-switch__label mdl-card__supporting-text mdl-color-text--grey-400">Supporting</span>
-            </label>
-          </div>
-
-          <div class="mdl-card__supporting-text">
-            <p class="mdl-card__supporting-text">Your vote is delegated to:</p>
-            <div class="mdl-grid">
-              <div class="mdl-layout-spacer"></div>
-                <span class="mdl-chip mdl-chip--contact mdl-chip--deletable">
-                  <img class="mdl-chip__contact" src="images/john.jpg"></img>
-                  <span class="mdl-chip__text">Aaron Paul</span>
-                  <a href="#" class="mdl-chip__action"><i class="material-icons">cancel</i></a>
-                </span>
-              <div class="mdl-layout-spacer"></div>
-            </div>
-          </div>
-        </div>
-
-      </div> 
+      <div class="mdl-layout-spacer"></div>
     </div>
   </main>
   <footer class="mdl-mega-footer">
@@ -98,18 +65,5 @@
       </ul>
     </div>
   </footer>
-    <script>
-      var dialog3 = document.querySelector('dialog.dialog3');
-      var showDialogButton = document.querySelector('#show-delegated');
-      if (! dialog3.showModal) {
-        dialogPolyfill.registerDialog(dialog3);
-      }
-      showDialogButton.addEventListener('click', function() {
-        dialog3.showModal();
-      });
-      dialog3.querySelector('.close').addEventListener('click', function() {
-        dialog3.close();
-      });
-  </script>
 </body>
 </html>

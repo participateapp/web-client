@@ -1,18 +1,23 @@
 body { color: rgba(0,0,0,.54);}
 
-/*   =========   Navbar   =========   
-     ==============================   */
-.mdl-layout__header-row {
-  height: 75px;
-}
+a { cursor: pointer; }
+
+.border-bottom { border-bottom: 1px solid rgba(0,0,0,.1); }
+
+/*   ===============   Navbar   ===============   
+     ==========================================   */
 
 .demo-layout-transparent .mdl-layout__header,
-.demo-layout-transparent .mdl-layout__drawer-button {
-  color: black;
-}
+.demo-layout-transparent .mdl-layout__drawer-button { color: black; }
 
-/*   ======   Landing Page   ======   
-     ==============================   */
+a.main-title { text-decoration: none; }
+
+a#new-proposal { padding: 0 32px; }
+
+a#new-proposal button { border: 2px solid; }
+
+/*   ============   Landing Page   ============   
+     ==========================================   */
 
 #landing-pg section { padding: 1.9em 0; }
 section#hero {
@@ -25,17 +30,10 @@ section#hero {
 
 section#main-top p i { font-size: 45px; }
 
-a.card-link,
-a.main-title { text-decoration: none; }
+/*   ==============   Proposals   ==============   
+     ===========================================   */
 
-#user-name { 
-  padding: 0 16px;
-  display: block; 
-}
-
-#new-proposal { padding: 0 32px; }
-
-.filtering h4 { margin-top: 6px; }
+a.card-link { text-decoration: none; }
 
 .mdl-card { min-height: 100px; }
 
@@ -45,26 +43,40 @@ a.main-title { text-decoration: none; }
   position: relative;
 }
 
-.proposal-list p { margin-bottom: 0; }
-
-.mdl-card .proposal-status {
-  position: absolute;
-  right: 12px;
-  top: 23px;
+.proposal-list .mdl-card__supporting-text { 
+  padding-bottom: 0;
+  padding-top: 8px;
 }
-.mdl-card i.proposal-status { top: 10px; }
 
-a.mdl-list__item,
-.mdl-menu__item a,
-.mdl-card__supporting-text a,
-.mdl-card__title a { text-decoration: none; }
-
-a.mdl-list__item:hover { background: #ddd; }
-
-.mdl-card__actions i {
-  color: rgba(0,0,0,.54);
-  line-height: 36px;
+.actions__authored .authored {
+  display: block;
+  float: left;
 }
+
+.actions__authored img { 
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  float: left; 
+}
+
+.proposal-show .mdl-card__supporting-text { padding-top: 11px; }
+
+.proposal-show .mdl-card__title { padding-top: 18px; }
+.proposal-list .mdl-card__title { padding-top: 14px; }
+
+.proposal-show .mdl-card__title span,
+.proposal-list .mdl-card__title span { font-weight: 300; }
+
+.proposal-show .mdl-card__actions { padding: 16px 8px; }
+
+
+/*   ============   New Proposals   ============   
+     ===========================================   */
+
+.top-alert { padding-top: 24px; }
+.top-alert .mdl-chip { margin-bottom: 0; }
+
 
 .actions__authored,
 .notification__message {
@@ -73,55 +85,6 @@ a.mdl-list__item:hover { background: #ddd; }
   line-height: 18px;
 }
 
-.actions__authored img.mdl-chip__contact { float: left; }
+form#new-proposal-form { padding: 16px; }
 
-.actions__authored .authored {
-  display: block;
-  float: left;
-}
 
-.proposal-support .mdl-badge {
-  float: right;
-  margin-top: 12px;
-}
-
-.proposal-change i {
-  font-size: 36px;
-  padding-top: 16px;
-}
-
-.border-bottom { border-bottom: 1px solid rgba(0,0,0,.1); }
-
-a { cursor: pointer; }
-
-.mdl-collapse.mdl-collapse--opened {
-  border-top: 1px solid #e0e0e0;
-  border-bottom: 1px solid #e0e0e0;
-  margin-top: -1px;
-}
-
-.mdl-collapse.mdl-collapse--opened + .mdl-collapse.mdl-collapse--opened {
-  border-top: none;
-  margin-top: 0;
-}
-
-.mdl-collapse .mdl-collapse__content-wrapper { overflow: hidden; }
-
-.mdl-collapse .mdl-collapse__content {
-  transition-property: margin-top;
-  transition-duration: 0.2s;
-}
-
-.mdl-collapse .mdl-collapse__icon {
-  transition-property: transform;
-  transition-duration: 0.2s;
-  color: rgba(0,0,0,0.3);
-  /* MDL should provide some facility for positioning icons inside list items so I don't have to do this */
-  position: absolute;
-  right: 6px;
-  margin-top: -3px;
-}
-
-.mdl-collapse.mdl-collapse--opened .mdl-collapse__icon { transform: rotate(-180deg); }
-.mdl-collapse.mdl-collapse--opened .mdl-collapse__button { color: teal; }
-.mdl-collapse.mdl-collapse--opened .mdl-collapse__content { margin-top: 0 !important; }

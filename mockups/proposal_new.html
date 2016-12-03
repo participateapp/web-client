@@ -1,24 +1,22 @@
 <!doctype html>
 
 <html>
-  <head>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
-    <!-- <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.grey-pink.min.css" /> -->
-    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
-    <link rel="stylesheet" href="styles/style.css">
-    <link rel="stylesheet" href="styles/layout.css">
-  </head>
-  <body class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-    <header class="mdl-layout__header mdl-color--white">
+<head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
+  <!-- <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.grey-pink.min.css" /> -->
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
+  <link rel="stylesheet" href="styles/style.css">
+  <link rel="stylesheet" href="styles/layout.css">
+</head>
+<body class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+  <header class="mdl-layout__header mdl-color--white">
     <div class="mdl-layout__header-row">
-      <a href="proposals_index.html" class="main-title"><span class="mdl-layout-title mdl-color-text--grey-700">Participate</span></a>
+      <a href="proposals_index.html" class="main-title"><span class="mdl-layout-title mdl-color-text--primary">Participate!</span></a>
       <div class="mdl-layout-spacer"></div>
-      <a href="proposal_new.html" id="new-proposal"><button class="mdl-button mdl-js-button mdl-button--accent">
-        New proposal
-      </button></a>
+      <a href="proposal_new.html" id="new-proposal"><button class="mdl-button mdl-js-button mdl-button--colored">New proposal</button></a>
       <nav class="mdl-navigation">
         <button id="user-menu" class="mdl-button mdl-js-button mdl-button--icon"><img class="mdl-chip__contact" src="images/yuna.jpg"></button>Yuna Smith
         <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="user-menu">
@@ -31,45 +29,45 @@
     </div>
   </header>
     
-    <main class="mdl-layout__content mdl-color--grey-200">
-      <div class="content-grid mdl-grid">
-        <div class="mdl-layout-spacer"></div>
-          <div class="mdl-cell mdl-card mdl-shadow--2dp mdl-cell--8-col">
-            <form action="#">
-              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--12-col">
-                <input class="mdl-textfield__input" type="text" id="sample3">
-                <label class="mdl-textfield__label" for="sample3">Title</label>
-              </div>
+  <main class="mdl-layout__content mdl-color--grey-200">
+    <div class="content-grid mdl-grid">
+      <div class="mdl-layout-spacer"></div>
+        <div class="mdl-cell mdl-card mdl-shadow--2dp mdl-cell--8-col">
+          <form action="#" id="new-proposal-form">
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--12-col">
+              <input class="mdl-textfield__input" type="text" id="sample3">
+              <label class="mdl-textfield__label" for="sample3">Title</label>
+            </div>
 
-              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--12-col">
-                <textarea class="mdl-textfield__input" type="text" rows= "2" id="sample5" ></textarea>
-                <label class="mdl-textfield__label" for="sample5">Sumary</label>
-              </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--12-col">
+              <textarea class="mdl-textfield__input" type="text" rows= "2" id="sample5" ></textarea>
+              <label class="mdl-textfield__label" for="sample5">Sumary</label>
+            </div>
 
-              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--12-col">
-                <textarea class="mdl-textfield__input" type="text" rows= "6" id="sample5" ></textarea>
-                <label class="mdl-textfield__label" for="sample5">Proposal details</label>
-              </div>
-            </form>
-            <div class="mdl-card__supporting-text">
-              <div class="mdl-grid"> 
-                <div class="mdl-layout-spacer"></div>
-                <a href="proposal_saved.html"><button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Save</button></a>
-                <div class="mdl-layout-spacer"></div>
-              </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label mdl-cell mdl-cell--12-col">
+              <textarea class="mdl-textfield__input" type="text" rows= "6" id="sample5" ></textarea>
+              <label class="mdl-textfield__label" for="sample5">Proposal details</label>
+            </div>
+          </form>
+          <div class="mdl-card__supporting-text">
+            <div class="mdl-grid"> 
+              <div class="mdl-layout-spacer"></div>
+              <a href="proposal_saved.html"><button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Save</button></a>
+              <div class="mdl-layout-spacer"></div>
             </div>
           </div>
-        <div class="mdl-layout-spacer"></div>
-      </div>
-    </main>
-    <footer class="mdl-mega-footer">
-      <div class="mdl-mega-footer__left-section"></div>
-      <div class="mdl-mega-footer__right-section">
-        <ul class="mdl-mini-footer__link-list">
-          <li><a href="#">Help</a></li>
-          <li><a href="#">Privacy &amp; Terms</a></li>
-        </ul>
-      </div>
-    </footer>
-  </body>
+        </div>
+      <div class="mdl-layout-spacer"></div>
+    </div>
+  </main>
+  <footer class="mdl-mega-footer">
+    <div class="mdl-mega-footer__left-section"></div>
+    <div class="mdl-mega-footer__right-section">
+      <ul class="mdl-mini-footer__link-list">
+        <li><a href="#">Help</a></li>
+        <li><a href="#">Privacy &amp; Terms</a></li>
+      </ul>
+    </div>
+  </footer>
+</body>
 </html>

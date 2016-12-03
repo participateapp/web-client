@@ -13,11 +13,9 @@
 <body class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
   <header class="mdl-layout__header mdl-color--white">
     <div class="mdl-layout__header-row">
-      <a href="proposals_index.html" class="main-title"><span class="mdl-layout-title mdl-color-text--grey-700">Participate</span></a>
+      <a href="proposals_index.html" class="main-title"><span class="mdl-layout-title mdl-color-text--primary">Participate!</span></a>
       <div class="mdl-layout-spacer"></div>
-      <a href="proposal_new.html" id="new-proposal"><button class="mdl-button mdl-js-button mdl-button--accent">
-        New proposal
-      </button></a>
+      <a href="proposal_new.html" id="new-proposal"><button class="mdl-button mdl-js-button mdl-button--colored">New proposal</button></a>
       <nav class="mdl-navigation">
         <button id="user-menu" class="mdl-button mdl-js-button mdl-button--icon"><img class="mdl-chip__contact" src="images/yuna.jpg"></button>Yuna Smith
         <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="user-menu">
@@ -32,63 +30,30 @@
   
   <main class="mdl-layout__content mdl-color--grey-200">
     <div class="content-grid mdl-grid">
-      <div class="mdl-cell mdl-cell--8-col">
+      <div class="mdl-layout-spacer"></div>
+      <div class="mdl-cell mdl-cell--10-col">
         <div class="mdl-cell mdl-card mdl-cell--12-col proposal-show">
           <div class="mdl-card__actions content-grid mdl-grid mdl-cell--12-col border-bottom">
             <span class="actions__authored">
               <img class="mdl-chip__contact" src="images/john.jpg">
               <span class="authored">
                 Aaron Paul<br />
-                5 days ago
+                7 days ago
               </span>
-            </span>
+            </span> 
             <div class="mdl-layout-spacer"></div>
-            <span class="mdl-chip mdl-color--cyan-800">
-              <span class="mdl-chip__text mdl-color-text--white">30 votes</span>
-            </span>      
+            <a href="proposal_show3_supporting.html"><button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" id="show-delegate">Support Proposal</button></a> 
           </div>
           <div class="mdl-card__title">
-            <h2 class="mdl-card__title-text mdl-color-text--grey-700">Make British Sign Language part of the curriculum</h2>
+            <span class="mdl-typography--headline mdl-color-text--grey-700">Increase Carers Allowance in line with the Living Wage</span>
           </div>
           <div class="mdl-card__supporting-text">
-            <p><strong>It's compulsory for students in England to take a language to 14 but signing isn't listed along with French, Germany or Mandarin. With one in 60 brits profoundly deaf and 11m others with hearing problems, this is a glaring omission is it not?</strong></p>
+            <p><strong>To receive Carers Allowance from the Government carers need to care for the disabled (at a predetermined level of need) for AT LEAST 35 hours a week. For this they receive less than £2 an hour to help them do this. Sign if you think this should be increased in line with the living wage.</strong></p>
             <p>Excepteur reprehenderit sint exercitation ipsum consequat qui sit id velit elit. Velit anim eiusmod labore sit amet. Voluptate voluptate irure occaecat deserunt incididunt esse in. Sunt velit aliquip sunt elit ex nulla reprehenderit qui ut eiusmod ipsum do. Duis veniam reprehenderit laborum occaecat id proident nulla veniam. Duis enim deserunt voluptate aute veniam sint pariatur exercitation. Irure mollit est sit labore est deserunt pariatur duis aute laboris cupidatat. Consectetur consequat esse est sit veniam adipisicing ipsum enim irure. Excepteur reprehenderit sint exercitation ipsum consequat qui sit id velit elit.</p>
           </div>
-          <div class="mdl-card__actions mdl-card--border content-grid mdl-grid">
-            <div class="mdl-layout-spacer"></div>
-            <p>30 votes</p> 
-            <div class="mdl-layout-spacer"></div>   
-          </div> 
-        </div>       
-      </div>
-      
-      <div class="mdl-cell mdl-cell--4-col">
-
-        <div class="mdl-cell mdl-card mdl-cell--12-col proposal-support mdl-shadow--2dp">
-          <div class="mdl-card__title mdl-color--cyan-800">
-            <h2 class="mdl-card__title-text mdl-color-text--white">Support Proposal</h2>
-          </div>
-          <div class="mdl-card__supporting-text"> 
-            <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect mdl-cell--10-col" for="switch-2">
-              <input type="checkbox" id="switch-2" class="mdl-switch__input" checked>
-              <span class="mdl-switch__label mdl-card__supporting-text">Supporting</span>
-            </label>
-  
-            <a href="#"><span id="tt2" class="mdl-badge mdl-cell--2-col" data-badge="1"></span></a>   
-            <div class="mdl-tooltip mdl-tooltip" for="tt2">
-              0 delegated votes
-            </div>
-          </div>
-          <div class="mdl-card__supporting-text proposal-delegate">
-            <div class="mdl-grid">
-              <div class="mdl-layout-spacer"></div>
-              <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="show-delegate" disabled>Delegate vote</button>
-              <div class="mdl-layout-spacer"></div>
-            </div> 
-          </div>
         </div>
-
-      </div> 
+      </div>
+      <div class="mdl-layout-spacer"></div>
     </div>
   </main>
   <footer class="mdl-mega-footer">
@@ -100,30 +65,5 @@
       </ul>
     </div>
   </footer>
-    <script>
-      var dialog = document.querySelector('dialog.dialog1');
-      var showDialogButton = document.querySelector('#tt2');
-      if (! dialog.showModal) {
-        dialogPolyfill.registerDialog(dialog);
-      }
-      showDialogButton.addEventListener('click', function() {
-        dialog.showModal();
-      });
-      dialog.querySelector('.close').addEventListener('click', function() {
-        dialog.close();
-      });
-
-      var dialog2 = document.querySelector('dialog.dialog2');
-      var showDialogButton = document.querySelector('#show-delegate');
-      if (! dialog.showModal) {
-        dialogPolyfill.registerDialog(dialog2);
-      }
-      showDialogButton.addEventListener('click', function() {
-        dialog2.showModal();
-      });
-      dialog2.querySelector('.close').addEventListener('click', function() {
-        dialog2.close();
-      });
-  </script>
 </body>
 </html>
