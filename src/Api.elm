@@ -128,29 +128,42 @@ assembleProposalList document =
 assembleProposalFromResource : JsonApi.Resource -> Result String Proposal
 assembleProposalFromResource proposalResource =
     JsonApi.Resources.attributes decodeProposalAttributes proposalResource
-        :> \( title, body, supportCount ) ->
+        :> \proposalAttrs ->
             JsonApi.Resources.relatedResource "author" proposalResource
                 :> \participantResource ->
                     JsonApi.Resources.attributes decodeParticipantAttributes participantResource
                         :> \name ->
                             Ok
                                 { id = JsonApi.Resources.id proposalResource
-                                , title = title
-                                , body = body
+                                , title = proposalAttrs.title
+                                , body = proposalAttrs.body
                                 , author =
                                     { id = JsonApi.Resources.id participantResource
                                     , name = name
                                     }
-                                , supportCount = supportCount
+                                , supportCount = proposalAttrs.supportCount
+                                , authoredByMe = proposalAttrs.authoredByMe
+                                , supportedByMe = proposalAttrs.supportedByMe
                                 }
 
 
-decodeProposalAttributes : Decoder ( String, String, Int )
+type alias DecodedProposalAttributes =
+    { title : String
+    , body : String
+    , supportCount : Int
+    , authoredByMe : Bool
+    , supportedByMe : Bool
+    }
+
+
+decodeProposalAttributes : Decoder DecodedProposalAttributes
 decodeProposalAttributes =
-    Decode.object3 (,,)
+    Decode.object5 DecodedProposalAttributes
         (Decode.at [ "title" ] Decode.string)
         (Decode.at [ "body" ] Decode.string)
         (Decode.at [ "support-count" ] Decode.int)
+        (Decode.at [ "authored-by-me" ] Decode.bool)
+        (Decode.at [ "supported-by-me" ] Decode.bool)
 
 
 decodeParticipantAttributes : Decoder String
@@ -216,8 +229,9 @@ createProposal proposalInput accessToken wrapMsg =
         |> Cmd.map wrapMsg
 
 
-supportProposal : String -> String -> (Msg -> a) -> Cmd a
-supportProposal id accessToken wrapMsg =
+supportProposal : String -> Bool -> String -> (Msg -> a) -> Cmd a
+supportProposal id newState accessToken wrapMsg =
+    -- ToDo: Send DELETE request to remove support (if newState == False)
     encodeSupportProposal id
         |> Api.Util.requestPost supportProposalEndpoint
         |> Api.Util.withAccessToken accessToken

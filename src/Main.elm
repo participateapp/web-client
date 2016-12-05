@@ -136,7 +136,6 @@ type alias Model =
     , form : Form () NewProposal
     , mdl : Material.Model
     , proposals : Dict String Proposal
-    , supportedByMe : Set String
     }
 
 
@@ -150,7 +149,6 @@ initialModel accessToken route address =
     , form = Form.initial [] validate
     , mdl = Material.model
     , proposals = Dict.empty
-    , supportedByMe = Set.empty
     }
 
 
@@ -164,7 +162,7 @@ type Msg
     | FormMsg Form.Msg
     | NoOp
     | Mdl (Material.Msg Msg)
-    | SupportProposal String
+    | SupportProposal String Bool
 
 
 addProposal : Proposal -> Model -> Model
@@ -207,7 +205,7 @@ update msg model =
                     ( { model | error = Just <| toString httpError }, Cmd.none )
 
                 Api.ProposalSupported id ->
-                    ( { model | supportedByMe = Set.insert id model.supportedByMe }
+                    ( model
                     , Navigation.newUrl <|
                         Hop.output hopConfig { path = [ "proposals", id ], query = Dict.empty }
                     )
@@ -252,9 +250,9 @@ update msg model =
         Mdl msg' ->
             Material.update msg' model
 
-        SupportProposal id ->
+        SupportProposal id newState ->
             ( model
-            , Api.supportProposal id model.accessToken ApiMsg
+            , Api.supportProposal id newState model.accessToken ApiMsg
             )
 
 
@@ -436,10 +434,10 @@ viewProposal model id =
                 , div [] [ text "Author: ", text proposal.author.name ]
                 , div [] [ text "Body: ", text proposal.body ]
                 , div [] [ text "Support Count: ", text <| toString proposal.supportCount ]
-                , button [ onClick <| SupportProposal id ]
+                , button [ onClick <| SupportProposal id (not proposal.supportedByMe) ]
                     [ text <|
-                        if Set.member id model.supportedByMe then
-                            "Unsupport this proposal"
+                        if proposal.supportedByMe then
+                            "Unsupport this proposal (unimplemented)"
                         else
                             "Support this proposal"
                     ]
