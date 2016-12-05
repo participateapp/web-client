@@ -3,7 +3,7 @@ port module Main exposing (main)
 import Html exposing (..)
 import Html.App as App
 import Html.Events exposing (..)
-import Html.Attributes exposing (style, href, class)
+import Html.Attributes exposing (style, href, class, disabled)
 import Material
 import Material.Scheme
 import Material.Button as Button
@@ -455,13 +455,18 @@ viewProposal model id =
                 , div [] [ text "Author: ", text proposal.author.name ]
                 , div [] [ text "Body: ", text proposal.body ]
                 , div [] [ text "Support Count: ", text <| toString proposal.supportCount ]
-                , button [ onClick <| SupportProposal id (not proposal.supportedByMe) ]
-                    [ text <|
-                        if proposal.supportedByMe then
-                            "Unsupport this proposal (unimplemented)"
-                        else
-                            "Support this proposal"
-                    ]
+                , if proposal.authoredByMe then
+                    button [ disabled True ]
+                        [ text "Authored by me, automatically supported"
+                        ]
+                  else
+                    button [ onClick <| SupportProposal id (not proposal.supportedByMe) ]
+                        [ text <|
+                            if proposal.supportedByMe then
+                                "Unsupport this proposal (unimplemented)"
+                            else
+                                "Support this proposal"
+                        ]
                 ]
 
 
