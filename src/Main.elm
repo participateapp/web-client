@@ -175,6 +175,28 @@ addProposalList proposalList model =
     List.foldl addProposal model proposalList
 
 
+updateProposalSupport : Support -> Model -> Model
+updateProposalSupport support model =
+    let
+        newProposals =
+            Dict.update support.proposal
+                (Maybe.map
+                    (\proposal ->
+                        { proposal
+                            | supportCount = support.supportCount
+                            , supportedByMe = support.supportedByMe
+                        }
+                    )
+                )
+                model.proposals
+    in
+        { model | proposals = newProposals }
+
+
+
+-- { model | proposals = Dict.insert proposal.id proposal model.proposals }
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -204,10 +226,9 @@ update msg model =
                 Api.ProposalCreationFailed httpError ->
                     ( { model | error = Just <| toString httpError }, Cmd.none )
 
-                Api.ProposalSupported id ->
-                    ( model
-                    , Navigation.newUrl <|
-                        Hop.output hopConfig { path = [ "proposals", id ], query = Dict.empty }
+                Api.ProposalSupported support ->
+                    ( model |> updateProposalSupport support
+                    , Cmd.none
                     )
 
                 Api.SupportProposalFailed httpError ->
