@@ -29,7 +29,7 @@ type Msg
     | AuthFailed Http.Error
     | ProposalCreated Proposal
     | ProposalCreationFailed Http.Error
-    | ProposalSupported String
+    | ProposalSupported Support
     | SupportProposalFailed Http.Error
     | GotProposal Proposal
     | GettingProposalFailed Http.Error
@@ -195,6 +195,29 @@ encodeSupportProposal id =
         ]
 
 
+assembleSupport : JsonApi.Document -> Result String Support
+assembleSupport document =
+    JsonApi.Documents.primaryResource document
+        :> \supportResource ->
+            JsonApi.Resources.relatedResource "proposal" supportResource
+                :> \proposalResource ->
+                    JsonApi.Resources.attributes decodeProposalSupportAttributes proposalResource
+                        :> \( supportCount, supportedByMe ) ->
+                            Ok
+                                { id = JsonApi.Resources.id supportResource
+                                , proposal = JsonApi.Resources.id proposalResource
+                                , supportCount = supportCount
+                                , supportedByMe = supportedByMe
+                                }
+
+
+decodeProposalSupportAttributes : Decoder ( Int, Bool )
+decodeProposalSupportAttributes =
+    Decode.object2 (,)
+        (Decode.at [ "support-count" ] Decode.int)
+        (Decode.at [ "supported-by-me" ] Decode.bool)
+
+
 
 -- COMMANDS
 
@@ -235,8 +258,8 @@ supportProposal id newState accessToken wrapMsg =
     encodeSupportProposal id
         |> Api.Util.requestPost supportProposalEndpoint
         |> Api.Util.withAccessToken accessToken
-        |> Api.Util.sendDefJsonApi (always (Ok ()))
-        |> Task.perform SupportProposalFailed (always (ProposalSupported id))
+        |> Api.Util.sendDefJsonApi assembleSupport
+        |> Task.perform SupportProposalFailed ProposalSupported
         |> Cmd.map wrapMsg
 
 

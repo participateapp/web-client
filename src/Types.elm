@@ -31,3 +31,11 @@ type alias Participant =
     { id : String
     , name : String
     }
+
+
+type alias Support =
+    { id : String
+    , proposal : String
+    , supportCount : Int
+    , supportedByMe : Bool
+    }
