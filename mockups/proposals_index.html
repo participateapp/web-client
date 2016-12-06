@@ -29,14 +29,16 @@
     <div class="mdl-layout__header-row">
       <a href="proposals_index.html" class="main-title"><span class="mdl-layout-title mdl-color-text--primary">Participate!</span></a>
       <div class="mdl-layout-spacer"></div>
-      <a href="proposal_new.html" id="new-proposal"><button class="mdl-button mdl-js-button mdl-button--colored">New proposal</button></a>
+      <div class="mdl-layout--large-screen-only">
+        <a href="proposal_new.html" id="new-proposal"><button class="mdl-button mdl-js-button mdl-button--colored">New proposal</button></a>
+      </div>
       <nav class="mdl-navigation">
         <button id="user-menu" class="mdl-button mdl-js-button mdl-button--icon"><img class="mdl-chip__contact" src="images/yuna.jpg"></button>Yuna Smith
         <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="user-menu">
-          <span class="mdl-color-text--cyan-800" id="user-name">Signed in as<br /><strong>Yuna Smith</strong></span>
+          <span class="mdl-color-text--grey-700" id="current-user">Signed in as<br /><strong>Yuna Smith</strong></span>
           <hr>
-          <li class="mdl-menu__item"><a href="proposal_new.html" class="mdl-color-text--grey-700">New proposal</a></li>
-          <li class="mdl-menu__item"><a href="#" class="mdl-color-text--grey-700">Sign out</a></li>
+          <li class="mdl-menu__item"><a href="proposal_new.html" class="mdl-color-text--primary">New proposal</a></li>
+          <li class="mdl-menu__item"><a href="index.html" class="mdl-color-text--primary">Sign out</a></li>
         </ul>
       </nav>
     </div>
@@ -72,7 +74,11 @@
           <div class="mdl-cell mdl-card mdl-cell--12-col proposal-list">
             <div class="mdl-card__title">
               <span class="mdl-typography--title mdl-color-text--primary">Make British Sign Language part of the curriculum</span>
-              <i class="material-icons proposal-status mdl-color-text--light-green">check_circle</i>
+              <div class="mdl-layout-spacer"></div>
+              <div class="mdl-layout--large-screen-only mdl-button supporting mdl-color-text--light-green">Supporting</div>
+              <div class="mdl-layout--small-screen-only">
+                <i class="material-icons proposal-status mdl-color-text--light-green">check_circle</i>
+              </div>
             </div>
             <div class="mdl-card__supporting-text">
               <p>It's compulsory for students in England to take a language to 14 but signing isn't listed along with French, Germany or Mandarin. With one in 60 brits profoundly deaf and 11m others with hearing problems, this is a glaring omission is it not?</p>
@@ -84,7 +90,11 @@
           <div class="mdl-cell mdl-card mdl-cell--12-col proposal-list">
             <div class="mdl-card__title">
               <span class="mdl-typography--title mdl-color-text--primary">Increase Carers Allowance in line with the Living Wage</span>
-              <i class="material-icons proposal-status mdl-color-text--light-green">check_circle</i>
+              <div class="mdl-layout-spacer"></div>
+              <div class="mdl-layout--large-screen-only mdl-button supporting mdl-color-text--light-green">Supporting</div>
+              <div class="mdl-layout--small-screen-only">
+                <i class="material-icons proposal-status mdl-color-text--light-green">check_circle</i>
+              </div>
             </div>
             <div class="mdl-card__supporting-text">
               <p>To receive Carers Allowance from the Government carers need to care for the disabled (at a predetermined level of need) for AT LEAST 35 hours a week. For this they receive less than £2 an hour to help them do this. Sign if you think this should be increased in line with the living wage.</p>
@@ -95,12 +105,27 @@
       <div class="mdl-layout-spacer"></div>
     </div>
   </main>
+
   <footer class="mdl-mega-footer">
-    <div class="mdl-mega-footer__left-section"></div>
-    <div class="mdl-mega-footer__right-section">
+    <div class="mdl-mega-footer__top-section">
+      <div class="mdl-mega-footer__left-section">
+        <ul class="mdl-mini-footer__link-list social-links">
+          <li><a href="https://github.com/oliverbarnes/participate"><img src="images/github-circle.png"></a></li>
+          <li><a href="https://participateapp.slack.com"><img src="images/slack.png"></a></li>
+          <li><a href="https://twitter.com/digiberber"><img src="images/twitter.png"></a></li>
+        </ul>
+      </div>
+
+      <div class="mdl-mega-footer__right-section">
+        <p class="mdl-layout-title">Participate!</p>
+        <p>An open source liquid democracy application.</p>
+      </div>
+    </div>
+
+    <div class="mdl-mega-footer__bottom-section">
       <ul class="mdl-mini-footer__link-list">
-        <li><a href="help.html">Help</a></li>
-        <li><a href="#">Privacy &amp; Terms</a></li>
+        <li><a href="https://github.com/oliverbarnes/participate/blob/master/CONTRIBUTING.md">Guide to contributing</a></li>
+        <li><a href="https://github.com/oliverbarnes/participate/wiki/Development-Setup">Wiki</a></li>
       </ul>
     </div>
   </footer>

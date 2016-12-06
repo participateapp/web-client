@@ -16,6 +16,19 @@ a#new-proposal { padding: 0 32px; }
 
 a#new-proposal button { border: 2px solid; }
 
+a#new-proposal button:hover {
+  color: #fff;
+  background: rgb(63,81,181);
+  border: 2px solid rgb(63,81,181);
+}
+
+li.mdl-menu__item a { text-decoration: none; }
+
+#current-user { 
+  padding: 0 16px;
+  display: block; 
+}
+
 /*   ============   Landing Page   ============   
      ==========================================   */
 
@@ -32,7 +45,6 @@ section#main-top p i { font-size: 45px; }
 
 /*   ==============   Proposals   ==============   
      ===========================================   */
-
 a.card-link { text-decoration: none; }
 
 .mdl-card { min-height: 100px; }
@@ -42,6 +54,8 @@ a.card-link { text-decoration: none; }
   padding-bottom: 0;
   position: relative;
 }
+
+.proposal-list .mdl-button.supporting:hover { background: none; }
 
 .proposal-list .mdl-card__supporting-text { 
   padding-bottom: 0;
@@ -86,5 +100,17 @@ a.card-link { text-decoration: none; }
 }
 
 form#new-proposal-form { padding: 16px; }
+
+/*   ================   Footer  ================   
+     ===========================================   */
+
+footer .mdl-mega-footer__top-section { padding-top: 4px; }
+
+/*footer .social-links {
+  padding-top: 12px;
+  padding-bottom: 17px;
+}
+
+footer .mdl-mega-footer__right-section { padding-top: 12px; }*/
 
 
