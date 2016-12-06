@@ -82,24 +82,27 @@ urlUpdate ( route, address ) model =
         _ =
             Debug.log "urlUpdate" ( route, address )
     in
-        case route of
-            ProposalRoute id ->
-                case Dict.get id model.proposals of
-                    Nothing ->
-                        ( model1
-                        , Api.getProposal id model.accessToken ApiMsg
-                        )
+        if String.isEmpty model.accessToken && route /= Home then
+            ( model1, Navigation.newUrl <| Hop.outputFromPath hopConfig "/" )
+        else
+            case route of
+                ProposalRoute id ->
+                    case Dict.get id model.proposals of
+                        Nothing ->
+                            ( model1
+                            , Api.getProposal id model.accessToken ApiMsg
+                            )
 
-                    Just _ ->
-                        ( model1, Cmd.none )
+                        Just _ ->
+                            ( model1, Cmd.none )
 
-            Home ->
-                ( model1
-                , Api.getProposalList model.accessToken ApiMsg
-                )
+                Home ->
+                    ( model1
+                    , Api.getProposalList model.accessToken ApiMsg
+                    )
 
-            _ ->
-                ( model1, Cmd.none )
+                _ ->
+                    ( model1, Cmd.none )
 
 
 checkForAuthCode : Address -> Cmd Msg
