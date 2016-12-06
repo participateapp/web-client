@@ -310,7 +310,7 @@ viewBody : Model -> Html Msg
 viewBody model =
     case model.route of
         Home ->
-            if String.isEmpty model.accessToken == True then
+            if String.isEmpty model.accessToken then
                 div []
                     [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
             else
