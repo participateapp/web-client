@@ -77,7 +77,7 @@ a.card-link { text-decoration: none; }
 .proposal-show .mdl-card__supporting-text { padding-top: 11px; }
 
 .proposal-show .mdl-card__title { padding-top: 18px; }
-.proposal-list .mdl-card__title { padding-top: 14px; }
+.proposal-list .mdl-card__title { padding-top: 6px; }
 
 .proposal-show .mdl-card__title span,
 .proposal-list .mdl-card__title span { font-weight: 300; }
