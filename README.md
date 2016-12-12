@@ -22,23 +22,22 @@ Elm front-end app talking to an [Elixir/Phoenix API](https://github.com/oliverba
 ### Prerequisites
 
 - [Elm 0.17](http://elm-lang.org/)
-- [NPM](https://www.npmjs.com/)
+- [modd 0.4](https://github.com/cortesi/modd) and [devd 0.7](https://github.com/cortesi/devd). They both come as a single executable, available for all major platforms [here](https://github.com/cortesi/modd/releases) and [here](https://github.com/cortesi/modd/releases).
+- Optionally `unbuffer` for colorful compiler output. Included in the package [expect](https://www.nist.gov/services-resources/software/expect).
+Available for [OSX](http://apple.stackexchange.com/questions/193138/to-install-unbuffer-in-osx) and [Linux](http://unix.stackexchange.com/a/25375) (e.g. [ArchLinux](https://www.archlinux.org/packages/extra/x86_64/expect/), [Debian](https://packages.debian.org/wheezy/expect-dev), [Ubuntu](http://packages.ubuntu.com/precise/expect-dev))
+
 
 ### Build
 
-Get dependencies:
+Begin by building and starting the [API](https://github.com/oliverbarnes/participate-api#setup).
+
+Then to compile client's Elm sources and to start a development server:
 
 ```sh
-$ npm install
+$ modd
 ```
 
-Start the [API](https://github.com/oliverbarnes/participate-api#setup).
-
-Compile and run dev server:
-
-```sh
-$ npm run dev
-```
+Access the web app from [http://devd.io:3000/](http://devd.io:3000/) (same as [http://localhost:3000/](http://localhost:3000/)).
 
 More details can be found [on the wiki](https://github.com/oliverbarnes/participate/wiki/Development-Setup).
 
