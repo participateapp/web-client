@@ -12,24 +12,18 @@ a { cursor: pointer; }
 
 a.main-title { text-decoration: none; }
 
-a#new-proposal { padding: 0 32px; }
+#new-proposal {
+  margin: 0 32px;
+  border: 2px solid;
+}
 
-a#new-proposal button { border: 2px solid; }
-
-a#new-proposal button:hover {
+#new-proposal:hover {
   color: #fff;
   background: rgb(63,81,181);
   border: 2px solid rgb(63,81,181);
 }
 
-li.mdl-menu__item a { text-decoration: none; }
-
-#current-user { 
-  padding: 0 16px;
-  display: block; 
-}
-
-/*   ============   Landing Page   ============   
+/*   ============   Landing Page   ============
      ==========================================   */
 
 #landing-pg section { padding: 1.9em 0; }

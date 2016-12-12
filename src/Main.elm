@@ -13,6 +13,7 @@ import Material.Options exposing (css)
 import Material.Options as Options
 import Material.Layout as Layout
 import Material.Color as Color
+import Material.Menu as Menu
 import Material.Elevation as Elevation
 import Material.Grid exposing (grid, size, cell, Device(..))
 import Form exposing (Form)
@@ -310,7 +311,7 @@ view model =
 
 viewHeader : Model -> List (Html Msg)
 viewHeader model =
-    [ Layout.row [ Color.background Color.white ]
+    [ Layout.row [ Color.background Color.white ] <|
         [ a
             [ href "/"
             , class "main-title"
@@ -319,8 +320,64 @@ viewHeader model =
                 [ text "Participate!"
                 ]
             ]
+        , Layout.spacer
         ]
+            ++ if String.isEmpty model.accessToken then
+                [ a [ href Api.facebookAuthUrl ]
+                    [ img
+                        [ Html.Attributes.src "/images/facebook-sign-in.png"
+                        , Html.Attributes.style [ ( "width", "185px" ) ]
+                        ]
+                        []
+                    ]
+                ]
+               else
+                [ div [ class "mdl-layout--large-screen-only" ]
+                    [ Button.render Mdl
+                        [ 2 ]
+                        model.mdl
+                        [ Options.id "new-proposal"
+                        , Button.colored
+                        , Button.onClick <| NavigateToPath "/new-proposal"
+                        ]
+                        [ text "New proposal" ]
+                    ]
+                , viewUserNavigation model
+                ]
     ]
+
+
+viewUserNavigation : Model -> Html Msg
+viewUserNavigation model =
+    let
+        usernameColor =
+            Color.text <| Color.color Color.Grey Color.S700
+    in
+        Layout.navigation []
+            -- According to the mockup, the button should display user's avatar.
+            -- But elm-mdl currently only supports icons for menu buttons.
+            -- See: https://github.com/debois/elm-mdl/issues/165
+            [ Menu.render Mdl
+                [ 0 ]
+                model.mdl
+                [ Menu.ripple
+                , Menu.bottomRight
+                , Color.text <| Color.primary
+                ]
+                [ Menu.item
+                    [ Menu.disabled, usernameColor ]
+                    [ text "Signed in as" ]
+                , Menu.item
+                    [ Menu.divider, Menu.disabled, usernameColor ]
+                    [ strong [] [ text model.me.name ] ]
+                , Menu.item
+                    [ Menu.onSelect <| NavigateToPath "/new-proposal" ]
+                    [ text "New proposal" ]
+                , Menu.item
+                    [ Menu.onSelect NoOp ]
+                    [ text "Sign out" ]
+                ]
+            ]
 
 
 viewBody : Model -> Html Msg
@@ -523,7 +580,13 @@ init flags ( route, address ) =
         ( model1, cmd1 ) =
             urlUpdate ( route, address ) model0
     in
-        ( model1, Cmd.batch [ cmd1, checkForAuthCode address ] )
+        ( model1
+        , Cmd.batch
+            [ cmd1
+            , checkForAuthCode address
+            , Layout.sub0 Mdl
+            ]
+        )
 
 
 main : Program Flags
@@ -532,6 +595,11 @@ main =
         { init = init
         , update = update
         , urlUpdate = urlUpdate
-        , subscriptions = (always Sub.none)
+        , subscriptions =
+            \model ->
+                Sub.batch
+                    [ Layout.subs Mdl model.mdl
+                    , Menu.subs Mdl model.mdl
+                    ]
         , view = view
         }

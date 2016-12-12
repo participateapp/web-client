@@ -1,4 +1,5 @@
 var path = require("path");
+var CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   entry: {
@@ -47,6 +48,12 @@ module.exports = {
 
     noParse: /\.elm$/,
   },
+
+  plugins: [
+    new CopyWebpackPlugin([
+      { from: 'src/static/images', to: 'images/' }
+    ])
+  ],
 
   devServer: {
     inline: true,
