@@ -297,16 +297,15 @@ type alias Mdl =
 
 view : Model -> Html Msg
 view model =
-    Material.Scheme.topWithScheme Color.Amber Color.Red <|
-        Layout.render Mdl
-            model.mdl
-            [ Layout.fixedHeader
-            ]
-            { header = [ h4 [ style [ ( "padding", ".5rem" ) ] ] [ text "Participate!" ] ]
-            , drawer = []
-            , tabs = ( [], [] )
-            , main = [ div [ style [ ( "margin", "2rem" ) ] ] [ viewBody model ] ]
-            }
+    Layout.render Mdl
+        model.mdl
+        [ Layout.fixedHeader
+        ]
+        { header = [ h4 [ style [ ( "padding", ".5rem" ) ] ] [ text "Participate!" ] ]
+        , drawer = []
+        , tabs = ( [], [] )
+        , main = [ div [ style [ ( "margin", "2rem" ) ] ] [ viewBody model ] ]
+        }
 
 
 viewBody : Model -> Html Msg
