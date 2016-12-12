@@ -301,11 +301,26 @@ view model =
         model.mdl
         [ Layout.fixedHeader
         ]
-        { header = [ h4 [ style [ ( "padding", ".5rem" ) ] ] [ text "Participate!" ] ]
+        { header = viewHeader model
         , drawer = []
         , tabs = ( [], [] )
         , main = [ div [ style [ ( "margin", "2rem" ) ] ] [ viewBody model ] ]
         }
+
+
+viewHeader : Model -> List (Html Msg)
+viewHeader model =
+    [ Layout.row [ Color.background Color.white ]
+        [ a
+            [ href "/"
+            , class "main-title"
+            ]
+            [ Layout.title [ Color.text <| Color.color Color.Cyan Color.S800 ]
+                [ text "Participate!"
+                ]
+            ]
+        ]
+    ]
 
 
 viewBody : Model -> Html Msg
