@@ -3,19 +3,19 @@ port module Main exposing (main)
 import Html exposing (..)
 import Html.App as App
 import Html.Events exposing (..)
-import Html.Attributes exposing (style, href, class, disabled)
+import Html.Attributes exposing (style, href, class, disabled, id)
 import Material
 import Material.Scheme
 import Material.Button as Button
 import Material.Textfield as Textfield
 import Material.List as List
-import Material.Options exposing (css)
-import Material.Options as Options
+import Material.Options as Options exposing (css)
 import Material.Layout as Layout
 import Material.Color as Color
 import Material.Menu as Menu
 import Material.Elevation as Elevation
 import Material.Grid exposing (grid, size, cell, Device(..))
+import Material.Typography as Typography
 import Form exposing (Form)
 import Form.Field
 import Form.Input
@@ -305,7 +305,7 @@ view model =
         { header = viewHeader model
         , drawer = []
         , tabs = ( [], [] )
-        , main = [ div [ style [ ( "margin", "2rem" ) ] ] [ viewBody model ] ]
+        , main = [ viewMain model ]
         }
 
 
@@ -323,14 +323,7 @@ viewHeader model =
         , Layout.spacer
         ]
             ++ if String.isEmpty model.accessToken then
-                [ a [ href Api.facebookAuthUrl ]
-                    [ img
-                        [ Html.Attributes.src "/images/facebook-sign-in.png"
-                        , Html.Attributes.style [ ( "width", "185px" ) ]
-                        ]
-                        []
-                    ]
-                ]
+                [ viewLoginButton model ]
                else
                 [ div [ class "mdl-layout--large-screen-only" ]
                     [ Button.render Mdl
@@ -345,6 +338,17 @@ viewHeader model =
                 , viewUserNavigation model
                 ]
     ]
+
+
+viewLoginButton : Model -> Html Msg
+viewLoginButton model =
+    a [ href Api.facebookAuthUrl ]
+        [ img
+            [ Html.Attributes.src "/images/facebook-sign-in.png"
+            , class "login-button-img"
+            ]
+            []
+        ]
 
 
 viewUserNavigation : Model -> Html Msg
@@ -380,13 +384,12 @@ viewUserNavigation model =
             ]
 
 
-viewBody : Model -> Html Msg
-viewBody model =
+viewMain : Model -> Html Msg
+viewMain model =
     case model.route of
         Home ->
             if String.isEmpty model.accessToken then
-                div []
-                    [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
+                viewLandingPage model
             else
                 div []
                     [ text <| "Hello, " ++ (.name model.me)
@@ -418,6 +421,29 @@ viewBody model =
         FacebookRedirect ->
             div []
                 [ text <| "Authenticating, please wait..." ]
+
+
+viewLandingPage : Model -> Html Msg
+viewLandingPage model =
+    div [ id "landing-pg" ]
+        [ section [ id "hero" ]
+            [ grid [ Options.cs "content-grid" ]
+                [ cell [ size All 6, Typography.center ]
+                    [ viewLoginButton model ]
+                , cell [ size All 6 ]
+                    [ Options.styled h1
+                        [ Typography.display1
+                        , Typography.contrast 1
+                        , Color.text <| Color.color Color.Cyan Color.S800
+                        ]
+                        [ text "Participate!" ]
+                    , Options.styled p
+                        [ Typography.headline, Color.text <| Color.color Color.Cyan Color.S800 ]
+                        [ text "An App for Democratic Decision Making" ]
+                    ]
+                ]
+            ]
+        ]
 
 
 formView : Model -> Html Msg
