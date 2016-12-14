@@ -16,6 +16,7 @@ import Material.Menu as Menu
 import Material.Elevation as Elevation
 import Material.Grid exposing (grid, size, cell, Device(..))
 import Material.Typography as Typography
+import Material.Icon as Icon
 import Form exposing (Form)
 import Form.Field
 import Form.Input
@@ -443,6 +444,50 @@ viewLandingPage model =
                     ]
                 ]
             ]
+        , let
+            feature icon text_ =
+                cell [ size All 4, Typography.center ]
+                    [ p [] [ Icon.i icon ]
+                    , p [] [ text text_ ]
+                    ]
+          in
+            section [ id "main-top" ]
+                [ grid [ Options.cs "content-grid" ]
+                    [ feature "assignment"
+                        "A participant makes a proposal and gathers support for it. Other participants can collaborate on it if they support it in principle."
+                    , feature "announcement"
+                        "Dissenters have to make a counter-proposal, and gather support for it as well, to be heard."
+                    , feature "call_merge"
+                        "Representation is ensured for participants who are less involved through fluid delegation of support, in a liquid democracy."
+                    ]
+                ]
+        , let
+            feature turn title txt =
+                grid [ Options.cs "content-grid" ] <|
+                    (if turn then
+                        List.reverse
+                     else
+                        identity
+                    )
+                        [ cell [ size All 6 ]
+                            [ Options.styled p [ Typography.title ] [ text title ]
+                            , p [] [ text txt ]
+                            ]
+                        , cell [ size All 6 ]
+                            [ Options.div
+                                [ Elevation.e2, Options.css "height" "150px" ]
+                                []
+                            ]
+                        ]
+          in
+            section [ id "main-middle" ]
+                [ feature True
+                    "Concrete Proposals"
+                    "Participate! focuses on concrete proposals rather than noisy and many times unproductive debate."
+                , feature False
+                    "Ensured Representation"
+                    "Representation is ensured for participants who are less involved (be it for lack of time, inclination or of knowledge) through fluid delegation of support, in a liquid democracy."
+                ]
         ]
 
 
