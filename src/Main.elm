@@ -17,6 +17,7 @@ import Material.Elevation as Elevation
 import Material.Grid exposing (grid, size, cell, Device(..))
 import Material.Typography as Typography
 import Material.Icon as Icon
+import Material.Footer as Footer
 import Form exposing (Form)
 import Form.Field
 import Form.Input
@@ -306,7 +307,7 @@ view model =
         { header = viewHeader model
         , drawer = []
         , tabs = ( [], [] )
-        , main = [ viewMain model ]
+        , main = viewMain model
         }
 
 
@@ -385,9 +386,9 @@ viewUserNavigation model =
             ]
 
 
-viewMain : Model -> Html Msg
+viewMain : Model -> List (Html Msg)
 viewMain model =
-    case model.route of
+    [ case model.route of
         Home ->
             if String.isEmpty model.accessToken then
                 viewLandingPage model
@@ -422,6 +423,8 @@ viewMain model =
         FacebookRedirect ->
             div []
                 [ text <| "Authenticating, please wait..." ]
+    , viewFooter model
+    ]
 
 
 viewLandingPage : Model -> Html Msg
@@ -488,7 +491,102 @@ viewLandingPage model =
                     "Ensured Representation"
                     "Representation is ensured for participants who are less involved (be it for lack of time, inclination or of knowledge) through fluid delegation of support, in a liquid democracy."
                 ]
+        , Options.styled' section
+            [ Color.background <| Color.color Color.Grey Color.S200 ]
+            [ id "main-lower" ]
+            [ grid [ Options.cs "content-grid" ]
+                [ cell [ size All 12, Typography.center ]
+                    [ Options.styled h2
+                        [ Typography.headline ]
+                        [ text "Want to get involved?" ]
+                    , p []
+                        [ strong []
+                            [ text "We pair program so you can get up to speed quickly and help us develop features"
+                            ]
+                        ]
+                    , p []
+                        [ a [ href "mailto:oliverbwork@gmail.com" ]
+                            [ text "Shoot us an email"
+                            ]
+                        , text ", we'll add you to our Slack channel to join the discussion and talk about next steps."
+                        ]
+                    , p []
+                        [ text "See the complete guide to contributing "
+                        , a
+                            [ href "https://github.com/oliverbarnes/participate/blob/master/CONTRIBUTING.md"
+                            , Html.Attributes.target "_blank"
+                            ]
+                            [ text "here"
+                            ]
+                        , text "."
+                        ]
+                    ]
+                ]
+            ]
         ]
+
+
+viewFooter : Model -> Html Msg
+viewFooter model =
+    Footer.mega []
+        { top =
+            Footer.top []
+                { left =
+                    Footer.left []
+                        {-
+                           -- elm-mdl has special functions for the footer contents, which we don't use here, because:
+                           -- Class mdl-mega-footer__link-list puts the items to-to-down. We want them left-to-right.
+                           -- Also, don't know how Footer.socialButton is supposed to work.
+                           [ Footer.links [ Options.cs "social-links" ]
+                               [ Footer.linkItem [ Footer.href "https://github.com/oliverbarnes/participate" ]
+                                   [ Footer.html <|
+                                       img [ Html.Attributes.src "/images/github-circle.png" ] []
+                                   ]
+                               , Footer.linkItem [ Footer.href "https://github.com/oliverbarnes/participate" ]
+                                   [ Footer.html <|
+                                       img [ Html.Attributes.src "/images/github-circle.png" ] []
+                                   ]
+                               ]
+                           ]
+                        -}
+                        [ Footer.html <|
+                            ul [ class "mdl-mini-footer__link-list social-links" ]
+                                [ li []
+                                    [ a [ Html.Attributes.href "https://github.com/oliverbarnes/participate" ]
+                                        [ img [ Html.Attributes.src "/images/github-circle.png" ] [] ]
+                                    ]
+                                , li []
+                                    [ a [ Html.Attributes.href "https://participateapp.slack.com" ]
+                                        [ img [ Html.Attributes.src "/images/slack.png" ] [] ]
+                                    ]
+                                , li []
+                                    [ a [ Html.Attributes.href "https://twitter.com/digiberber" ]
+                                        [ img [ Html.Attributes.src "/images/twitter.png" ] [] ]
+                                    ]
+                                ]
+                        ]
+                , right =
+                    Footer.right []
+                        [ Footer.html <| Options.styled p [ Typography.title ] [ text "Participate!" ]
+                        , Footer.html <| p [] [ text "An open source liquid democracy application." ]
+                        ]
+                }
+        , middle = Nothing
+        , bottom =
+            Footer.bottom []
+                [ Footer.html <|
+                    ul [ class "mdl-mini-footer__link-list" ]
+                        [ li []
+                            [ a [ Html.Attributes.href "https://github.com/oliverbarnes/participate/blob/master/CONTRIBUTING.md" ]
+                                [ text "Guide to contributing" ]
+                            ]
+                        , li []
+                            [ a [ Html.Attributes.href "https://github.com/oliverbarnes/participate/wiki/Development-Setup" ]
+                                [ text "Wiki" ]
+                            ]
+                        ]
+                ]
+        }
 
 
 formView : Model -> Html Msg
