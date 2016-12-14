@@ -14,10 +14,11 @@ import Material.Layout as Layout
 import Material.Color as Color
 import Material.Menu as Menu
 import Material.Elevation as Elevation
-import Material.Grid exposing (grid, size, cell, Device(..))
+import Material.Grid as Grid exposing (grid, size, cell, Device(..))
 import Material.Typography as Typography
 import Material.Icon as Icon
 import Material.Footer as Footer
+import Material.Card as Card
 import Form exposing (Form)
 import Form.Field
 import Form.Input
@@ -393,15 +394,7 @@ viewMain model =
             if String.isEmpty model.accessToken then
                 viewLandingPage model
             else
-                div []
-                    [ text <| "Hello, " ++ (.name model.me)
-                    , h3 []
-                        [ a [ onClick <| NavigateToPath "/new-proposal" ]
-                            [ text "Create a proposal" ]
-                        ]
-                    , h3 [] [ text "Existing Proposals" ]
-                    , div [] [ viewProposalList model ]
-                    ]
+                viewProposalList model
 
         NewProposalRoute ->
             div []
@@ -715,24 +708,32 @@ viewProposal model id =
 
 viewProposalList : Model -> Html Msg
 viewProposalList model =
-    ul [] <|
-        List.map
-            viewProposalListEntry
-            (Dict.values model.proposals)
+    grid [ Options.cs "content-grid", Color.background <| Color.color Color.Grey Color.S200 ]
+        [ cell [ Grid.offset All 1, size All 10, Color.background <| Color.white ] <|
+            List.map viewProposalListEntry (Dict.values model.proposals)
+        ]
 
 
 viewProposalListEntry : Proposal -> Html Msg
 viewProposalListEntry proposal =
-    li []
-        [ i [] [ text proposal.author.name ]
-        , text ": "
-        , a
-            [ onClick <| NavigateToPath <| "proposals/" ++ proposal.id ]
-            [ text proposal.title ]
+    Card.view
+        []
+        [ Card.title []
+            [ Card.head [] [ text proposal.title ] ]
+        , Card.text [] [ text proposal.body ]
         ]
 
 
 
+{-
+   li []
+       [ i [] [ text proposal.author.name ]
+       , text ": "
+       , a
+           [ onClick <| NavigateToPath <| "proposals/" ++ proposal.id ]
+           [ text proposal.title ]
+       ]
+-}
 -- APP
 
 
