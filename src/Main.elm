@@ -19,6 +19,7 @@ import Material.Typography as Typography
 import Material.Icon as Icon
 import Material.Footer as Footer
 import Material.Card as Card
+import Material.Chip as Chip
 import Form exposing (Form)
 import Form.Field
 import Form.Input
@@ -708,8 +709,9 @@ viewProposal model id =
 
 viewProposalList : Model -> Html Msg
 viewProposalList model =
-    grid [ Options.cs "content-grid", Color.background <| Color.color Color.Grey Color.S200 ]
-        [ cell [ Grid.offset All 1, size All 10, Color.background <| Color.white ] <|
+    Options.styled div
+        [ Color.background <| Color.color Color.Grey Color.S200 ]
+        [ div [ class "content-col proposal-list-col" ] <|
             List.map viewProposalListEntry (Dict.values model.proposals)
         ]
 
@@ -717,23 +719,43 @@ viewProposalList model =
 viewProposalListEntry : Proposal -> Html Msg
 viewProposalListEntry proposal =
     Card.view
-        []
+        [ Options.attribute <| onClick <| NavigateToPath <| "proposals/" ++ proposal.id
+        , Color.background <| Color.white
+        ]
         [ Card.title []
-            [ Card.head [] [ text proposal.title ] ]
+            [ div [ class "proposal-card-title" ]
+                [ Card.head
+                    [ Options.cs "proposal-title"
+                    , Color.text <| Color.primary
+                    ]
+                    [ text proposal.title ]
+                , div [ class "proposal-state" ]
+                    [ div []
+                        [ Chip.span
+                            [ Typography.center
+                            ]
+                            [ Chip.text [] <| toString proposal.supportCount ]
+                        ]
+                    , if proposal.authoredByMe || proposal.supportedByMe then
+                        Options.styled
+                            span
+                            [ Color.text <| Color.color Color.Green Color.S500 ]
+                            [ text <|
+                                if proposal.authoredByMe then
+                                    "AUTHORED"
+                                else
+                                    "SUPPORTING"
+                            ]
+                      else
+                        text ""
+                    ]
+                ]
+            ]
         , Card.text [] [ text proposal.body ]
         ]
 
 
 
-{-
-   li []
-       [ i [] [ text proposal.author.name ]
-       , text ": "
-       , a
-           [ onClick <| NavigateToPath <| "proposals/" ++ proposal.id ]
-           [ text proposal.title ]
-       ]
--}
 -- APP
 
 

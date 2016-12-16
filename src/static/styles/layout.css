@@ -1,3 +1,12 @@
 .content-grid {
   max-width: 960px;
 }
+
+.content-col {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.content-col.proposal-list-col {
+  max-width: 794px;
+}

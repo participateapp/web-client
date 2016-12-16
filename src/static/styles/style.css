@@ -1,4 +1,7 @@
-body { color: rgba(0,0,0,.54);}
+body {
+  color: rgba(0,0,0,.54);
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
 
 a { cursor: pointer; }
 
@@ -51,7 +54,10 @@ section#main-top p i { font-size: 45px; }
      ===========================================   */
 a.card-link { text-decoration: none; }
 
-.mdl-card { min-height: 100px; }
+.mdl-card {
+  min-height: 150px !important;
+  margin: 8px;
+}
 
 .proposal-show .mdl-card__title,
 .proposal-list .mdl-card__title { 
@@ -88,8 +94,38 @@ a.card-link { text-decoration: none; }
 
 .proposal-show .mdl-card__actions { padding: 16px 8px; }
 
+.proposal-list-col {
+  padding: 20px 0;
+}
 
-/*   ============   New Proposals   ============   
+.proposal-list-col .mdl-card {
+  width: auto;
+}
+
+.proposal-card-title {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.proposal-card-title .proposal-title {
+  flex: 1 0;
+}
+
+.proposal-card-title .proposal-state {
+  flex: 0 0 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 13px;
+}
+
+.proposal-card-title .proposal-state > * {
+  flex: 0;
+  margin: 4px 0;
+}
+
+/*   ============   New Proposals   ============
      ===========================================   */
 
 .top-alert { padding-top: 24px; }
