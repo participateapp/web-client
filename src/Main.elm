@@ -286,6 +286,7 @@ update msg model =
                     ( model |> updateProposalSupport support |> progressDone
                     , Cmd.none
                     )
+                        |> withSnackbarNote "Proposal supported"
 
                 Api.SupportProposalFailed httpError ->
                     withHttpErrorResponse
