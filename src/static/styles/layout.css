@@ -4,9 +4,10 @@
 
 .content-col {
   max-width: 960px;
+  padding: 20px 0;
   margin: 0 auto;
 }
 
-.content-col.proposal-list-col {
+.content-col.narrow {
   max-width: 794px;
 }

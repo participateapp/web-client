@@ -72,12 +72,16 @@ a.card-link { text-decoration: none; }
   padding-top: 8px;
 }
 
+.actions__authored {
+  padding: 0 8px;
+}
+
 .actions__authored .authored {
   display: block;
   float: left;
 }
 
-.actions__authored img { 
+.actions__authored img {
   width: 36px;
   height: 36px;
   border-radius: 18px;
@@ -94,11 +98,7 @@ a.card-link { text-decoration: none; }
 
 .proposal-show .mdl-card__actions { padding: 16px 8px; }
 
-.proposal-list-col {
-  padding: 20px 0;
-}
-
-.proposal-list-col .mdl-card {
+.mdl-card {
   width: auto;
 }
 
@@ -118,11 +118,16 @@ a.card-link { text-decoration: none; }
   flex-direction: column;
   align-items: center;
   font-size: 13px;
+  text-transform: uppercase;
 }
 
 .proposal-card-title .proposal-state > * {
   flex: 0;
   margin: 4px 0;
+}
+
+.proposal-card-title .proposal-state .mdl-chip {
+  min-width: 15px;
 }
 
 /*   ============   New Proposals   ============

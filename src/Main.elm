@@ -201,10 +201,6 @@ updateProposalSupport support model =
         { model | proposals = newProposals }
 
 
-
--- { model | proposals = Dict.insert proposal.id proposal model.proposals }
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -405,10 +401,7 @@ viewMain model =
                 ]
 
         ProposalRoute id ->
-            div []
-                [ h2 [] [ text "Proposal" ]
-                , viewProposal model id
-                ]
+            div [] [ viewProposal model id ]
 
         NotFoundRoute ->
             div []
@@ -682,36 +675,99 @@ submitButton model =
 
 viewProposal : Model -> String -> Html Msg
 viewProposal model id =
-    case Dict.get id model.proposals of
-        Nothing ->
-            div [] [ text "Unknown proposal id: ", text id ]
+    let
+        cardContent =
+            case Dict.get id model.proposals of
+                Nothing ->
+                    [ Card.title [] [ text "Unknown proposal id: ", text id ] ]
 
-        Just proposal ->
-            div []
-                [ div [] [ text "Title: ", text proposal.title ]
-                , div [] [ text "Author: ", text proposal.author.name ]
-                , div [] [ text "Body: ", text proposal.body ]
-                , div [] [ text "Support Count: ", text <| toString proposal.supportCount ]
-                , if proposal.authoredByMe then
-                    button [ disabled True ]
-                        [ text "Authored by me, automatically supported"
+                Just proposal ->
+                    [ Card.actions [ Options.cs "mdl-grid border-bottom" ]
+                        [ span [ class "actions__authored" ]
+                            [ img
+                                [ class "mdl-chip__contact"
+                                , Html.Attributes.src "/images/john.jpg"
+                                ]
+                                []
+                            , span [ class "authored" ]
+                                [ text proposal.author.name
+                                , br [] []
+                                , text "2 days ago"
+                                ]
+                            ]
+                        , Layout.spacer
+                        , Chip.span []
+                            [ Chip.content []
+                                [ text "Support count: "
+                                , text <| toString proposal.supportCount
+                                ]
+                            ]
+                        , Layout.spacer
+                        , if proposal.authoredByMe then
+                            Button.render Mdl
+                                [ 3 ]
+                                model.mdl
+                                [ Options.id "support-proposal"
+                                , Button.colored
+                                , Button.accent
+                                , Button.disabled
+                                ]
+                                [ text "Authored by me" ]
+                          else
+                            Button.render Mdl
+                                [ 3 ]
+                                model.mdl
+                                ([ Options.id "support-proposal"
+                                 , Button.colored
+                                 , Button.onClick <| SupportProposal id (not proposal.supportedByMe)
+                                 ]
+                                    ++ if proposal.supportedByMe then
+                                        [ Color.text <| Color.color Color.Green Color.S500 ]
+                                       else
+                                        [ Button.raised
+                                        , Button.accent
+                                        ]
+                                )
+                                [ text <|
+                                    if proposal.supportedByMe then
+                                        "Supporting"
+                                    else
+                                        "Support Proposal"
+                                ]
                         ]
-                  else
-                    button [ onClick <| SupportProposal id (not proposal.supportedByMe) ]
-                        [ text <|
-                            if proposal.supportedByMe then
-                                "Unsupport this proposal (unimplemented)"
-                            else
-                                "Support this proposal"
+                    , Card.title []
+                        [ Card.head
+                            [ Typography.headline
+                            , Color.text <| Color.color Color.Grey Color.S700
+                            ]
+                            [ text proposal.title ]
+                        , Card.subhead
+                            [ Typography.subhead ]
+                            [ strong []
+                                [ text "Here goes the summary, which is yet to be implemented ..." ]
+                            ]
                         ]
+                    , Card.text []
+                        [ text proposal.body ]
+                    ]
+    in
+        Options.styled div
+            [ Color.background <| Color.color Color.Grey Color.S200 ]
+            [ div [ class "content-col narrow proposal-col" ]
+                [ Card.view
+                    [ Options.cs "proposal-show"
+                    , Color.background <| Color.white
+                    ]
+                    cardContent
                 ]
+            ]
 
 
 viewProposalList : Model -> Html Msg
 viewProposalList model =
     Options.styled div
         [ Color.background <| Color.color Color.Grey Color.S200 ]
-        [ div [ class "content-col proposal-list-col" ] <|
+        [ div [ class "content-col narrow proposal-list-col" ] <|
             List.map viewProposalListEntry (Dict.values model.proposals)
         ]
 
@@ -742,9 +798,9 @@ viewProposalListEntry proposal =
                             [ Color.text <| Color.color Color.Green Color.S500 ]
                             [ text <|
                                 if proposal.authoredByMe then
-                                    "AUTHORED"
+                                    "My Proposal"
                                 else
-                                    "SUPPORTING"
+                                    "Supporting"
                             ]
                       else
                         text ""
