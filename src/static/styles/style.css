@@ -146,6 +146,10 @@ a.card-link { text-decoration: none; }
 
 form#new-proposal-form { padding: 16px; }
 
+.new-proposal .mdl-textfield {
+  width: 100%;
+}
+
 /*   ================   Footer  ================   
      ===========================================   */
 

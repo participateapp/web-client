@@ -394,11 +394,7 @@ viewMain model =
                 viewProposalList model
 
         NewProposalRoute ->
-            div []
-                [ h2 []
-                    [ text <| "New Proposal" ]
-                , formView model
-                ]
+            viewNewProposal model
 
         ProposalRoute id ->
             div [] [ viewProposal model id ]
@@ -576,12 +572,35 @@ viewFooter model =
         }
 
 
-formView : Model -> Html Msg
-formView model =
-    grid []
-        [ cell [ size All 12 ] [ titleField model ]
-        , cell [ size All 12 ] [ bodyField model ]
-        , cell [ size All 12 ] [ submitButton model ]
+viewNewProposal : Model -> Html Msg
+viewNewProposal model =
+    Options.styled div
+        [ Color.background <| Color.color Color.Grey Color.S200 ]
+        [ div [ class "content-col narrow new-proposal-col" ]
+            [ Card.view
+                [ Options.cs "new-proposal"
+                , Color.background <| Color.white
+                ]
+                [ Card.text []
+                    [ titleField model
+                    , bodyField model
+                    ]
+                , Card.text
+                    [ Options.cs "mdl-grid" ]
+                    [ Layout.spacer
+                    , Button.render Mdl
+                        [ 5 ]
+                        model.mdl
+                        [ Button.raised
+                        , Button.ripple
+                        , Button.colored
+                        , Button.onClick <| FormMsg <| Form.Submit
+                        ]
+                        [ text "Save" ]
+                    , Layout.spacer
+                    ]
+                ]
+            ]
         ]
 
 
@@ -650,6 +669,7 @@ bodyField model =
             ([ Textfield.label "Body"
              , Textfield.floatingLabel
              , Textfield.textarea
+             , Textfield.rows 6
              , Textfield.value <| Maybe.withDefault "" body.value
              , Textfield.onInput <| FormMsg << (Form.Field.Text >> Form.Input body.path)
              , Textfield.onFocus <| FormMsg <| Form.Focus body.path
@@ -657,20 +677,6 @@ bodyField model =
              ]
                 ++ conditionalProperties
             )
-
-
-submitButton : Model -> Html Msg
-submitButton model =
-    Button.render Mdl
-        [ 1 ]
-        model.mdl
-        [ Button.raised
-        , Button.ripple
-        , Color.background <| Color.color Color.Green Color.S500
-        , Color.text <| Color.white
-        , Button.onClick <| FormMsg <| Form.Submit
-        ]
-        [ text "Submit" ]
 
 
 viewProposal : Model -> String -> Html Msg
