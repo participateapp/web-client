@@ -21,6 +21,7 @@ import Material.Footer as Footer
 import Material.Card as Card
 import Material.Chip as Chip
 import Material.Snackbar as Snackbar
+import Material.Progress as Progress
 import Form exposing (Form)
 import Form.Field
 import Form.Input
@@ -86,17 +87,20 @@ urlUpdate ( route, address ) model =
         model1 =
             { model | route = route, address = address }
 
+        model1ps =
+            model1 |> progressStart
+
         _ =
             Debug.log "urlUpdate" ( route, address )
     in
         if String.isEmpty model.accessToken && route /= Home then
-            ( model1, Navigation.newUrl <| Hop.outputFromPath hopConfig "/" )
+            ( model1ps, Navigation.newUrl <| Hop.outputFromPath hopConfig "/" )
         else
             case route of
                 ProposalRoute id ->
                     case Dict.get id model.proposals of
                         Nothing ->
-                            ( model1
+                            ( model1ps
                             , Api.getProposal id model.accessToken ApiMsg
                             )
 
@@ -104,7 +108,7 @@ urlUpdate ( route, address ) model =
                             ( model1, Cmd.none )
 
                 Home ->
-                    ( model1
+                    ( model1ps
                     , Api.getProposalList model.accessToken ApiMsg
                     )
 
@@ -147,6 +151,7 @@ type alias Model =
     , mdl : Material.Model
     , proposals : Dict String Proposal
     , snackbar : Snackbar.Model ()
+    , progress : Bool
     }
 
 
@@ -161,6 +166,7 @@ initialModel accessToken route address =
     , mdl = Material.model
     , proposals = Dict.empty
     , snackbar = Snackbar.model
+    , progress = False
     }
 
 
@@ -205,7 +211,9 @@ withHttpErrorResponse : String -> Http.Error -> ( Model, Cmd Msg ) -> ( Model, C
 withHttpErrorResponse contextText httpError ( model, cmd ) =
     withSnackbarNote
         (contextText ++ ": " ++ toString httpError)
-        ( { model | error = Just <| toString httpError }, Cmd.none )
+        ( { model | error = Just <| toString httpError } |> progressDone
+        , Cmd.none
+        )
 
 
 updateProposalSupport : Support -> Model -> Model
@@ -224,6 +232,16 @@ updateProposalSupport support model =
                 model.proposals
     in
         { model | proposals = newProposals }
+
+
+progressStart : Model -> Model
+progressStart model =
+    { model | progress = True }
+
+
+progressDone : Model -> Model
+progressDone model =
+    { model | progress = False }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -246,7 +264,9 @@ update msg model =
                         ( model, Cmd.none )
 
                 Api.GotMe me ->
-                    ( { model | me = me }, Navigation.newUrl "/" )
+                    ( { model | me = me } |> progressDone
+                    , Navigation.newUrl "/"
+                    )
 
                 Api.ProposalCreated proposal ->
                     ( model
@@ -263,7 +283,7 @@ update msg model =
                         ( model, Cmd.none )
 
                 Api.ProposalSupported support ->
-                    ( model |> updateProposalSupport support
+                    ( model |> updateProposalSupport support |> progressDone
                     , Cmd.none
                     )
 
@@ -276,6 +296,7 @@ update msg model =
                 Api.GotProposal proposal ->
                     ( model
                         |> addProposal proposal
+                        |> progressDone
                     , Cmd.none
                     )
 
@@ -288,6 +309,7 @@ update msg model =
                 Api.GotProposalList proposalList ->
                     ( model
                         |> addProposalList proposalList
+                        |> progressDone
                     , Cmd.none
                     )
 
@@ -329,7 +351,7 @@ update msg model =
                 )
 
         SupportProposal id newState ->
-            ( model
+            ( model |> progressStart
             , Api.supportProposal id newState model.accessToken ApiMsg
             )
 
@@ -439,7 +461,11 @@ viewUserNavigation model =
 
 viewMain : Model -> List (Html Msg)
 viewMain model =
-    [ case model.route of
+    [ if model.progress then
+        Progress.indeterminate
+      else
+        Progress.progress 0.0
+    , case model.route of
         Home ->
             if String.isEmpty model.accessToken then
                 viewLandingPage model
