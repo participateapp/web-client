@@ -20,6 +20,7 @@ import Material.Icon as Icon
 import Material.Footer as Footer
 import Material.Card as Card
 import Material.Chip as Chip
+import Material.Snackbar as Snackbar
 import Form exposing (Form)
 import Form.Field
 import Form.Input
@@ -30,6 +31,7 @@ import Set exposing (Set)
 import String
 import Navigation
 import UrlParser exposing ((</>))
+import Http
 import Hop
 import Hop.Types exposing (Config, Address, Query)
 import Types exposing (..)
@@ -144,6 +146,7 @@ type alias Model =
     , form : Form () NewProposal
     , mdl : Material.Model
     , proposals : Dict String Proposal
+    , snackbar : Snackbar.Model ()
     }
 
 
@@ -157,6 +160,7 @@ initialModel accessToken route address =
     , form = Form.initial [] validate
     , mdl = Material.model
     , proposals = Dict.empty
+    , snackbar = Snackbar.model
     }
 
 
@@ -170,6 +174,7 @@ type Msg
     | FormMsg Form.Msg
     | NoOp
     | Mdl (Material.Msg Msg)
+    | SnackbarMsg (Snackbar.Msg ())
     | SupportProposal String Bool
 
 
@@ -181,6 +186,26 @@ addProposal proposal model =
 addProposalList : ProposalList -> Model -> Model
 addProposalList proposalList model =
     List.foldl addProposal model proposalList
+
+
+withSnackbarNote : String -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+withSnackbarNote snackContent ( model, cmd ) =
+    let
+        ( snackModel, snackCmd ) =
+            Snackbar.add
+                (Snackbar.toast () snackContent)
+                model.snackbar
+    in
+        ( { model | snackbar = snackModel }
+        , Cmd.batch [ cmd, Cmd.map SnackbarMsg snackCmd ]
+        )
+
+
+withHttpErrorResponse : String -> Http.Error -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+withHttpErrorResponse contextText httpError ( model, cmd ) =
+    withSnackbarNote
+        (contextText ++ ": " ++ toString httpError)
+        ( { model | error = Just <| toString httpError }, Cmd.none )
 
 
 updateProposalSupport : Support -> Model -> Model
@@ -215,7 +240,10 @@ update msg model =
                     )
 
                 Api.AuthFailed httpError ->
-                    ( { model | error = Just <| toString httpError }, Cmd.none )
+                    withHttpErrorResponse
+                        "Authentication failed"
+                        httpError
+                        ( model, Cmd.none )
 
                 Api.GotMe me ->
                     ( { model | me = me }, Navigation.newUrl "/" )
@@ -226,9 +254,13 @@ update msg model =
                     , Navigation.newUrl <|
                         Hop.output hopConfig { path = [ "proposals", proposal.id ], query = Dict.empty }
                     )
+                        |> withSnackbarNote "Proposal saved"
 
                 Api.ProposalCreationFailed httpError ->
-                    ( { model | error = Just <| toString httpError }, Cmd.none )
+                    withHttpErrorResponse
+                        "Saving proposal failed"
+                        httpError
+                        ( model, Cmd.none )
 
                 Api.ProposalSupported support ->
                     ( model |> updateProposalSupport support
@@ -236,7 +268,10 @@ update msg model =
                     )
 
                 Api.SupportProposalFailed httpError ->
-                    ( { model | error = Just <| toString httpError }, Cmd.none )
+                    withHttpErrorResponse
+                        "Supporting proposal failed"
+                        httpError
+                        ( model, Cmd.none )
 
                 Api.GotProposal proposal ->
                     ( model
@@ -245,7 +280,10 @@ update msg model =
                     )
 
                 Api.GettingProposalFailed httpError ->
-                    ( { model | error = Just <| toString httpError }, Cmd.none )
+                    withHttpErrorResponse
+                        "Loading proposal failed"
+                        httpError
+                        ( model, Cmd.none )
 
                 Api.GotProposalList proposalList ->
                     ( model
@@ -254,7 +292,10 @@ update msg model =
                     )
 
                 Api.GettingProposalListFailed httpError ->
-                    ( { model | error = Just <| toString httpError }, Cmd.none )
+                    withHttpErrorResponse
+                        "Loading proposal list failed"
+                        httpError
+                        ( model, Cmd.none )
 
         NavigateToPath path ->
             ( model
@@ -274,6 +315,18 @@ update msg model =
 
         Mdl msg' ->
             Material.update msg' model
+
+        SnackbarMsg snackMsg ->
+            -- Snackbar currently has no builtin elm-mdl-component support.
+            -- Have to wire up manually here.
+            -- https://github.com/debois/elm-mdl/blob/6340ec3c83875c35a5a89e7bf4408c1ca1cbfdcb/src/Material/Snackbar.elm#L311-L328
+            let
+                ( snackModel, snackCmd ) =
+                    Snackbar.update snackMsg model.snackbar
+            in
+                ( { model | snackbar = snackModel }
+                , Cmd.map SnackbarMsg snackCmd
+                )
 
         SupportProposal id newState ->
             ( model
@@ -407,6 +460,7 @@ viewMain model =
             div []
                 [ text <| "Authenticating, please wait..." ]
     , viewFooter model
+    , Snackbar.view model.snackbar |> App.map SnackbarMsg
     ]
 
 
