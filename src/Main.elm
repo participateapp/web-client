@@ -186,10 +186,6 @@ updateProposalSupport support model =
         { model | proposals = newProposals }
 
 
-
--- { model | proposals = Dict.insert proposal.id proposal model.proposals }
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
