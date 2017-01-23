@@ -17,6 +17,8 @@ import Hop.Types exposing (Config, Address, Query)
 import Types exposing (..)
 import Api
 import Component.NewProposal
+import Component.ProposalList
+import Component.Proposal
 
 
 -- ROUTES
@@ -317,7 +319,11 @@ viewBody model =
                             [ text "Create a proposal" ]
                         ]
                     , h3 [] [ text "Existing Proposals" ]
-                    , div [] [ viewProposalList model ]
+                    , div []
+                        [ Component.ProposalList.view
+                            (\id -> NavigateToPath <| "proposals/" ++ id)
+                            (Dict.values model.proposals)
+                        ]
                     ]
 
         NewProposalRoute ->
@@ -331,7 +337,10 @@ viewBody model =
         ProposalRoute id ->
             div []
                 [ h2 [] [ text "Proposal" ]
-                , viewProposal model id
+                , Component.Proposal.view
+                    SupportProposal
+                    (Dict.get id model.proposals)
+                    id
                 ]
 
         NotFoundRoute ->
@@ -341,52 +350,6 @@ viewBody model =
         FacebookRedirect ->
             div []
                 [ text <| "Authenticating, please wait..." ]
-
-
-viewProposal : Model -> String -> Html Msg
-viewProposal model id =
-    case Dict.get id model.proposals of
-        Nothing ->
-            div [] [ text "Unknown proposal id: ", text id ]
-
-        Just proposal ->
-            div []
-                [ div [] [ text "Title: ", text proposal.title ]
-                , div [] [ text "Author: ", text proposal.author.name ]
-                , div [] [ text "Body: ", text proposal.body ]
-                , div [] [ text "Support Count: ", text <| toString proposal.supportCount ]
-                , if proposal.authoredByMe then
-                    button [ disabled True ]
-                        [ text "Authored by me, automatically supported"
-                        ]
-                  else
-                    button [ onClick <| SupportProposal id (not proposal.supportedByMe) ]
-                        [ text <|
-                            if proposal.supportedByMe then
-                                "Unsupport this proposal (unimplemented)"
-                            else
-                                "Support this proposal"
-                        ]
-                ]
-
-
-viewProposalList : Model -> Html Msg
-viewProposalList model =
-    ul [] <|
-        List.map
-            viewProposalListEntry
-            (Dict.values model.proposals)
-
-
-viewProposalListEntry : Proposal -> Html Msg
-viewProposalListEntry proposal =
-    li []
-        [ i [] [ text proposal.author.name ]
-        , text ": "
-        , a
-            [ onClick <| NavigateToPath <| "proposals/" ++ proposal.id ]
-            [ text proposal.title ]
-        ]
 
 
 
