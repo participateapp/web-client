@@ -1,34 +1,16 @@
 module Component.NewProposal exposing (Model, init, Msg, update, view)
 
 import Html exposing (..)
-import Html.App as App
-import Html.Events exposing (..)
-import Html.Attributes exposing (style, href, class, disabled)
 import Material
-import Material.Scheme
 import Material.Button as Button
 import Material.Textfield as Textfield
-import Material.List as List
-import Material.Options exposing (css)
-import Material.Options as Options
-import Material.Layout as Layout
 import Material.Color as Color
-import Material.Elevation as Elevation
 import Material.Grid exposing (grid, size, cell, Device(..))
 import Form exposing (Form)
 import Form.Field
-import Form.Input
 import Form.Error
 import Form.Validate exposing (Validation, form1, form2, get, string)
-import Dict exposing (Dict)
-import Set exposing (Set)
-import String
-import Navigation
-import UrlParser exposing ((</>))
-import Hop
-import Hop.Types exposing (Config, Address, Query)
 import Types exposing (..)
-import Api
 
 
 -- MODEL
