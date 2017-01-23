@@ -29,6 +29,7 @@ import Hop
 import Hop.Types exposing (Config, Address, Query)
 import Types exposing (..)
 import Api
+import Component.NewProposal
 
 
 -- ROUTES
@@ -136,7 +137,7 @@ type alias Model =
     , accessToken : String
     , error : Maybe String
     , me : Me
-    , form : Form () NewProposal
+    , newProposal : Component.NewProposal.Model
     , mdl : Material.Model
     , proposals : Dict String Proposal
     }
@@ -149,7 +150,7 @@ initialModel accessToken route address =
     , accessToken = accessToken
     , error = Nothing
     , me = { name = "" }
-    , form = Form.initial [] validate
+    , newProposal = Component.NewProposal.init
     , mdl = Material.model
     , proposals = Dict.empty
     }
@@ -162,7 +163,7 @@ initialModel accessToken route address =
 type Msg
     = ApiMsg Api.Msg
     | NavigateToPath String
-    | FormMsg Form.Msg
+    | NewProposalMsg Component.NewProposal.Msg
     | NoOp
     | Mdl (Material.Msg Msg)
     | SupportProposal String Bool
@@ -260,13 +261,25 @@ update msg model =
             , Navigation.newUrl <| Hop.outputFromPath hopConfig path
             )
 
-        FormMsg formMsg ->
-            case ( formMsg, Form.getOutput model.form ) of
-                ( Form.Submit, Just proposalInput ) ->
-                    model ! [ Api.createProposal proposalInput model.accessToken ApiMsg ]
+        NewProposalMsg newProposalMsg ->
+            let
+                ( compModel, compCmd, maybeNewProposal ) =
+                    Component.NewProposal.update newProposalMsg model.newProposal
 
-                _ ->
-                    ( { model | form = Form.update formMsg model.form }, Cmd.none )
+                apiCmd =
+                    case maybeNewProposal of
+                        Just newProposalInput ->
+                            Api.createProposal newProposalInput model.accessToken ApiMsg
+
+                        Nothing ->
+                            Cmd.none
+            in
+                ( { model | newProposal = compModel }
+                , Cmd.batch
+                    [ Cmd.map NewProposalMsg compCmd
+                    , apiCmd
+                    ]
+                )
 
         NoOp ->
             ( model, Cmd.none )
@@ -278,13 +291,6 @@ update msg model =
             ( model
             , Api.supportProposal id newState model.accessToken ApiMsg
             )
-
-
-validate : Validation () NewProposal
-validate =
-    form2 NewProposal
-        (get "title" string)
-        (get "body" string)
 
 
 
@@ -331,7 +337,8 @@ viewBody model =
             div []
                 [ h2 []
                     [ text <| "New Proposal" ]
-                , formView model
+                , Component.NewProposal.view model.newProposal
+                    |> App.map NewProposalMsg
                 ]
 
         ProposalRoute id ->
@@ -347,103 +354,6 @@ viewBody model =
         FacebookRedirect ->
             div []
                 [ text <| "Authenticating, please wait..." ]
-
-
-formView : Model -> Html Msg
-formView model =
-    grid []
-        [ cell [ size All 12 ] [ titleField model ]
-        , cell [ size All 12 ] [ bodyField model ]
-        , cell [ size All 12 ] [ submitButton model ]
-        ]
-
-
-titleField : Model -> Html Msg
-titleField model =
-    let
-        title =
-            Form.getFieldAsString "title" model.form
-
-        conditionalProperties =
-            case title.liveError of
-                Just error ->
-                    case error of
-                        Form.Error.InvalidString ->
-                            [ Textfield.error "Can't be blank" ]
-
-                        Form.Error.Empty ->
-                            [ Textfield.error "Can't be blank" ]
-
-                        _ ->
-                            [ Textfield.error <| toString error ]
-
-                Nothing ->
-                    []
-    in
-        Textfield.render Mdl
-            [ 0, 0 ]
-            model.mdl
-            ([ Textfield.label "Title"
-             , Textfield.floatingLabel
-             , Textfield.text'
-             , Textfield.value <| Maybe.withDefault "" title.value
-             , Textfield.onInput <| FormMsg << (Form.Field.Text >> Form.Input title.path)
-             , Textfield.onFocus <| FormMsg <| Form.Focus title.path
-             , Textfield.onBlur <| FormMsg <| Form.Blur title.path
-             ]
-                ++ conditionalProperties
-            )
-
-
-bodyField : Model -> Html Msg
-bodyField model =
-    let
-        body =
-            Form.getFieldAsString "body" model.form
-
-        conditionalProperties =
-            case body.liveError of
-                Just error ->
-                    case error of
-                        Form.Error.InvalidString ->
-                            [ Textfield.error "Can't be blank" ]
-
-                        Form.Error.Empty ->
-                            [ Textfield.error "Can't be blank" ]
-
-                        _ ->
-                            [ Textfield.error <| toString error ]
-
-                Nothing ->
-                    []
-    in
-        Textfield.render Mdl
-            [ 0, 1 ]
-            model.mdl
-            ([ Textfield.label "Body"
-             , Textfield.floatingLabel
-             , Textfield.textarea
-             , Textfield.value <| Maybe.withDefault "" body.value
-             , Textfield.onInput <| FormMsg << (Form.Field.Text >> Form.Input body.path)
-             , Textfield.onFocus <| FormMsg <| Form.Focus body.path
-             , Textfield.onBlur <| FormMsg <| Form.Blur body.path
-             ]
-                ++ conditionalProperties
-            )
-
-
-submitButton : Model -> Html Msg
-submitButton model =
-    Button.render Mdl
-        [ 1 ]
-        model.mdl
-        [ Button.raised
-        , Button.ripple
-        , Color.background <| Color.color Color.Green Color.S500
-        , Color.text <| Color.white
-        , Button.onClick <| FormMsg <| Form.Submit
-        ]
-        [ text "Submit" ]
 
 
 viewProposal : Model -> String -> Html Msg
