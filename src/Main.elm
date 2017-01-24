@@ -23,11 +23,22 @@ import Component.Proposal
 -- APP
 
 
-type alias Flags =
+type alias ProgramFlags =
     { accessToken : Maybe String }
 
 
-init : Flags -> ( Route, Address ) -> ( Model, Cmd Msg )
+main : Program ProgramFlags
+main =
+    Navigation.programWithFlags Routing.urlParser
+        { init = init
+        , update = update
+        , urlUpdate = urlUpdate
+        , subscriptions = (always Sub.none)
+        , view = view
+        }
+
+
+init : ProgramFlags -> ( Route, Address ) -> ( Model, Cmd Msg )
 init flags ( route, address ) =
     let
         model0 =
@@ -39,15 +50,14 @@ init flags ( route, address ) =
         ( model1, Cmd.batch [ cmd1, checkForAuthCode address ] )
 
 
-main : Program Flags
-main =
-    Navigation.programWithFlags Routing.urlParser
-        { init = init
-        , update = update
-        , urlUpdate = urlUpdate
-        , subscriptions = (always Sub.none)
-        , view = view
-        }
+checkForAuthCode : Address -> Cmd Msg
+checkForAuthCode address =
+    case address.query |> Dict.get "code" of
+        Just authCode ->
+            Api.authenticate authCode ApiMsg
+
+        Nothing ->
+            Cmd.none
 
 
 urlUpdate : ( Route, Address ) -> Model -> ( Model, Cmd Msg )
@@ -80,20 +90,6 @@ urlUpdate ( route, address ) model =
 
                 _ ->
                     ( model1, Cmd.none )
-
-
-checkForAuthCode : Address -> Cmd Msg
-checkForAuthCode address =
-    let
-        authCode =
-            address.query |> Dict.get "code"
-    in
-        case authCode of
-            Just code ->
-                Api.authenticate code ApiMsg
-
-            Nothing ->
-                Cmd.none
 
 
 
