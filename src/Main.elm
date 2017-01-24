@@ -72,8 +72,8 @@ urlUpdate ( route, address ) model =
         if String.isEmpty model.accessToken then
             -- User is not logged in
             ( model1
-            , if route /= Home then
-                Routing.newRoute Home
+            , if route /= HomeRoute then
+                Routing.newRoute HomeRoute
               else
                 Cmd.none
             )
@@ -89,7 +89,7 @@ urlUpdate ( route, address ) model =
                         Just _ ->
                             ( model1, Cmd.none )
 
-                Home ->
+                HomeRoute ->
                     ( model1
                     , Api.getProposalList model.accessToken ApiMsg
                     )
@@ -190,7 +190,7 @@ update msg model =
                     ( { model | error = Just <| toString httpError }, Cmd.none )
 
                 Api.GotMe me ->
-                    ( { model | me = me }, Routing.newRoute Home )
+                    ( { model | me = me }, Routing.newRoute HomeRoute )
 
                 Api.ProposalCreated proposal ->
                     ( model |> addProposal proposal
@@ -288,7 +288,7 @@ view model =
 viewBody : Model -> Html Msg
 viewBody model =
     case model.route of
-        Home ->
+        HomeRoute ->
             if String.isEmpty model.accessToken then
                 div []
                     [ a [ href Api.facebookAuthUrl ] [ text "Login with Facebook" ] ]
@@ -328,6 +328,6 @@ viewBody model =
             div []
                 [ text <| "Not found" ]
 
-        FacebookRedirect ->
+        FacebookRedirectRoute ->
             div []
                 [ text <| "Authenticating, please wait..." ]

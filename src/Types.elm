@@ -2,10 +2,10 @@ module Types exposing (..)
 
 
 type Route
-    = Home
+    = HomeRoute
     | NewProposalRoute
     | ProposalRoute String
-    | FacebookRedirect
+    | FacebookRedirectRoute
     | NotFoundRoute
 
 

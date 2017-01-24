@@ -10,10 +10,10 @@ import Types exposing (..)
 routes : UrlParser.Parser (Route -> a) a
 routes =
     UrlParser.oneOf
-        [ UrlParser.format Home (UrlParser.s "")
+        [ UrlParser.format HomeRoute (UrlParser.s "")
         , UrlParser.format NewProposalRoute (UrlParser.s "new-proposal")
         , UrlParser.format ProposalRoute (UrlParser.s "proposals" </> UrlParser.string)
-        , UrlParser.format FacebookRedirect (UrlParser.s "facebook_redirect")
+        , UrlParser.format FacebookRedirectRoute (UrlParser.s "facebook_redirect")
         ]
 
 
@@ -42,7 +42,7 @@ urlBuilder : Route -> String
 urlBuilder route =
     "/"
         ++ case route of
-            Home ->
+            HomeRoute ->
                 ""
 
             NewProposalRoute ->
@@ -51,7 +51,7 @@ urlBuilder route =
             ProposalRoute id ->
                 "proposals/" ++ id
 
-            FacebookRedirect ->
+            FacebookRedirectRoute ->
                 "facebook_redirect"
 
             NotFoundRoute ->
