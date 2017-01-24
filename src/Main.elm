@@ -21,6 +21,37 @@ import Component.ProposalList
 import Component.Proposal
 
 
+-- APP
+
+
+type alias Flags =
+    { accessToken : Maybe String }
+
+
+init : Flags -> ( Route, Address ) -> ( Model, Cmd Msg )
+init flags ( route, address ) =
+    let
+        model0 =
+            initialModel (Maybe.withDefault "" flags.accessToken) route
+
+        ( model1, cmd1 ) =
+            urlUpdate ( route, address ) model0
+    in
+        ( model1, Cmd.batch [ cmd1, checkForAuthCode address ] )
+
+
+main : Program Flags
+main =
+    Navigation.programWithFlags urlParser
+        { init = init
+        , update = update
+        , urlUpdate = urlUpdate
+        , subscriptions = (always Sub.none)
+        , view = view
+        }
+
+
+
 -- ROUTES
 
 
@@ -342,34 +373,3 @@ viewBody model =
         FacebookRedirect ->
             div []
                 [ text <| "Authenticating, please wait..." ]
-
-
-
--- APP
-
-
-type alias Flags =
-    { accessToken : Maybe String }
-
-
-init : Flags -> ( Route, Address ) -> ( Model, Cmd Msg )
-init flags ( route, address ) =
-    let
-        model0 =
-            initialModel (Maybe.withDefault "" flags.accessToken) route
-
-        ( model1, cmd1 ) =
-            urlUpdate ( route, address ) model0
-    in
-        ( model1, Cmd.batch [ cmd1, checkForAuthCode address ] )
-
-
-main : Program Flags
-main =
-    Navigation.programWithFlags urlParser
-        { init = init
-        , update = update
-        , urlUpdate = urlUpdate
-        , subscriptions = (always Sub.none)
-        , view = view
-        }
