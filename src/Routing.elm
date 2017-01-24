@@ -1,4 +1,4 @@
-port module Routing exposing (urlParser)
+port module Routing exposing (urlParser, newRoute)
 
 import Navigation
 import UrlParser exposing ((</>))
@@ -36,3 +36,28 @@ urlParser =
             Hop.makeResolver hopConfig parse
     in
         Navigation.makeParser (.href >> resolver)
+
+
+urlBuilder : Route -> String
+urlBuilder route =
+    "/"
+        ++ case route of
+            Home ->
+                ""
+
+            NewProposalRoute ->
+                "new-proposal"
+
+            ProposalRoute id ->
+                "proposals/" ++ id
+
+            FacebookRedirect ->
+                "facebook_redirect"
+
+            NotFoundRoute ->
+                ""
+
+
+newRoute : Route -> Cmd msg
+newRoute route =
+    Navigation.newUrl <| urlBuilder route

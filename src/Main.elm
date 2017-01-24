@@ -73,7 +73,7 @@ urlUpdate ( route, address ) model =
             -- User is not logged in
             ( model1
             , if route /= Home then
-                Navigation.newUrl "/"
+                Routing.newRoute Home
               else
                 Cmd.none
             )
@@ -138,7 +138,7 @@ initialModel accessToken route =
 
 type Msg
     = ApiMsg Api.Msg
-    | NavigateToPath String
+    | NavigateToRoute Route
     | NewProposalMsg Component.NewProposal.Msg
     | NoOp
     | Mdl (Material.Msg Msg)
@@ -190,11 +190,11 @@ update msg model =
                     ( { model | error = Just <| toString httpError }, Cmd.none )
 
                 Api.GotMe me ->
-                    ( { model | me = me }, Navigation.newUrl "/" )
+                    ( { model | me = me }, Routing.newRoute Home )
 
                 Api.ProposalCreated proposal ->
                     ( model |> addProposal proposal
-                    , Navigation.newUrl <| "proposals/" ++ proposal.id
+                    , Routing.newRoute <| ProposalRoute proposal.id
                     )
 
                 Api.ProposalCreationFailed httpError ->
@@ -226,9 +226,9 @@ update msg model =
                 Api.GettingProposalListFailed httpError ->
                     ( { model | error = Just <| toString httpError }, Cmd.none )
 
-        NavigateToPath path ->
+        NavigateToRoute route ->
             ( model
-            , Navigation.newUrl path
+            , Routing.newRoute route
             )
 
         NewProposalMsg newProposalMsg ->
@@ -296,13 +296,13 @@ viewBody model =
                 div []
                     [ text <| "Hello, " ++ (.name model.me)
                     , h3 []
-                        [ a [ onClick <| NavigateToPath "/new-proposal" ]
+                        [ a [ onClick <| NavigateToRoute NewProposalRoute ]
                             [ text "Create a proposal" ]
                         ]
                     , h3 [] [ text "Existing Proposals" ]
                     , div []
                         [ Component.ProposalList.view
-                            (\id -> NavigateToPath <| "proposals/" ++ id)
+                            (\id -> NavigateToRoute <| ProposalRoute id)
                             (Dict.values model.proposals)
                         ]
                     ]
