@@ -69,8 +69,14 @@ urlUpdate ( route, address ) model =
         _ =
             Debug.log "urlUpdate" ( route, address )
     in
-        if String.isEmpty model.accessToken && route /= Home then
-            ( model1, Navigation.newUrl "/" )
+        if String.isEmpty model.accessToken then
+            -- User is not logged in
+            ( model1
+            , if route /= Home then
+                Navigation.newUrl "/"
+              else
+                Cmd.none
+            )
         else
             case route of
                 ProposalRoute id ->
