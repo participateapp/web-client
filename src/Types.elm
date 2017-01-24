@@ -1,6 +1,14 @@
 module Types exposing (..)
 
 
+type Route
+    = Home
+    | NewProposalRoute
+    | ProposalRoute String
+    | FacebookRedirect
+    | NotFoundRoute
+
+
 type alias Me =
     { name : String
     }

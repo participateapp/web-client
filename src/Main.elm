@@ -11,10 +11,9 @@ import Material.Color as Color
 import Dict exposing (Dict)
 import String
 import Navigation
-import UrlParser exposing ((</>))
-import Hop
-import Hop.Types exposing (Config, Address, Query)
+import Hop.Types exposing (Address)
 import Types exposing (..)
+import Routing
 import Api
 import Component.NewProposal
 import Component.ProposalList
@@ -42,56 +41,13 @@ init flags ( route, address ) =
 
 main : Program Flags
 main =
-    Navigation.programWithFlags urlParser
+    Navigation.programWithFlags Routing.urlParser
         { init = init
         , update = update
         , urlUpdate = urlUpdate
         , subscriptions = (always Sub.none)
         , view = view
         }
-
-
-
--- ROUTES
-
-
-type Route
-    = Home
-    | NewProposalRoute
-    | ProposalRoute String
-    | FacebookRedirect
-    | NotFoundRoute
-
-
-routes : UrlParser.Parser (Route -> a) a
-routes =
-    UrlParser.oneOf
-        [ UrlParser.format Home (UrlParser.s "")
-        , UrlParser.format NewProposalRoute (UrlParser.s "new-proposal")
-        , UrlParser.format ProposalRoute (UrlParser.s "proposals" </> UrlParser.string)
-        , UrlParser.format FacebookRedirect (UrlParser.s "facebook_redirect")
-        ]
-
-
-hopConfig : Config
-hopConfig =
-    { basePath = ""
-    , hash = False
-    }
-
-
-urlParser : Navigation.Parser ( Route, Address )
-urlParser =
-    let
-        parse path =
-            path
-                |> UrlParser.parse identity routes
-                |> Result.withDefault NotFoundRoute
-
-        resolver =
-            Hop.makeResolver hopConfig parse
-    in
-        Navigation.makeParser (.href >> resolver)
 
 
 urlUpdate : ( Route, Address ) -> Model -> ( Model, Cmd Msg )
@@ -236,7 +192,7 @@ update msg model =
 
                 Api.ProposalCreated proposal ->
                     ( model |> addProposal proposal
-                    , Navigation.newUrl <| "proposals/" ++ toString proposal.id
+                    , Navigation.newUrl <| "proposals/" ++ proposal.id
                     )
 
                 Api.ProposalCreationFailed httpError ->
