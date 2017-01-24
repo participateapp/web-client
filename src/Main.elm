@@ -67,13 +67,13 @@ urlUpdate : ( Route, Address ) -> Model -> ( Model, Cmd Msg )
 urlUpdate ( route, address ) model =
     let
         model1 =
-            { model | route = route, address = address }
+            { model | route = route }
 
         _ =
             Debug.log "urlUpdate" ( route, address )
     in
         if String.isEmpty model.accessToken && route /= Home then
-            ( model1, Navigation.newUrl <| Hop.outputFromPath hopConfig "/" )
+            ( model1, Navigation.newUrl "/" )
         else
             case route of
                 ProposalRoute id ->
@@ -122,7 +122,6 @@ port storeAccessToken : String -> Cmd msg
 
 type alias Model =
     { route : Route
-    , address : Address
     , accessToken : String
     , error : Maybe String
     , me : Me
@@ -132,10 +131,9 @@ type alias Model =
     }
 
 
-initialModel : String -> Route -> Address -> Model
-initialModel accessToken route address =
+initialModel : String -> Route -> Model
+initialModel accessToken route =
     { route = route
-    , address = address
     , accessToken = accessToken
     , error = Nothing
     , me = { name = "" }
@@ -206,10 +204,8 @@ update msg model =
                     ( { model | me = me }, Navigation.newUrl "/" )
 
                 Api.ProposalCreated proposal ->
-                    ( model
-                        |> addProposal proposal
-                    , Navigation.newUrl <|
-                        Hop.output hopConfig { path = [ "proposals", proposal.id ], query = Dict.empty }
+                    ( model |> addProposal proposal
+                    , Navigation.newUrl <| "proposals/" ++ toString proposal.id
                     )
 
                 Api.ProposalCreationFailed httpError ->
@@ -243,7 +239,7 @@ update msg model =
 
         NavigateToPath path ->
             ( model
-            , Navigation.newUrl <| Hop.outputFromPath hopConfig path
+            , Navigation.newUrl path
             )
 
         NewProposalMsg newProposalMsg ->
@@ -360,7 +356,7 @@ init : Flags -> ( Route, Address ) -> ( Model, Cmd Msg )
 init flags ( route, address ) =
     let
         model0 =
-            initialModel (Maybe.withDefault "" flags.accessToken) route address
+            initialModel (Maybe.withDefault "" flags.accessToken) route
 
         ( model1, cmd1 ) =
             urlUpdate ( route, address ) model0
