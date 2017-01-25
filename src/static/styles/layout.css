@@ -1,0 +1,13 @@
+.content-grid {
+  max-width: 960px;
+}
+
+.content-col {
+  max-width: 960px;
+  padding: 20px 0;
+  margin: 0 auto;
+}
+
+.content-col.narrow {
+  max-width: 794px;
+}

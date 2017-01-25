@@ -1,4 +1,5 @@
 var path = require("path");
+var CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   entry: {
@@ -39,10 +40,20 @@ module.exports = {
         test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         loader: 'file-loader',
       },
+      {
+        test: /\.(png|jpg)$/,
+        loader: 'file-loader'
+      }
     ],
 
     noParse: /\.elm$/,
   },
+
+  plugins: [
+    new CopyWebpackPlugin([
+      { from: 'src/static/images', to: 'images/' }
+    ])
+  ],
 
   devServer: {
     inline: true,
