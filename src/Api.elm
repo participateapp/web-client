@@ -44,7 +44,8 @@ type Msg
 
 apiUrl : String
 apiUrl =
-    "http://localhost:4000"
+    -- "http://localhost:4000"
+    "https://participate-api.herokuapp.com"
 
 
 tokenEndpoint : String
