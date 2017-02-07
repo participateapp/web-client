@@ -84,7 +84,7 @@ getProposalListEndpoint =
 
 facebookAuthUrl : String
 facebookAuthUrl =
-    "https://www.facebook.com/dialog/oauth?client_id=1583083701926004&redirect_uri=http://localhost:3000/facebook_redirect"
+    "https://www.facebook.com/dialog/oauth?client_id=1583083701926004&redirect_uri=https://oliverbarnes.github.io/participate/facebook_redirect"
 
 
 
