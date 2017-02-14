@@ -39,6 +39,14 @@ import Types exposing (..)
 import Api
 
 
+-- Configuration
+
+
+basePath =
+    "/participate"
+
+
+
 -- ROUTES
 
 
@@ -62,7 +70,7 @@ routes =
 
 hopConfig : Config
 hopConfig =
-    { basePath = ""
+    { basePath = basePath
     , hash = False
     }
 
@@ -265,7 +273,7 @@ update msg model =
 
                 Api.GotMe me ->
                     ( { model | me = me } |> progressDone
-                    , Navigation.newUrl "/"
+                    , Navigation.newUrl <| Hop.outputFromPath hopConfig "/"
                     )
 
                 Api.ProposalCreated proposal ->
@@ -420,7 +428,7 @@ viewLoginButton : Model -> Html Msg
 viewLoginButton model =
     a [ href Api.facebookAuthUrl ]
         [ img
-            [ Html.Attributes.src "/images/facebook-sign-in.png"
+            [ Html.Attributes.src <| basePath ++ "/images/facebook-sign-in.png"
             , class "login-button-img"
             ]
             []
@@ -604,11 +612,11 @@ viewFooter model =
                            [ Footer.links [ Options.cs "social-links" ]
                                [ Footer.linkItem [ Footer.href "https://github.com/oliverbarnes/participate" ]
                                    [ Footer.html <|
-                                       img [ Html.Attributes.src "/images/github-circle.png" ] []
+                                       img [ Html.Attributes.src <| basePath ++ "/images/github-circle.png" ] []
                                    ]
                                , Footer.linkItem [ Footer.href "https://github.com/oliverbarnes/participate" ]
                                    [ Footer.html <|
-                                       img [ Html.Attributes.src "/images/github-circle.png" ] []
+                                       img [ Html.Attributes.src <| basePath ++ "/images/github-circle.png" ] []
                                    ]
                                ]
                            ]
@@ -617,15 +625,15 @@ viewFooter model =
                             ul [ class "mdl-mini-footer__link-list social-links" ]
                                 [ li []
                                     [ a [ Html.Attributes.href "https://github.com/oliverbarnes/participate" ]
-                                        [ img [ Html.Attributes.src "/images/github-circle.png" ] [] ]
+                                        [ img [ Html.Attributes.src <| basePath ++ "/images/github-circle.png" ] [] ]
                                     ]
                                 , li []
                                     [ a [ Html.Attributes.href "https://participateapp.slack.com" ]
-                                        [ img [ Html.Attributes.src "/images/slack.png" ] [] ]
+                                        [ img [ Html.Attributes.src <| basePath ++ "/images/slack.png" ] [] ]
                                     ]
                                 , li []
                                     [ a [ Html.Attributes.href "https://twitter.com/digiberber" ]
-                                        [ img [ Html.Attributes.src "/images/twitter.png" ] [] ]
+                                        [ img [ Html.Attributes.src <| basePath ++ "/images/twitter.png" ] [] ]
                                     ]
                                 ]
                         ]
@@ -773,7 +781,7 @@ viewProposal model id =
                         [ span [ class "actions__authored" ]
                             [ img
                                 [ class "mdl-chip__contact"
-                                , Html.Attributes.src "/images/john.jpg"
+                                , Html.Attributes.src <| basePath ++ "/images/john.jpg"
                                 ]
                                 []
                             , span [ class "authored" ]
