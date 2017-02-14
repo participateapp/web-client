@@ -2,11 +2,13 @@ module Config exposing (..)
 
 
 baseRoot =
-    "https://oliverbarnes.github.io"
+    -- "https://oliverbarnes.github.io"
+    "http://localhost:3000"
 
 
 basePath =
-    "/participate"
+    -- "/participate"
+    ""
 
 
 facebookRedirectPath =
@@ -18,5 +20,5 @@ facebookClientId =
 
 
 apiUrl =
-    -- "http://localhost:4000"
-    "https://participate-api.herokuapp.com"
+    -- "https://participate-api.herokuapp.com"
+    "http://localhost:4000"
