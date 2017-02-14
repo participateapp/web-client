@@ -36,15 +36,8 @@ import Http
 import Hop
 import Hop.Types exposing (Config, Address, Query)
 import Types exposing (..)
+import Config exposing (basePath)
 import Api
-
-
--- Configuration
-
-
-basePath =
-    "/participate"
-
 
 
 -- ROUTES

@@ -22,6 +22,7 @@ import JsonApi.Documents
 import JsonApi.Extra
 import Api.Util exposing ((:>))
 import Types exposing (..)
+import Config
 
 
 type Msg
@@ -42,49 +43,49 @@ type Msg
 -- ENDPOINTS
 
 
-apiUrl : String
-apiUrl =
-    -- "http://localhost:4000"
-    "https://participate-api.herokuapp.com"
-
-
 tokenEndpoint : String
 tokenEndpoint =
-    apiUrl ++ "/token"
+    Config.apiUrl ++ "/token"
 
 
 meEndpoint : String
 meEndpoint =
-    apiUrl ++ "/me"
+    Config.apiUrl ++ "/me"
 
 
 newProposalEndpoint : String
 newProposalEndpoint =
-    apiUrl ++ "/proposals"
+    Config.apiUrl ++ "/proposals"
 
 
 supportProposalEndpoint : String
 supportProposalEndpoint =
-    apiUrl ++ "/supports"
+    Config.apiUrl ++ "/supports"
 
 
 getProposalEndpoint : String -> String
 getProposalEndpoint id =
-    apiUrl ++ "/proposals/" ++ id
+    Config.apiUrl ++ "/proposals/" ++ id
 
 
 getProposalListEndpoint : String
 getProposalListEndpoint =
-    apiUrl ++ "/proposals"
-
-
-
--- TODO: move client_id and redirect_uri into environment variables
+    Config.apiUrl ++ "/proposals"
 
 
 facebookAuthUrl : String
 facebookAuthUrl =
-    "https://www.facebook.com/dialog/oauth?client_id=1583083701926004&redirect_uri=https://oliverbarnes.github.io/participate/facebook_redirect"
+    let
+        facebookRedirectUri =
+            Config.baseRoot
+                ++ Config.basePath
+                ++ "/"
+                ++ Config.facebookRedirectPath
+    in
+        "https://www.facebook.com/dialog/oauth?client_id="
+            ++ Config.facebookClientId
+            ++ "&redirect_uri="
+            ++ facebookRedirectUri
 
 
 
