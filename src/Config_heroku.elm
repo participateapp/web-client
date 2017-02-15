@@ -6,7 +6,7 @@ baseRoot =
 
 
 basePath =
-    "/participate"
+    "/web-client"
 
 
 facebookRedirectPath =
