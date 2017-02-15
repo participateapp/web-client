@@ -6,7 +6,7 @@ baseRoot =
 
 
 basePath =
-    "/web-client"
+    ""
 
 
 facebookRedirectPath =
