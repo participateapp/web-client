@@ -3,18 +3,18 @@ Contributing
 
 Contributions are much appreciated!
 
-You're welcome to submit [pull requests](https://github.com/oliverbarnes/participate/pulls), propose features and post bugs on [Github issues](https://github.com/oliverbarnes/participate/issues), and ask questions on our [Slack channel](https://participateapp.slack.com) (ping me for an invite [by email](mailto:oliverbwork@gmail.com) or on [twitter](http://twitter.com/digiberber)). 
+You're welcome to submit [pull requests](https://github.com/participateapp/web-client/pulls), propose features and post bugs on [Github issues](https://github.com/participateapp/web-client/issues), and ask questions on our [Slack channel](https://participateapp.slack.com) (ping me for an invite [by email](mailto:oliverbwork@gmail.com) or on [twitter](http://twitter.com/digiberber)). 
 
 Here are the steps for contributing code:
 
 #### Fork the Project
 
-Fork the [project on Github](https://github.com/oliverbarnes/participate) and check out your copy.
+Fork the [project on Github](https://github.com/participateapp/web-client) and check out your copy.
 
 ```
-git clone https://github.com/contributor/participate.git
+git clone https://github.com/contributor/web-client.git
 cd participate
-git remote add upstream https://github.com/oliverbarnes/participate.git
+git remote add upstream https://github.com/participateapp/web-client.git
 ```
 
 #### Create a Topic Branch
@@ -71,7 +71,7 @@ git push origin my-feature-branch
 
 #### Make a Pull Request
 
-Go to https://github.com/contributor/participate and select your feature branch. Click the 'Pull Request' button and fill out the form. Pull requests are usually reviewed daily on weekdays.
+Go to https://github.com/contributor/web-client and select your feature branch. Click the 'Pull Request' button and fill out the form. Pull requests are usually reviewed daily on weekdays.
 
 If you're new to Pull Requests, check out the [Github docs](https://help.github.com/articles/using-pull-requests)
 
