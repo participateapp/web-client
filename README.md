@@ -14,7 +14,7 @@ Early stages of development. Participate! is open source and plans are to have a
 
 ## Stack
 
-Elm front-end app talking to an [Elixir/Phoenix API](https://github.com/oliverbarnes/participate-api).
+Elm front-end app talking to an [Elixir/Phoenix API](https://github.com/participateapp/api).
 
 
 ## Setup the client
@@ -32,7 +32,7 @@ Get dependencies:
 $ npm install
 ```
 
-Start the [API](https://github.com/oliverbarnes/participate-api#setup).
+Start the [API](https://github.com/participateapp/api#setup).
 
 Compile and run dev server:
 
@@ -40,7 +40,7 @@ Compile and run dev server:
 $ npm run dev
 ```
 
-More details can be found [on the wiki](https://github.com/oliverbarnes/participate/wiki/Development-Setup).
+More details can be found [on the wiki](https://github.com/participateapp/web-client/wiki/Development-Setup).
 
 
 ## Want to get involved?
