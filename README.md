@@ -49,7 +49,7 @@ We'll pair with you so you can get up to speed quickly, and we pair on features 
 
 [Shoot us an email](mailto:oliverbwork@gmail.com), we'll add you to our Slack channel to join the discussion and talk about next steps.
 
-See the complete guide to contributing [here](CONTRIBUTING.md).
+Please check out [the contributing guide](CONTRIBUTING.md) and our [code of conduct](CODE_OF_CONDUCT.md)
 
 ---
 
