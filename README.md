@@ -10,7 +10,9 @@ A participant makes a proposal and gathers support for it. Other participants ca
 
 Representation is ensured for participants who are less involved (be it for lack of time, inclination or of knowledge) through fluid delegation of support, in a [liquid democracy](https://en.wikipedia.org/wiki/Delegative_democracy).
 
-Early stages of development. Participate! is open source and plans are to have a hosted version in the future as well.
+Very early stages of development. See a [deployed demo](https://participateapp.github.io)
+
+Participate! is open source and plans are to have a hosted version in the future as well.
 
 ## Stack
 
