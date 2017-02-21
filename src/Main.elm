@@ -578,7 +578,7 @@ viewLandingPage model =
                     , p []
                         [ text "See the complete guide to contributing "
                         , a
-                            [ href "https://github.com/oliverbarnes/participate/blob/master/CONTRIBUTING.md"
+                            [ href "https://github.com/participateapp/web-client/blob/master/CONTRIBUTING.md"
                             , Html.Attributes.target "_blank"
                             ]
                             [ text "here"
@@ -603,11 +603,11 @@ viewFooter model =
                            -- Class mdl-mega-footer__link-list puts the items to-to-down. We want them left-to-right.
                            -- Also, don't know how Footer.socialButton is supposed to work.
                            [ Footer.links [ Options.cs "social-links" ]
-                               [ Footer.linkItem [ Footer.href "https://github.com/oliverbarnes/participate" ]
+                               [ Footer.linkItem [ Footer.href "https://github.com/participateapp/web-client" ]
                                    [ Footer.html <|
                                        img [ Html.Attributes.src <| basePath ++ "/images/github-circle.png" ] []
                                    ]
-                               , Footer.linkItem [ Footer.href "https://github.com/oliverbarnes/participate" ]
+                               , Footer.linkItem [ Footer.href "https://github.com/participateapp/web-client" ]
                                    [ Footer.html <|
                                        img [ Html.Attributes.src <| basePath ++ "/images/github-circle.png" ] []
                                    ]
@@ -617,7 +617,7 @@ viewFooter model =
                         [ Footer.html <|
                             ul [ class "mdl-mini-footer__link-list social-links" ]
                                 [ li []
-                                    [ a [ Html.Attributes.href "https://github.com/oliverbarnes/participate" ]
+                                    [ a [ Html.Attributes.href "https://github.com/participateapp/web-client" ]
                                         [ img [ Html.Attributes.src <| basePath ++ "/images/github-circle.png" ] [] ]
                                     ]
                                 , li []
@@ -642,11 +642,11 @@ viewFooter model =
                 [ Footer.html <|
                     ul [ class "mdl-mini-footer__link-list" ]
                         [ li []
-                            [ a [ Html.Attributes.href "https://github.com/oliverbarnes/participate/blob/master/CONTRIBUTING.md" ]
+                            [ a [ Html.Attributes.href "https://github.com/participateapp/web-client/blob/master/CONTRIBUTING.md" ]
                                 [ text "Guide to contributing" ]
                             ]
                         , li []
-                            [ a [ Html.Attributes.href "https://github.com/oliverbarnes/participate/wiki/Development-Setup" ]
+                            [ a [ Html.Attributes.href "https://github.com/participateapp/web-client/wiki/Development-Setup" ]
                                 [ text "Wiki" ]
                             ]
                         ]
