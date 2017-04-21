@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/participateapp/web-client.svg?branch=master)](https://travis-ci.org/participateapp/web-client)
+
 # Participate!
 
 An app for democratic decision-making.
