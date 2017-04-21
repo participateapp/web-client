@@ -1,0 +1,102 @@
+#
+# For deployment to a github repo set following environment variables:
+# - DEPLOY_REPO_SLUG
+# - DEPLOY_REPO_KEY
+# Set them in travis-ci.org dashboard or by using the travis CLI.
+# For DEPLOY_REPO_KEY escape spaces as "\ " and newlines as "\\n"
+#     Example bash command, using awk and sed:
+#         cat private_key_file | awk 1 ORS='\\\\n' | sed 's/ /\\ /g'
+#     See http://stackoverflow.com/questions/1251999/how-can-i-replace-a-newline-n-using-sed
+
+
+sudo: false
+
+language: node_js
+
+node_js:
+  - "7.7.3"
+
+cache:
+  directories:
+    # - tests/elm-stuff/build-artifacts
+    - elm-stuff/build-artifacts
+    - sysconfcpus
+
+before_install:
+  - |
+    # Install sysconfcpus to avoid long build times.
+    #     (Elm compiler slows dramatically when number of CPUs is incorrectly reported.)
+    #     https://github.com/elm-lang/elm-compiler/issues/1473#issuecomment-245704142
+    # This tools
+    if [ ! -d sysconfcpus/bin ];
+    then
+      git clone https://github.com/obmarg/libsysconfcpus.git;
+      cd libsysconfcpus;
+      ./configure --prefix=$TRAVIS_BUILD_DIR/sysconfcpus;
+      make && make install;
+      cd ..;
+    fi
+
+install:
+  - npm install -g elm@0.17.1
+  - npm install
+  - mv $(npm config get prefix)/bin/elm-make $(npm config get prefix)/bin/elm-make-org
+  - printf '%s\n\n' '#!/bin/bash' 'echo "Running elm-make with sysconfcpus -n 2"' '$TRAVIS_BUILD_DIR/sysconfcpus/bin/sysconfcpus -n 2 elm-make-org "$@"' > $(npm config get prefix)/bin/elm-make
+  - chmod +x $(npm config get prefix)/bin/elm-make
+  - travis_retry elm-package install --yes
+
+before_script:
+  # Test compilation of Elm code
+  - elm make --yes --output /dev/null src/Main.elm
+
+script:
+  - npm run build
+
+after_success:
+  - | # Deploy to gh-pages
+    #
+    # Some resources:
+    # - https://gist.github.com/domenic/ec8b0fc8ab45f39403dd
+    # - http://stackoverflow.com/questions/23277391/how-to-publish-to-github-pages-from-travis-ci
+    #
+    if [ -n "$DEPLOY_REPO_SLUG" -a -n "$DEPLOY_REPO_KEY" -a "$TRAVIS_PULL_REQUEST" = "false" -a "$TRAVIS_BRANCH" = master ];
+    then
+      #
+      eval `ssh-agent -s`
+      echo -e $DEPLOY_REPO_KEY | ssh-add -
+      #
+      # As a SPA on gh-pages: Redirect all URLs to index.html
+      ln -s index.html dist/404.html
+      #
+      #
+      # Use email and name from last source repo commit for deployment commit.
+      git config --global user.email $(git show --format="%aE" -s)
+      git config --global user.name "$(git show --format="%aN" -s) - Travis CI"
+      git config --global push.default current
+      # 
+      # Get current deployment repo (which must exist beforehand)
+      git clone --depth=1 --branch=master git@github.com:$DEPLOY_REPO_SLUG.git _deployment_clone
+      # Commit and push the new build to deployment repo
+      mv _deployment_clone/.git/ dist/
+      rm -rf _deployment_clone
+      cd dist
+      git add --all .
+      git commit -m "Travis build $TRAVIS_BUILD_NUMBER of $TRAVIS_REPO_SLUG ${TRAVIS_COMMIT:0:7}" -m "Source: https://github.com/$TRAVIS_REPO_SLUG/commit/$TRAVIS_COMMIT"
+      git push origin
+      cd ..
+    fi
+
+
+# We don't use Travis' builtin gh-pages deployment method, which has these drawbacks:
+# - Needs a GitHub auth token, unnecessarily granting access to all repos of the user.
+# - Overwrites the target repo branch without preserving git history.
+#
+# deploy:
+#   skip_cleanup: true
+#   provider: pages
+#   github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+#   local_dir: dist
+#   repo: $DEPLOY_REPO_SLUG
+#   target_branch: travis-direct-deploy
+#   on:
+#     branch: master
