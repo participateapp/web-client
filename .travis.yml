@@ -80,6 +80,10 @@ after_success:
       mv _deployment_clone/.git/ dist/
       rm -rf _deployment_clone
       cd dist
+      touch README.md
+      echo "Built from https://github.com/$TRAVIS_REPO_SLUG" >> README.md
+      echo "" >> README.md
+      echo "By Travis CI https://travis-ci.org/$TRAVIS_REPO_SLUG/builds/$TRAVIS_BUILD_ID" >> README.md
       git add --all .
       git commit -m "Travis build $TRAVIS_BUILD_NUMBER of $TRAVIS_REPO_SLUG ${TRAVIS_COMMIT:0:7}" -m "Source: https://github.com/$TRAVIS_REPO_SLUG/commit/$TRAVIS_COMMIT"
       git push origin
