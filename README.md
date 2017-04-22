@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/participateapp/web-client.svg?branch=master)](https://travis-ci.org/participateapp/web-client)
+
 # Participate!
 
 An app for democratic decision-making.
@@ -33,6 +35,8 @@ Get dependencies:
 ```sh
 $ npm install
 ```
+
+Review settings in `src/Config.elm`.
 
 Start the [API](https://github.com/participateapp/api#setup).
 
