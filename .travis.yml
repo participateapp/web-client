@@ -21,6 +21,7 @@ cache:
     # - tests/elm-stuff/build-artifacts
     - elm-stuff/build-artifacts
     - sysconfcpus
+    - node_modules
 
 before_install:
   - |
