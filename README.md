@@ -36,6 +36,8 @@ Get dependencies:
 $ npm install
 ```
 
+Review settings in `src/Config.elm`.
+
 Start the [API](https://github.com/participateapp/api#setup).
 
 Compile and run dev server:
