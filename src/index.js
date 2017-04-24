@@ -17,7 +17,11 @@ var programFlags = {
 var app = Elm.Main.embed(mountNode, programFlags);
 
 app.ports.storeAccessToken.subscribe (function (accessToken) {
-  sessionStorage.setItem ('accessToken', accessToken);
+  if (accessToken) {
+    sessionStorage.setItem ('accessToken', accessToken);
+  } else {
+    sessionStorage.removeItem ('accessToken');
+  }
 });
 
 // TODO: Figure out how popup that only gets the authorization code
