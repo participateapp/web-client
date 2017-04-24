@@ -31,6 +31,7 @@ type Msg
     | ProposalCreated Proposal
     | ProposalCreationFailed Http.Error
     | ProposalSupported Support
+    | ProposalUnsupported
     | SupportProposalFailed Http.Error
     | GotProposal Proposal
     | GettingProposalFailed Http.Error
@@ -61,6 +62,11 @@ newProposalEndpoint =
 supportProposalEndpoint : String
 supportProposalEndpoint =
     Config.apiUrl ++ "/supports"
+
+
+unsupportProposalEndpoint : String -> String
+unsupportProposalEndpoint id =
+    Config.apiUrl ++ "/proposals/" ++ id ++ "/support"
 
 
 getProposalEndpoint : String -> String
@@ -256,13 +262,20 @@ createProposal proposalInput accessToken wrapMsg =
 
 supportProposal : String -> Bool -> String -> (Msg -> a) -> Cmd a
 supportProposal id newState accessToken wrapMsg =
-    -- ToDo: Send DELETE request to remove support (if newState == False)
-    encodeSupportProposal id
-        |> Api.Util.requestPost supportProposalEndpoint
-        |> Api.Util.withAccessToken accessToken
-        |> Api.Util.sendDefJsonApi assembleSupport
-        |> Task.perform SupportProposalFailed ProposalSupported
-        |> Cmd.map wrapMsg
+    if newState then
+        encodeSupportProposal id
+            |> Api.Util.requestPost supportProposalEndpoint
+            |> Api.Util.withAccessToken accessToken
+            |> Api.Util.sendDefJsonApi assembleSupport
+            |> Task.perform SupportProposalFailed ProposalSupported
+            |> Cmd.map wrapMsg
+    else
+        unsupportProposalEndpoint id
+            |> Api.Util.requestDelete
+            |> Api.Util.withAccessToken accessToken
+            |> Api.Util.sendDefDiscard
+            |> Task.perform SupportProposalFailed (\_ -> ProposalUnsupported)
+            |> Cmd.map wrapMsg
 
 
 getProposal : String -> String -> (Msg -> a) -> Cmd a

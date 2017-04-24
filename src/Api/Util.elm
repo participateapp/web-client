@@ -33,6 +33,17 @@ requestGet url =
     }
 
 
+{-| Build a DELETE request
+-}
+requestDelete : String -> Http.Request
+requestDelete url =
+    { verb = "DELETE"
+    , headers = []
+    , url = url
+    , body = Http.empty
+    }
+
+
 {-| Build a POST request
 -}
 requestPost : String -> String -> Http.Request
@@ -66,3 +77,42 @@ sendDefJson decodeResponse request =
     request
         |> Http.send Http.defaultSettings
         |> Http.fromJson decodeResponse
+
+
+{-| Send a Http request with default settings
+and discard the response
+-}
+sendDefDiscard :
+    Http.Request
+    -> Task Http.Error ()
+sendDefDiscard request =
+    request
+        |> Http.send Http.defaultSettings
+        |> discardResponse
+
+
+
+-- Things here will change in Elm 0.18 ...
+
+
+discardResponse : Task Http.RawError Http.Response -> Task Http.Error ()
+discardResponse responseTask =
+    responseTask
+        |> Task.mapError promoteError
+        |> (flip Task.andThen)
+            (\response ->
+                if 200 <= response.status && response.status < 300 then
+                    Task.succeed ()
+                else
+                    Task.fail (Http.BadResponse response.status response.statusText)
+            )
+
+
+promoteError : Http.RawError -> Http.Error
+promoteError rawError =
+    case rawError of
+        Http.RawTimeout ->
+            Http.Timeout
+
+        Http.RawNetworkError ->
+            Http.NetworkError

@@ -289,9 +289,13 @@ update msg model =
                     )
                         |> withSnackbarNote "Proposal supported"
 
+                Api.ProposalUnsupported ->
+                    ( model , Cmd.none )
+                        |> withSnackbarNote "Proposal support withdrawn"
+
                 Api.SupportProposalFailed httpError ->
                     withHttpErrorResponse
-                        "Supporting proposal failed"
+                        "(Un-)Supporting proposal failed"
                         httpError
                         ( model, Cmd.none )
 

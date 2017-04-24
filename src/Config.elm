@@ -1,1 +1,1 @@
-Config_heroku.elm
+Config_local.elm
