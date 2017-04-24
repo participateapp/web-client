@@ -31,7 +31,7 @@ type Msg
     | ProposalCreated Proposal
     | ProposalCreationFailed Http.Error
     | ProposalSupported Support
-    | ProposalUnsupported
+    | ProposalUnsupported String
     | SupportProposalFailed Http.Error
     | GotProposal Proposal
     | GettingProposalFailed Http.Error
@@ -274,7 +274,7 @@ supportProposal id newState accessToken wrapMsg =
             |> Api.Util.requestDelete
             |> Api.Util.withAccessToken accessToken
             |> Api.Util.sendDefDiscard
-            |> Task.perform SupportProposalFailed (\_ -> ProposalUnsupported)
+            |> Task.perform SupportProposalFailed (\_ -> ProposalUnsupported id)
             |> Cmd.map wrapMsg
 
 
