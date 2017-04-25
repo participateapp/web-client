@@ -135,7 +135,7 @@ checkForAuthCode address =
 -- Port for storage of accessToken
 
 
-port storeAccessToken : String -> Cmd msg
+port storeAccessToken : Maybe String -> Cmd msg
 
 
 
@@ -183,6 +183,7 @@ type Msg
     | Mdl (Material.Msg Msg)
     | SnackbarMsg (Snackbar.Msg ())
     | SupportProposal String Bool
+    | SignOut
 
 
 addProposal : Proposal -> Model -> Model
@@ -253,7 +254,7 @@ update msg model =
                 Api.GotAccessToken accessToken ->
                     ( { model | accessToken = accessToken }
                     , Cmd.batch
-                        [ storeAccessToken accessToken
+                        [ storeAccessToken (Just accessToken)
                         , Api.getMe accessToken ApiMsg
                         ]
                     )
@@ -357,6 +358,14 @@ update msg model =
             , Api.supportProposal id newState model.accessToken ApiMsg
             )
 
+        SignOut ->
+            ( { model | accessToken = "" }
+            , Cmd.batch
+                [ storeAccessToken Nothing
+                , Navigation.newUrl <| Hop.outputFromPath hopConfig "/"
+                ]
+            )
+
 
 validate : Validation () NewProposal
 validate =
@@ -455,7 +464,7 @@ viewUserNavigation model =
                     [ Menu.onSelect <| NavigateToPath "/new-proposal" ]
                     [ text "New proposal" ]
                 , Menu.item
-                    [ Menu.onSelect NoOp ]
+                    [ Menu.onSelect SignOut ]
                     [ text "Sign out" ]
                 ]
             ]
