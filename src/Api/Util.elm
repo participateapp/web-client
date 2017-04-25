@@ -4,21 +4,13 @@ import Result.Extra
 import Task exposing (Task)
 import Json.Decode as Decode
 import Http
+import HttpBuilder
 import JsonApi
-import JsonApi.Extra
+import JsonApi.Decode
 
 
 {-| Infix notation for Result.andThen. Makes andThen-chains look nicer.
 -}
-
-
-
--- ToDo: Elm 0.18 encourages using
---            |> Result.andThen
---       Compare this style (as soon the ongoing Elm 0.18 port is type-checking)
---       to the infix version here.
-
-
 infixl 0 :>
 (:>) : Result x a -> (a -> Result x b) -> Result x b
 (:>) =
@@ -30,57 +22,37 @@ That's the same as in `elm-lang/core 4.x` (Elm 0.17)
 -}
 attempt : (e -> msg) -> (a -> msg) -> Task e a -> Cmd msg
 attempt errorTagger successTagger task =
-    Task.attempt (Result.extra.unpack errorTagger successTagger) task
+    Task.attempt (Result.Extra.unpack errorTagger successTagger) task
 
 
 {-| Insert accessToken into Http header
 -}
-withAccessToken : String -> Http.Request -> Http.Request
+withAccessToken : String -> HttpBuilder.RequestBuilder a -> HttpBuilder.RequestBuilder a
 withAccessToken accessToken =
-    JsonApi.Extra.withHeader "Authorization" ("Bearer " ++ accessToken)
+    HttpBuilder.withHeader "Authorization" ("Bearer " ++ accessToken)
 
 
-{-| Build a GET request
+{-| Expect the response body to be a JsonApi Document.
 -}
-requestGet : String -> Http.Request
-requestGet url =
-    { verb = "GET"
-    , headers = []
-    , url = url
-    , body = Http.empty
-    }
-
-
-{-| Build a POST request
--}
-requestPost : String -> String -> Http.Request
-requestPost url body =
-    { verb = "POST"
-    , headers = []
-    , url = url
-    , body = Http.string body
-    }
-
-
-{-| Send a Http request with default settings
-and decode the response from a JSON API document
--}
-sendDefJsonApi :
+withExpectJsonApi :
     (JsonApi.Document -> Result String a)
-    -> Http.Request
-    -> Task Http.Error a
-sendDefJsonApi assembleResponse request =
-    JsonApi.Extra.sendJsonApi assembleResponse Http.defaultSettings request
+    -> HttpBuilder.RequestBuilder b
+    -> HttpBuilder.RequestBuilder a
+withExpectJsonApi assembleResponse requestBuilder =
+    requestBuilder
+        |> HttpBuilder.withHeader "Content-Type" "application/vnd.api+json"
+        |> HttpBuilder.withHeader "Accept" "application/vnd.api+json"
+        |> HttpBuilder.withExpect
+            (Http.expectJson
+                (JsonApi.Decode.document
+                    |> Decode.andThen
+                        (\document ->
+                            case assembleResponse document of
+                                Ok successValue ->
+                                    Decode.succeed successValue
 
-
-{-| Send a Http request with default settings
-and decode the response from JSON
--}
-sendDefJson :
-    Decode.Decoder a
-    -> Http.Request
-    -> Task Http.Error a
-sendDefJson decodeResponse request =
-    request
-        |> Http.send Http.defaultSettings
-        |> Http.fromJson decodeResponse
+                                Err errorMessage ->
+                                    Decode.fail errorMessage
+                        )
+                )
+            )

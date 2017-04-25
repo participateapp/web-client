@@ -12,7 +12,7 @@ module Api
 
 import Result.Extra
 import Http
-import Task exposing (Task)
+import HttpBuilder
 import Json.Decode as Decode
 import Json.Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -173,7 +173,7 @@ decodeParticipantAttributes =
     Decode.at [ "name" ] Decode.string
 
 
-encodeProposalInput : NewProposal -> String
+encodeProposalInput : NewProposal -> Encode.Value
 encodeProposalInput proposalInput =
     JsonApi.Extra.encodeDocument
         "proposal"
@@ -184,7 +184,7 @@ encodeProposalInput proposalInput =
         []
 
 
-encodeSupportProposal : String -> String
+encodeSupportProposal : String -> Encode.Value
 encodeSupportProposal id =
     JsonApi.Extra.encodeDocument
         "support"
@@ -226,10 +226,12 @@ decodeProposalSupportAttributes =
 
 authenticate : String -> (Msg -> a) -> Cmd a
 authenticate authCode wrapMsg =
-    ("{\"auth_code\": \"" ++ authCode ++ "\"}")
-        |> Api.Util.requestPost tokenEndpoint
-        |> JsonApi.Extra.withHeader "Content-Type" "application/json"
-        |> Api.Util.sendDefJson decodeToken
+    tokenEndpoint
+        |> HttpBuilder.post
+        |> HttpBuilder.withJsonBody
+            (Encode.object [ ( "auth_code", Encode.string authCode ) ])
+        |> HttpBuilder.withExpect (Http.expectJson decodeToken)
+        |> HttpBuilder.toTask
         |> Api.Util.attempt AuthFailed GotAccessToken
         |> Cmd.map wrapMsg
 
@@ -237,19 +239,22 @@ authenticate authCode wrapMsg =
 getMe : String -> (Msg -> a) -> Cmd a
 getMe accessToken wrapMsg =
     meEndpoint
-        |> Api.Util.requestGet
+        |> HttpBuilder.get
         |> Api.Util.withAccessToken accessToken
-        |> Api.Util.sendDefJsonApi assembleMe
+        |> Api.Util.withExpectJsonApi assembleMe
+        |> HttpBuilder.toTask
         |> Api.Util.attempt AuthFailed GotMe
         |> Cmd.map wrapMsg
 
 
 createProposal : NewProposal -> String -> (Msg -> a) -> Cmd a
 createProposal proposalInput accessToken wrapMsg =
-    encodeProposalInput proposalInput
-        |> Api.Util.requestPost newProposalEndpoint
+    newProposalEndpoint
+        |> HttpBuilder.post
+        |> HttpBuilder.withJsonBody (encodeProposalInput proposalInput)
         |> Api.Util.withAccessToken accessToken
-        |> Api.Util.sendDefJsonApi assembleProposal
+        |> Api.Util.withExpectJsonApi assembleProposal
+        |> HttpBuilder.toTask
         |> Api.Util.attempt ProposalCreationFailed ProposalCreated
         |> Cmd.map wrapMsg
 
@@ -257,10 +262,12 @@ createProposal proposalInput accessToken wrapMsg =
 supportProposal : String -> Bool -> String -> (Msg -> a) -> Cmd a
 supportProposal id newState accessToken wrapMsg =
     -- ToDo: Send DELETE request to remove support (if newState == False)
-    encodeSupportProposal id
-        |> Api.Util.requestPost supportProposalEndpoint
+    supportProposalEndpoint
+        |> HttpBuilder.post
+        |> HttpBuilder.withJsonBody (encodeSupportProposal id)
         |> Api.Util.withAccessToken accessToken
-        |> Api.Util.sendDefJsonApi assembleSupport
+        |> Api.Util.withExpectJsonApi assembleSupport
+        |> HttpBuilder.toTask
         |> Api.Util.attempt SupportProposalFailed ProposalSupported
         |> Cmd.map wrapMsg
 
@@ -268,9 +275,10 @@ supportProposal id newState accessToken wrapMsg =
 getProposal : String -> String -> (Msg -> a) -> Cmd a
 getProposal id accessToken wrapMsg =
     getProposalEndpoint id
-        |> Api.Util.requestGet
+        |> HttpBuilder.get
         |> Api.Util.withAccessToken accessToken
-        |> Api.Util.sendDefJsonApi assembleProposal
+        |> Api.Util.withExpectJsonApi assembleProposal
+        |> HttpBuilder.toTask
         |> Api.Util.attempt GettingProposalFailed GotProposal
         |> Cmd.map wrapMsg
 
@@ -278,8 +286,9 @@ getProposal id accessToken wrapMsg =
 getProposalList : String -> (Msg -> a) -> Cmd a
 getProposalList accessToken wrapMsg =
     getProposalListEndpoint
-        |> Api.Util.requestGet
+        |> HttpBuilder.get
         |> Api.Util.withAccessToken accessToken
-        |> Api.Util.sendDefJsonApi assembleProposalList
+        |> Api.Util.withExpectJsonApi assembleProposalList
+        |> HttpBuilder.toTask
         |> Api.Util.attempt GettingProposalListFailed GotProposalList
         |> Cmd.map wrapMsg
