@@ -36,7 +36,7 @@ withAccessToken accessToken =
 -}
 withExpectJsonApi :
     (JsonApi.Document -> Result String a)
-    -> HttpBuilder.RequestBuilder b
+    -> HttpBuilder.RequestBuilder ()
     -> HttpBuilder.RequestBuilder a
 withExpectJsonApi assembleResponse requestBuilder =
     requestBuilder
