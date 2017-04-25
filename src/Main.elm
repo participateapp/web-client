@@ -1,7 +1,6 @@
 port module Main exposing (main)
 
 import Html exposing (..)
-import Html.App as App
 import Html.Events exposing (..)
 import Html.Attributes exposing (style, href, class, disabled, id)
 import Material
@@ -338,8 +337,8 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
-        Mdl msg' ->
-            Material.update msg' model
+        Mdl mdlMsg ->
+            Material.update mdlMsg model
 
         SnackbarMsg snackMsg ->
             -- Snackbar currently has no builtin elm-mdl-component support.
@@ -565,7 +564,7 @@ viewLandingPage model =
                     "Ensured Representation"
                     "Representation is ensured for participants who are less involved (be it for lack of time, inclination or of knowledge) through fluid delegation of support, in a liquid democracy."
                 ]
-        , Options.styled' section
+        , Options.styled_ section
             [ Color.background <| Color.color Color.Grey Color.S200 ]
             [ id "main-lower" ]
             [ grid [ Options.cs "content-grid" ]
@@ -722,7 +721,7 @@ titleField model =
             model.mdl
             ([ Textfield.label "Title"
              , Textfield.floatingLabel
-             , Textfield.text'
+             , Textfield.text_
              , Textfield.value <| Maybe.withDefault "" title.value
              , Textfield.onInput <| FormMsg << (Form.Field.Text >> Form.Input title.path)
              , Textfield.onFocus <| FormMsg <| Form.Focus title.path

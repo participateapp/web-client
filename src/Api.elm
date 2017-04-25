@@ -160,7 +160,7 @@ type alias DecodedProposalAttributes =
 
 decodeProposalAttributes : Decoder DecodedProposalAttributes
 decodeProposalAttributes =
-    Decode.object5 DecodedProposalAttributes
+    Decode.map5 DecodedProposalAttributes
         (Decode.at [ "title" ] Decode.string)
         (Decode.at [ "body" ] Decode.string)
         (Decode.at [ "support-count" ] Decode.int)
@@ -215,7 +215,7 @@ assembleSupport document =
 
 decodeProposalSupportAttributes : Decoder ( Int, Bool )
 decodeProposalSupportAttributes =
-    Decode.object2 (,)
+    Decode.map2 (,)
         (Decode.at [ "support-count" ] Decode.int)
         (Decode.at [ "supported-by-me" ] Decode.bool)
 
@@ -230,7 +230,7 @@ authenticate authCode wrapMsg =
         |> Api.Util.requestPost tokenEndpoint
         |> JsonApi.Extra.withHeader "Content-Type" "application/json"
         |> Api.Util.sendDefJson decodeToken
-        |> Task.perform AuthFailed GotAccessToken
+        |> Api.Util.attempt AuthFailed GotAccessToken
         |> Cmd.map wrapMsg
 
 
@@ -240,7 +240,7 @@ getMe accessToken wrapMsg =
         |> Api.Util.requestGet
         |> Api.Util.withAccessToken accessToken
         |> Api.Util.sendDefJsonApi assembleMe
-        |> Task.perform AuthFailed GotMe
+        |> Api.Util.attempt AuthFailed GotMe
         |> Cmd.map wrapMsg
 
 
@@ -250,7 +250,7 @@ createProposal proposalInput accessToken wrapMsg =
         |> Api.Util.requestPost newProposalEndpoint
         |> Api.Util.withAccessToken accessToken
         |> Api.Util.sendDefJsonApi assembleProposal
-        |> Task.perform ProposalCreationFailed ProposalCreated
+        |> Api.Util.attempt ProposalCreationFailed ProposalCreated
         |> Cmd.map wrapMsg
 
 
@@ -261,7 +261,7 @@ supportProposal id newState accessToken wrapMsg =
         |> Api.Util.requestPost supportProposalEndpoint
         |> Api.Util.withAccessToken accessToken
         |> Api.Util.sendDefJsonApi assembleSupport
-        |> Task.perform SupportProposalFailed ProposalSupported
+        |> Api.Util.attempt SupportProposalFailed ProposalSupported
         |> Cmd.map wrapMsg
 
 
@@ -271,7 +271,7 @@ getProposal id accessToken wrapMsg =
         |> Api.Util.requestGet
         |> Api.Util.withAccessToken accessToken
         |> Api.Util.sendDefJsonApi assembleProposal
-        |> Task.perform GettingProposalFailed GotProposal
+        |> Api.Util.attempt GettingProposalFailed GotProposal
         |> Cmd.map wrapMsg
 
 
@@ -281,5 +281,5 @@ getProposalList accessToken wrapMsg =
         |> Api.Util.requestGet
         |> Api.Util.withAccessToken accessToken
         |> Api.Util.sendDefJsonApi assembleProposalList
-        |> Task.perform GettingProposalListFailed GotProposalList
+        |> Api.Util.attempt GettingProposalListFailed GotProposalList
         |> Cmd.map wrapMsg

@@ -1,5 +1,6 @@
 module Api.Util exposing (..)
 
+import Result.Extra
 import Task exposing (Task)
 import Json.Decode as Decode
 import Http
@@ -9,10 +10,27 @@ import JsonApi.Extra
 
 {-| Infix notation for Result.andThen. Makes andThen-chains look nicer.
 -}
+
+
+
+-- ToDo: Elm 0.18 encourages using
+--            |> Result.andThen
+--       Compare this style (as soon the ongoing Elm 0.18 port is type-checking)
+--       to the infix version here.
+
+
 infixl 0 :>
 (:>) : Result x a -> (a -> Result x b) -> Result x b
 (:>) =
-    Result.andThen
+    flip Result.andThen
+
+
+{-| Convenience version of `Task.attempt` that performs Tasks that may fail.
+That's the same as in `elm-lang/core 4.x` (Elm 0.17)
+-}
+attempt : (e -> msg) -> (a -> msg) -> Task e a -> Cmd msg
+attempt errorTagger successTagger task =
+    Task.attempt (Result.extra.unpack errorTagger successTagger) task
 
 
 {-| Insert accessToken into Http header
