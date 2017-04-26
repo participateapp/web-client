@@ -86,7 +86,6 @@ port storeAccessToken : Maybe String -> Cmd msg
 type alias Model =
     { route : Route
     , accessToken : String
-    , error : Maybe String
     , me : Me
     , form : Form () NewProposal
     , mdl : Material.Model
@@ -100,7 +99,6 @@ initialModel : String -> Model
 initialModel accessToken =
     { route = NotFoundRoute
     , accessToken = accessToken
-    , error = Nothing
     , me = { name = "" }
     , form = Form.initial [] validate
     , mdl = Material.model
@@ -152,10 +150,29 @@ withSnackbarNote snackContent ( model, cmd ) =
 withHttpErrorResponse : String -> Http.Error -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 withHttpErrorResponse contextText httpError ( model, cmd ) =
     withSnackbarNote
-        (contextText ++ ": " ++ toString httpError)
-        ( { model | error = Just <| toString httpError } |> progressDone
+        (contextText ++ ": " ++ httpErrorToNoticeString httpError)
+        ( model |> progressDone
         , Cmd.none
         )
+
+
+httpErrorToNoticeString : Http.Error -> String
+httpErrorToNoticeString httpError =
+    case httpError of
+        Http.BadStatus response ->
+            response.status.message ++ " (" ++ toString response.status.code ++ ")"
+
+        Http.BadPayload description _ ->
+            "Bad payload (" ++ description ++ ")"
+
+        Http.BadUrl description ->
+            "Bad URL (" ++ description ++ ")"
+
+        Http.Timeout ->
+            "Timeout"
+
+        Http.NetworkError ->
+            "Network Error"
 
 
 updateProposalSupport : Support -> Model -> Model
