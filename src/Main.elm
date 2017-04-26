@@ -25,7 +25,7 @@ import Form exposing (Form)
 import Form.Field
 import Form.Input
 import Form.Error
-import Form.Validate exposing (Validation, form1, form2, get, string)
+import Form.Validate exposing (Validation)
 import Dict exposing (Dict)
 import Set exposing (Set)
 import String
@@ -332,7 +332,7 @@ update msg model =
                     model ! [ Api.createProposal proposalInput model.accessToken ApiMsg ]
 
                 _ ->
-                    ( { model | form = Form.update formMsg model.form }, Cmd.none )
+                    ( { model | form = Form.update validate formMsg model.form }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
@@ -368,9 +368,9 @@ update msg model =
 
 validate : Validation () NewProposal
 validate =
-    form2 NewProposal
-        (get "title" string)
-        (get "body" string)
+    Form.Validate.map2 NewProposal
+        (Form.Validate.field "title" Form.Validate.string)
+        (Form.Validate.field "body" Form.Validate.string)
 
 
 
@@ -723,9 +723,9 @@ titleField model =
              , Textfield.floatingLabel
              , Textfield.text_
              , Textfield.value <| Maybe.withDefault "" title.value
-             , Textfield.onInput <| FormMsg << (Form.Field.Text >> Form.Input title.path)
-             , Textfield.onFocus <| FormMsg <| Form.Focus title.path
-             , Textfield.onBlur <| FormMsg <| Form.Blur title.path
+             , Textfield.onInput <| Form.Field.String >> Form.Input title.path Form.Text >> FormMsg
+             , Textfield.onFocus <| FormMsg (Form.Focus title.path)
+             , Textfield.onBlur <| FormMsg (Form.Blur title.path)
              ]
                 ++ conditionalProperties
             )
@@ -761,9 +761,9 @@ bodyField model =
              , Textfield.textarea
              , Textfield.rows 6
              , Textfield.value <| Maybe.withDefault "" body.value
-             , Textfield.onInput <| FormMsg << (Form.Field.Text >> Form.Input body.path)
-             , Textfield.onFocus <| FormMsg <| Form.Focus body.path
-             , Textfield.onBlur <| FormMsg <| Form.Blur body.path
+             , Textfield.onInput <| Form.Field.String >> Form.Input body.path Form.Textarea >> FormMsg
+             , Textfield.onFocus <| FormMsg (Form.Focus body.path)
+             , Textfield.onBlur <| FormMsg (Form.Blur body.path)
              ]
                 ++ conditionalProperties
             )
