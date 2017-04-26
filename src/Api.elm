@@ -250,7 +250,7 @@ createProposal : NewProposal -> String -> (Msg -> a) -> Cmd a
 createProposal proposalInput accessToken wrapMsg =
     newProposalEndpoint
         |> HttpBuilder.post
-        |> HttpBuilder.withJsonBody (encodeProposalInput proposalInput)
+        |> Api.Util.withJsonApiBody (encodeProposalInput proposalInput)
         |> Api.Util.withAccessToken accessToken
         |> Api.Util.withExpectJsonApi assembleProposal
         |> HttpBuilder.toTask
@@ -263,7 +263,7 @@ supportProposal id newState accessToken wrapMsg =
     -- ToDo: Send DELETE request to remove support (if newState == False)
     supportProposalEndpoint
         |> HttpBuilder.post
-        |> HttpBuilder.withJsonBody (encodeSupportProposal id)
+        |> Api.Util.withJsonApiBody (encodeSupportProposal id)
         |> Api.Util.withAccessToken accessToken
         |> Api.Util.withExpectJsonApi assembleSupport
         |> HttpBuilder.toTask

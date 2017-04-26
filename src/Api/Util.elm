@@ -2,6 +2,7 @@ module Api.Util exposing (..)
 
 import Result.Extra
 import Task exposing (Task)
+import Json.Encode as Encode
 import Json.Decode as Decode
 import Http
 import HttpBuilder
@@ -32,6 +33,16 @@ withAccessToken accessToken =
     HttpBuilder.withHeader "Authorization" ("Bearer " ++ accessToken)
 
 
+{-| Insert a JSON value as the body of a RequestBuilder.
+This will set the `Content-Type: application/vnd.api+json` header,
+as required by JSON API standard.
+-}
+withJsonApiBody : Encode.Value -> HttpBuilder.RequestBuilder a -> HttpBuilder.RequestBuilder a
+withJsonApiBody jsonValue =
+    HttpBuilder.withBody <|
+        Http.stringBody "application/vnd.api+json" (Encode.encode 0 jsonValue)
+
+
 {-| Expect the response body to be a JsonApi Document.
 -}
 withExpectJsonApi :
@@ -40,7 +51,6 @@ withExpectJsonApi :
     -> HttpBuilder.RequestBuilder a
 withExpectJsonApi assembleResponse requestBuilder =
     requestBuilder
-        |> HttpBuilder.withHeader "Content-Type" "application/vnd.api+json"
         |> HttpBuilder.withHeader "Accept" "application/vnd.api+json"
         |> HttpBuilder.withExpect
             (Http.expectJson
