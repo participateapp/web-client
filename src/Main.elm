@@ -338,7 +338,7 @@ update msg model =
             ( model, Cmd.none )
 
         Mdl mdlMsg ->
-            Material.update mdlMsg model
+            Material.update Mdl mdlMsg model
 
         SnackbarMsg snackMsg ->
             -- Snackbar currently has no builtin elm-mdl-component support.
@@ -416,7 +416,7 @@ viewHeader model =
                         model.mdl
                         [ Options.id "new-proposal"
                         , Button.colored
-                        , Button.onClick <| NavigateToPath "/new-proposal"
+                        , Options.onClick <| NavigateToPath "/new-proposal"
                         ]
                         [ text "New proposal" ]
                     ]
@@ -684,7 +684,7 @@ viewNewProposal model =
                         [ Button.raised
                         , Button.ripple
                         , Button.colored
-                        , Button.onClick <| FormMsg <| Form.Submit
+                        , Options.onClick <| FormMsg <| Form.Submit
                         ]
                         [ text "Save" ]
                     , Layout.spacer
@@ -723,12 +723,13 @@ titleField model =
              , Textfield.floatingLabel
              , Textfield.text_
              , Textfield.value <| Maybe.withDefault "" title.value
-             , Textfield.onInput <| Form.Field.String >> Form.Input title.path Form.Text >> FormMsg
-             , Textfield.onFocus <| FormMsg (Form.Focus title.path)
-             , Textfield.onBlur <| FormMsg (Form.Blur title.path)
+             , Options.onInput <| Form.Field.String >> Form.Input title.path Form.Text >> FormMsg
+             , Options.onFocus <| FormMsg (Form.Focus title.path)
+             , Options.onBlur <| FormMsg (Form.Blur title.path)
              ]
                 ++ conditionalProperties
             )
+            []
 
 
 bodyField : Model -> Html Msg
@@ -761,12 +762,13 @@ bodyField model =
              , Textfield.textarea
              , Textfield.rows 6
              , Textfield.value <| Maybe.withDefault "" body.value
-             , Textfield.onInput <| Form.Field.String >> Form.Input body.path Form.Textarea >> FormMsg
-             , Textfield.onFocus <| FormMsg (Form.Focus body.path)
-             , Textfield.onBlur <| FormMsg (Form.Blur body.path)
+             , Options.onInput <| Form.Field.String >> Form.Input body.path Form.Textarea >> FormMsg
+             , Options.onFocus <| FormMsg (Form.Focus body.path)
+             , Options.onBlur <| FormMsg (Form.Blur body.path)
              ]
                 ++ conditionalProperties
             )
+            []
 
 
 viewProposal : Model -> String -> Html Msg
@@ -815,7 +817,7 @@ viewProposal model id =
                                 model.mdl
                                 ([ Options.id "support-proposal"
                                  , Button.colored
-                                 , Button.onClick <| SupportProposal id (not proposal.supportedByMe)
+                                 , Options.onClick <| SupportProposal id (not proposal.supportedByMe)
                                  ]
                                     ++ if proposal.supportedByMe then
                                         [ Color.text <| Color.color Color.Green Color.S500 ]
