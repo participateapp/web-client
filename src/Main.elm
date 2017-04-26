@@ -29,11 +29,9 @@ import Form.Validate exposing (Validation)
 import Dict exposing (Dict)
 import Set exposing (Set)
 import String
-import Navigation
-import UrlParser exposing ((</>))
+import Navigation exposing (Location)
+import UrlParser exposing ((</>), (<?>))
 import Http
-import Hop
-import Hop.Types exposing (Config, Address, Query)
 import Types exposing (..)
 import Config
 import Api
@@ -46,88 +44,32 @@ type Route
     = Home
     | NewProposalRoute
     | ProposalRoute String
-    | FacebookRedirect
+    | FacebookRedirect (Maybe String)
     | NotFoundRoute
 
 
 routes : UrlParser.Parser (Route -> a) a
 routes =
     UrlParser.oneOf
-        [ UrlParser.format Home (UrlParser.s "")
-        , UrlParser.format NewProposalRoute (UrlParser.s "new-proposal")
-        , UrlParser.format ProposalRoute (UrlParser.s "proposals" </> UrlParser.string)
-        , UrlParser.format FacebookRedirect (UrlParser.s "facebook_redirect")
+        [ UrlParser.map Home (UrlParser.top)
+        , UrlParser.map NewProposalRoute (UrlParser.s "new-proposal")
+        , UrlParser.map ProposalRoute (UrlParser.s "proposals" </> UrlParser.string)
+        , UrlParser.map FacebookRedirect
+            (UrlParser.s "facebook_redirect" <?> UrlParser.stringParam "code")
         ]
 
 
-hopConfig : Config
-hopConfig =
-    { basePath = ""
-    , hash = False
-    }
+routeNeedsAccess : Route -> Bool
+routeNeedsAccess route =
+    case route of
+        Home ->
+            False
 
+        FacebookRedirect _ ->
+            False
 
-urlParser : Navigation.Parser ( Route, Address )
-urlParser =
-    let
-        parse path =
-            path
-                |> UrlParser.parse identity routes
-                |> Result.withDefault NotFoundRoute
-
-        resolver =
-            Hop.makeResolver hopConfig parse
-    in
-        Navigation.makeParser (.href >> resolver)
-
-
-urlUpdate : ( Route, Address ) -> Model -> ( Model, Cmd Msg )
-urlUpdate ( route, address ) model =
-    let
-        model1 =
-            { model | route = route, address = address }
-
-        model1ps =
-            model1 |> progressStart
-
-        _ =
-            Debug.log "urlUpdate" ( route, address )
-    in
-        if String.isEmpty model.accessToken && route /= Home then
-            ( model1ps, Navigation.newUrl <| Hop.outputFromPath hopConfig "/" )
-        else
-            case route of
-                ProposalRoute id ->
-                    case Dict.get id model.proposals of
-                        Nothing ->
-                            ( model1ps
-                            , Api.getProposal id model.accessToken ApiMsg
-                            )
-
-                        Just _ ->
-                            ( model1, Cmd.none )
-
-                Home ->
-                    ( model1ps
-                    , Api.getProposalList model.accessToken ApiMsg
-                    )
-
-                _ ->
-                    ( model1, Cmd.none )
-
-
-checkForAuthCode : Address -> Cmd Msg
-checkForAuthCode address =
-    let
-        authCode =
-            address.query |> Dict.get "code"
-    in
-        case authCode of
-            Just code ->
-                Api.authenticate code ApiMsg
-
-            Nothing ->
-                Cmd.none
+        _ ->
+            True
 
 
 
@@ -143,7 +85,6 @@ port storeAccessToken : Maybe String -> Cmd msg
 
 type alias Model =
     { route : Route
-    , address : Address
     , accessToken : String
     , error : Maybe String
     , me : Me
@@ -155,10 +96,9 @@ type alias Model =
     }
 
 
-initialModel : String -> Route -> Address -> Model
-initialModel accessToken route address =
-    { route = route
-    , address = address
+initialModel : String -> Model
+initialModel accessToken =
+    { route = NotFoundRoute
     , accessToken = accessToken
     , error = Nothing
     , me = { name = "" }
@@ -175,7 +115,8 @@ initialModel accessToken route address =
 
 
 type Msg
-    = ApiMsg Api.Msg
+    = UrlChange Location
+    | ApiMsg Api.Msg
     | NavigateToPath String
     | FormMsg Form.Msg
     | NoOp
@@ -248,6 +189,53 @@ progressDone model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        UrlChange location ->
+            let
+                route =
+                    UrlParser.parsePath routes location
+                        |> Maybe.withDefault NotFoundRoute
+
+                model1 =
+                    { model | route = route }
+
+                model1ps =
+                    model1 |> progressStart
+
+                _ =
+                    Debug.log "UrlChange" ( route, location.href )
+            in
+                if String.isEmpty model.accessToken && routeNeedsAccess route then
+                    ( model1ps, Navigation.newUrl "/" )
+                else
+                    case route of
+                        FacebookRedirect maybeCode ->
+                            ( model1ps
+                            , case maybeCode of
+                                Just code ->
+                                    Api.authenticate code ApiMsg
+
+                                Nothing ->
+                                    Navigation.newUrl "/"
+                            )
+
+                        ProposalRoute id ->
+                            case Dict.get id model.proposals of
+                                Nothing ->
+                                    ( model1ps
+                                    , Api.getProposal id model.accessToken ApiMsg
+                                    )
+
+                                Just _ ->
+                                    ( model1, Cmd.none )
+
+                        Home ->
+                            ( model1ps
+                            , Api.getProposalList model.accessToken ApiMsg
+                            )
+
+                        _ ->
+                            ( model1, Cmd.none )
+
         ApiMsg apiMsg ->
             case apiMsg of
                 Api.GotAccessToken accessToken ->
@@ -266,14 +254,13 @@ update msg model =
 
                 Api.GotMe me ->
                     ( { model | me = me } |> progressDone
-                    , Navigation.newUrl <| Hop.outputFromPath hopConfig "/"
+                    , Navigation.newUrl "/"
                     )
 
                 Api.ProposalCreated proposal ->
                     ( model
                         |> addProposal proposal
-                    , Navigation.newUrl <|
-                        Hop.output hopConfig { path = [ "proposals", proposal.id ], query = Dict.empty }
+                    , Navigation.newUrl ("/proposals/" ++ proposal.id)
                     )
                         |> withSnackbarNote "Proposal saved"
 
@@ -323,7 +310,7 @@ update msg model =
 
         NavigateToPath path ->
             ( model
-            , Navigation.newUrl <| Hop.outputFromPath hopConfig path
+            , Navigation.newUrl path
             )
 
         FormMsg formMsg ->
@@ -361,7 +348,7 @@ update msg model =
             ( { model | accessToken = "" }
             , Cmd.batch
                 [ storeAccessToken Nothing
-                , Navigation.newUrl <| Hop.outputFromPath hopConfig "/"
+                , Navigation.newUrl "/"
                 ]
             )
 
@@ -492,11 +479,11 @@ viewMain model =
             div []
                 [ text <| "Not found" ]
 
-        FacebookRedirect ->
+        FacebookRedirect _ ->
             div []
                 [ text <| "Authenticating, please wait..." ]
     , viewFooter model
-    , Snackbar.view model.snackbar |> App.map SnackbarMsg
+    , Snackbar.view model.snackbar |> Html.map SnackbarMsg
     ]
 
 
@@ -917,30 +904,28 @@ type alias Flags =
     { accessToken : Maybe String }
 
 
-init : Flags -> ( Route, Address ) -> ( Model, Cmd Msg )
-init flags ( route, address ) =
+init : Flags -> Location -> ( Model, Cmd Msg )
+init flags location =
     let
         model0 =
-            initialModel (Maybe.withDefault "" flags.accessToken) route address
+            initialModel (Maybe.withDefault "" flags.accessToken)
 
         ( model1, cmd1 ) =
-            urlUpdate ( route, address ) model0
+            update (UrlChange location) model0
     in
         ( model1
         , Cmd.batch
             [ cmd1
-            , checkForAuthCode address
             , Layout.sub0 Mdl
             ]
         )
 
 
-main : Program Flags
+main : Program Flags Model Msg
 main =
-    Navigation.programWithFlags urlParser
+    Navigation.programWithFlags UrlChange
         { init = init
         , update = update
-        , urlUpdate = urlUpdate
         , subscriptions =
             \model ->
                 Sub.batch
