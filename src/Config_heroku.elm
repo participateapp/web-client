@@ -6,11 +6,6 @@ baseRoot =
     "https://participateapp.github.io"
 
 
-basePath : String
-basePath =
-    ""
-
-
 facebookRedirectPath : String
 facebookRedirectPath =
     "facebook_redirect"

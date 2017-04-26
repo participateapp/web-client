@@ -6,11 +6,6 @@ baseRoot =
     "http://localhost:3000"
 
 
-basePath : String
-basePath =
-    ""
-
-
 facebookRedirectPath : String
 facebookRedirectPath =
     "facebook_redirect"

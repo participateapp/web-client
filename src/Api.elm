@@ -78,7 +78,6 @@ facebookAuthUrl =
     let
         facebookRedirectUri =
             Config.baseRoot
-                ++ Config.basePath
                 ++ "/"
                 ++ Config.facebookRedirectPath
     in
