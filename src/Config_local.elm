@@ -1,24 +1,21 @@
 module Config exposing (..)
 
 
+baseRoot : String
 baseRoot =
-    -- "https://oliverbarnes.github.io"
     "http://localhost:3000"
 
 
-basePath =
-    -- "/participate"
-    ""
-
-
+facebookRedirectPath : String
 facebookRedirectPath =
     "facebook_redirect"
 
 
+facebookClientId : String
 facebookClientId =
     "1583083701926004"
 
 
+apiUrl : String
 apiUrl =
-    -- "https://participate-api.herokuapp.com"
     "http://localhost:4000"

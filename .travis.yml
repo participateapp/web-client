@@ -39,7 +39,7 @@ before_install:
     fi
 
 install:
-  - npm install -g elm@0.17.1
+  - npm install -g elm@0.18.0
   - npm install
   - mv $(npm config get prefix)/bin/elm-make $(npm config get prefix)/bin/elm-make-org
   - printf '%s\n\n' '#!/bin/bash' 'echo "Running elm-make with sysconfcpus -n 2"' '$TRAVIS_BUILD_DIR/sysconfcpus/bin/sysconfcpus -n 2 elm-make-org "$@"' > $(npm config get prefix)/bin/elm-make

@@ -1,7 +1,6 @@
 port module Main exposing (main)
 
 import Html exposing (..)
-import Html.App as App
 import Html.Events exposing (..)
 import Html.Attributes exposing (style, href, class, disabled, id)
 import Material
@@ -26,17 +25,15 @@ import Form exposing (Form)
 import Form.Field
 import Form.Input
 import Form.Error
-import Form.Validate exposing (Validation, form1, form2, get, string)
+import Form.Validate exposing (Validation)
 import Dict exposing (Dict)
 import Set exposing (Set)
 import String
-import Navigation
-import UrlParser exposing ((</>))
+import Navigation exposing (Location)
+import UrlParser exposing ((</>), (<?>))
 import Http
-import Hop
-import Hop.Types exposing (Config, Address, Query)
 import Types exposing (..)
-import Config exposing (basePath)
+import Config
 import Api
 
 
@@ -47,88 +44,32 @@ type Route
     = Home
     | NewProposalRoute
     | ProposalRoute String
-    | FacebookRedirect
+    | FacebookRedirect (Maybe String)
     | NotFoundRoute
 
 
 routes : UrlParser.Parser (Route -> a) a
 routes =
     UrlParser.oneOf
-        [ UrlParser.format Home (UrlParser.s "")
-        , UrlParser.format NewProposalRoute (UrlParser.s "new-proposal")
-        , UrlParser.format ProposalRoute (UrlParser.s "proposals" </> UrlParser.string)
-        , UrlParser.format FacebookRedirect (UrlParser.s "facebook_redirect")
+        [ UrlParser.map Home (UrlParser.top)
+        , UrlParser.map NewProposalRoute (UrlParser.s "new-proposal")
+        , UrlParser.map ProposalRoute (UrlParser.s "proposals" </> UrlParser.string)
+        , UrlParser.map FacebookRedirect
+            (UrlParser.s "facebook_redirect" <?> UrlParser.stringParam "code")
         ]
 
 
-hopConfig : Config
-hopConfig =
-    { basePath = basePath
-    , hash = False
-    }
+routeNeedsAccess : Route -> Bool
+routeNeedsAccess route =
+    case route of
+        Home ->
+            False
 
+        FacebookRedirect _ ->
+            False
 
-urlParser : Navigation.Parser ( Route, Address )
-urlParser =
-    let
-        parse path =
-            path
-                |> UrlParser.parse identity routes
-                |> Result.withDefault NotFoundRoute
-
-        resolver =
-            Hop.makeResolver hopConfig parse
-    in
-        Navigation.makeParser (.href >> resolver)
-
-
-urlUpdate : ( Route, Address ) -> Model -> ( Model, Cmd Msg )
-urlUpdate ( route, address ) model =
-    let
-        model1 =
-            { model | route = route, address = address }
-
-        model1ps =
-            model1 |> progressStart
-
-        _ =
-            Debug.log "urlUpdate" ( route, address )
-    in
-        if String.isEmpty model.accessToken && route /= Home then
-            ( model1ps, Navigation.newUrl <| Hop.outputFromPath hopConfig "/" )
-        else
-            case route of
-                ProposalRoute id ->
-                    case Dict.get id model.proposals of
-                        Nothing ->
-                            ( model1ps
-                            , Api.getProposal id model.accessToken ApiMsg
-                            )
-
-                        Just _ ->
-                            ( model1, Cmd.none )
-
-                Home ->
-                    ( model1ps
-                    , Api.getProposalList model.accessToken ApiMsg
-                    )
-
-                _ ->
-                    ( model1, Cmd.none )
-
-
-checkForAuthCode : Address -> Cmd Msg
-checkForAuthCode address =
-    let
-        authCode =
-            address.query |> Dict.get "code"
-    in
-        case authCode of
-            Just code ->
-                Api.authenticate code ApiMsg
-
-            Nothing ->
-                Cmd.none
+        _ ->
+            True
 
 
 
@@ -144,9 +85,7 @@ port storeAccessToken : Maybe String -> Cmd msg
 
 type alias Model =
     { route : Route
-    , address : Address
     , accessToken : String
-    , error : Maybe String
     , me : Me
     , form : Form () NewProposal
     , mdl : Material.Model
@@ -156,12 +95,10 @@ type alias Model =
     }
 
 
-initialModel : String -> Route -> Address -> Model
-initialModel accessToken route address =
-    { route = route
-    , address = address
+initialModel : String -> Model
+initialModel accessToken =
+    { route = NotFoundRoute
     , accessToken = accessToken
-    , error = Nothing
     , me = { name = "" }
     , form = Form.initial [] validate
     , mdl = Material.model
@@ -176,7 +113,8 @@ initialModel accessToken route address =
 
 
 type Msg
-    = ApiMsg Api.Msg
+    = UrlChange Location
+    | ApiMsg Api.Msg
     | NavigateToPath String
     | FormMsg Form.Msg
     | NoOp
@@ -212,10 +150,29 @@ withSnackbarNote snackContent ( model, cmd ) =
 withHttpErrorResponse : String -> Http.Error -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 withHttpErrorResponse contextText httpError ( model, cmd ) =
     withSnackbarNote
-        (contextText ++ ": " ++ toString httpError)
-        ( { model | error = Just <| toString httpError } |> progressDone
+        (contextText ++ ": " ++ httpErrorToNoticeString httpError)
+        ( model |> progressDone
         , Cmd.none
         )
+
+
+httpErrorToNoticeString : Http.Error -> String
+httpErrorToNoticeString httpError =
+    case httpError of
+        Http.BadStatus response ->
+            response.status.message ++ " (" ++ toString response.status.code ++ ")"
+
+        Http.BadPayload description _ ->
+            "Bad payload (" ++ description ++ ")"
+
+        Http.BadUrl description ->
+            "Bad URL (" ++ description ++ ")"
+
+        Http.Timeout ->
+            "Timeout"
+
+        Http.NetworkError ->
+            "Network Error"
 
 
 updateProposalSupport : Support -> Model -> Model
@@ -249,6 +206,53 @@ progressDone model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        UrlChange location ->
+            let
+                route =
+                    UrlParser.parsePath routes location
+                        |> Maybe.withDefault NotFoundRoute
+
+                model1 =
+                    { model | route = route }
+
+                model1ps =
+                    model1 |> progressStart
+
+                _ =
+                    Debug.log "UrlChange" ( route, location.href )
+            in
+                if String.isEmpty model.accessToken && routeNeedsAccess route then
+                    ( model1ps, Navigation.newUrl "/" )
+                else
+                    case route of
+                        FacebookRedirect maybeCode ->
+                            ( model1ps
+                            , case maybeCode of
+                                Just code ->
+                                    Api.authenticate code ApiMsg
+
+                                Nothing ->
+                                    Navigation.newUrl "/"
+                            )
+
+                        ProposalRoute id ->
+                            case Dict.get id model.proposals of
+                                Nothing ->
+                                    ( model1ps
+                                    , Api.getProposal id model.accessToken ApiMsg
+                                    )
+
+                                Just _ ->
+                                    ( model1, Cmd.none )
+
+                        Home ->
+                            ( model1ps
+                            , Api.getProposalList model.accessToken ApiMsg
+                            )
+
+                        _ ->
+                            ( model1, Cmd.none )
+
         ApiMsg apiMsg ->
             case apiMsg of
                 Api.GotAccessToken accessToken ->
@@ -267,14 +271,13 @@ update msg model =
 
                 Api.GotMe me ->
                     ( { model | me = me } |> progressDone
-                    , Navigation.newUrl <| Hop.outputFromPath hopConfig "/"
+                    , Navigation.newUrl "/"
                     )
 
                 Api.ProposalCreated proposal ->
                     ( model
                         |> addProposal proposal
-                    , Navigation.newUrl <|
-                        Hop.output hopConfig { path = [ "proposals", proposal.id ], query = Dict.empty }
+                    , Navigation.newUrl ("/proposals/" ++ proposal.id)
                     )
                         |> withSnackbarNote "Proposal saved"
 
@@ -324,7 +327,7 @@ update msg model =
 
         NavigateToPath path ->
             ( model
-            , Navigation.newUrl <| Hop.outputFromPath hopConfig path
+            , Navigation.newUrl path
             )
 
         FormMsg formMsg ->
@@ -333,13 +336,13 @@ update msg model =
                     model ! [ Api.createProposal proposalInput model.accessToken ApiMsg ]
 
                 _ ->
-                    ( { model | form = Form.update formMsg model.form }, Cmd.none )
+                    ( { model | form = Form.update validate formMsg model.form }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
 
-        Mdl msg' ->
-            Material.update msg' model
+        Mdl mdlMsg ->
+            Material.update Mdl mdlMsg model
 
         SnackbarMsg snackMsg ->
             -- Snackbar currently has no builtin elm-mdl-component support.
@@ -362,16 +365,16 @@ update msg model =
             ( { model | accessToken = "" }
             , Cmd.batch
                 [ storeAccessToken Nothing
-                , Navigation.newUrl <| Hop.outputFromPath hopConfig "/"
+                , Navigation.newUrl "/"
                 ]
             )
 
 
 validate : Validation () NewProposal
 validate =
-    form2 NewProposal
-        (get "title" string)
-        (get "body" string)
+    Form.Validate.map2 NewProposal
+        (Form.Validate.field "title" Form.Validate.string)
+        (Form.Validate.field "body" Form.Validate.string)
 
 
 
@@ -417,7 +420,7 @@ viewHeader model =
                         model.mdl
                         [ Options.id "new-proposal"
                         , Button.colored
-                        , Button.onClick <| NavigateToPath "/new-proposal"
+                        , Options.onClick <| NavigateToPath "/new-proposal"
                         ]
                         [ text "New proposal" ]
                     ]
@@ -430,7 +433,7 @@ viewLoginButton : Model -> Html Msg
 viewLoginButton model =
     a [ href Api.facebookAuthUrl ]
         [ img
-            [ Html.Attributes.src <| basePath ++ "/images/facebook-sign-in.png"
+            [ Html.Attributes.src "/images/facebook-sign-in.png"
             , class "login-button-img"
             ]
             []
@@ -493,11 +496,11 @@ viewMain model =
             div []
                 [ text <| "Not found" ]
 
-        FacebookRedirect ->
+        FacebookRedirect _ ->
             div []
                 [ text <| "Authenticating, please wait..." ]
     , viewFooter model
-    , Snackbar.view model.snackbar |> App.map SnackbarMsg
+    , Snackbar.view model.snackbar |> Html.map SnackbarMsg
     ]
 
 
@@ -565,7 +568,7 @@ viewLandingPage model =
                     "Ensured Representation"
                     "Representation is ensured for participants who are less involved (be it for lack of time, inclination or of knowledge) through fluid delegation of support, in a liquid democracy."
                 ]
-        , Options.styled' section
+        , Options.styled_ section
             [ Color.background <| Color.color Color.Grey Color.S200 ]
             [ id "main-lower" ]
             [ grid [ Options.cs "content-grid" ]
@@ -614,11 +617,11 @@ viewFooter model =
                            [ Footer.links [ Options.cs "social-links" ]
                                [ Footer.linkItem [ Footer.href "https://github.com/participateapp/web-client" ]
                                    [ Footer.html <|
-                                       img [ Html.Attributes.src <| basePath ++ "/images/github-circle.png" ] []
+                                       img [ Html.Attributes.src "/images/github-circle.png" ] []
                                    ]
                                , Footer.linkItem [ Footer.href "https://github.com/participateapp/web-client" ]
                                    [ Footer.html <|
-                                       img [ Html.Attributes.src <| basePath ++ "/images/github-circle.png" ] []
+                                       img [ Html.Attributes.src "/images/github-circle.png" ] []
                                    ]
                                ]
                            ]
@@ -627,15 +630,15 @@ viewFooter model =
                             ul [ class "mdl-mini-footer__link-list social-links" ]
                                 [ li []
                                     [ a [ Html.Attributes.href "https://github.com/participateapp/web-client" ]
-                                        [ img [ Html.Attributes.src <| basePath ++ "/images/github-circle.png" ] [] ]
+                                        [ img [ Html.Attributes.src "/images/github-circle.png" ] [] ]
                                     ]
                                 , li []
                                     [ a [ Html.Attributes.href "https://participateapp.slack.com" ]
-                                        [ img [ Html.Attributes.src <| basePath ++ "/images/slack.png" ] [] ]
+                                        [ img [ Html.Attributes.src "/images/slack.png" ] [] ]
                                     ]
                                 , li []
                                     [ a [ Html.Attributes.href "https://twitter.com/digiberber" ]
-                                        [ img [ Html.Attributes.src <| basePath ++ "/images/twitter.png" ] [] ]
+                                        [ img [ Html.Attributes.src "/images/twitter.png" ] [] ]
                                     ]
                                 ]
                         ]
@@ -685,7 +688,7 @@ viewNewProposal model =
                         [ Button.raised
                         , Button.ripple
                         , Button.colored
-                        , Button.onClick <| FormMsg <| Form.Submit
+                        , Options.onClick <| FormMsg <| Form.Submit
                         ]
                         [ text "Save" ]
                     , Layout.spacer
@@ -722,14 +725,15 @@ titleField model =
             model.mdl
             ([ Textfield.label "Title"
              , Textfield.floatingLabel
-             , Textfield.text'
+             , Textfield.text_
              , Textfield.value <| Maybe.withDefault "" title.value
-             , Textfield.onInput <| FormMsg << (Form.Field.Text >> Form.Input title.path)
-             , Textfield.onFocus <| FormMsg <| Form.Focus title.path
-             , Textfield.onBlur <| FormMsg <| Form.Blur title.path
+             , Options.onInput <| Form.Field.String >> Form.Input title.path Form.Text >> FormMsg
+             , Options.onFocus <| FormMsg (Form.Focus title.path)
+             , Options.onBlur <| FormMsg (Form.Blur title.path)
              ]
                 ++ conditionalProperties
             )
+            []
 
 
 bodyField : Model -> Html Msg
@@ -762,12 +766,13 @@ bodyField model =
              , Textfield.textarea
              , Textfield.rows 6
              , Textfield.value <| Maybe.withDefault "" body.value
-             , Textfield.onInput <| FormMsg << (Form.Field.Text >> Form.Input body.path)
-             , Textfield.onFocus <| FormMsg <| Form.Focus body.path
-             , Textfield.onBlur <| FormMsg <| Form.Blur body.path
+             , Options.onInput <| Form.Field.String >> Form.Input body.path Form.Textarea >> FormMsg
+             , Options.onFocus <| FormMsg (Form.Focus body.path)
+             , Options.onBlur <| FormMsg (Form.Blur body.path)
              ]
                 ++ conditionalProperties
             )
+            []
 
 
 viewProposal : Model -> String -> Html Msg
@@ -783,7 +788,7 @@ viewProposal model id =
                         [ span [ class "actions__authored" ]
                             [ img
                                 [ class "mdl-chip__contact"
-                                , Html.Attributes.src <| basePath ++ "/images/john.jpg"
+                                , Html.Attributes.src "/images/john.jpg"
                                 ]
                                 []
                             , span [ class "authored" ]
@@ -816,7 +821,7 @@ viewProposal model id =
                                 model.mdl
                                 ([ Options.id "support-proposal"
                                  , Button.colored
-                                 , Button.onClick <| SupportProposal id (not proposal.supportedByMe)
+                                 , Options.onClick <| SupportProposal id (not proposal.supportedByMe)
                                  ]
                                     ++ if proposal.supportedByMe then
                                         [ Color.text <| Color.color Color.Green Color.S500 ]
@@ -916,30 +921,28 @@ type alias Flags =
     { accessToken : Maybe String }
 
 
-init : Flags -> ( Route, Address ) -> ( Model, Cmd Msg )
-init flags ( route, address ) =
+init : Flags -> Location -> ( Model, Cmd Msg )
+init flags location =
     let
         model0 =
-            initialModel (Maybe.withDefault "" flags.accessToken) route address
+            initialModel (Maybe.withDefault "" flags.accessToken)
 
         ( model1, cmd1 ) =
-            urlUpdate ( route, address ) model0
+            update (UrlChange location) model0
     in
         ( model1
         , Cmd.batch
             [ cmd1
-            , checkForAuthCode address
             , Layout.sub0 Mdl
             ]
         )
 
 
-main : Program Flags
+main : Program Flags Model Msg
 main =
-    Navigation.programWithFlags urlParser
+    Navigation.programWithFlags UrlChange
         { init = init
         , update = update
-        , urlUpdate = urlUpdate
         , subscriptions =
             \model ->
                 Sub.batch
