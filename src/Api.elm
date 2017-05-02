@@ -5,7 +5,7 @@ module Api
         , authenticate
         , getMe
         , createProposal
-        , supportProposal
+        , toggleProposal
         , getProposal
         , getProposalList
         )
@@ -264,8 +264,8 @@ createProposal proposalInput accessToken wrapMsg =
         |> Cmd.map wrapMsg
 
 
-supportProposal : String -> Bool -> String -> (Msg -> a) -> Cmd a
-supportProposal id newState accessToken wrapMsg =
+toggleProposal : String -> Bool -> String -> (Msg -> a) -> Cmd a
+toggleProposal id newState accessToken wrapMsg =
     if newState then
         supportProposalEndpoint
             |> HttpBuilder.post

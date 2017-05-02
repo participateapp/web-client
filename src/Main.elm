@@ -382,7 +382,7 @@ update msg model =
 
         SupportProposal id newState ->
             ( model |> progressStart
-            , Api.supportProposal id newState model.accessToken ApiMsg
+            , Api.toggleProposal id newState model.accessToken ApiMsg
             )
 
         SignOut ->
