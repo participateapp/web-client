@@ -5,7 +5,7 @@ module Api
         , authenticate
         , getMe
         , createProposal
-        , supportProposal
+        , toggleSupport
         , getProposal
         , getProposalList
         )
@@ -31,7 +31,8 @@ type Msg
     | ProposalCreated Proposal
     | ProposalCreationFailed Http.Error
     | ProposalSupported Support
-    | SupportProposalFailed Http.Error
+    | ProposalUnsupported String
+    | ToggleSupportFailed Http.Error
     | GotProposal Proposal
     | GettingProposalFailed Http.Error
     | GotProposalList ProposalList
@@ -61,6 +62,11 @@ newProposalEndpoint =
 supportProposalEndpoint : String
 supportProposalEndpoint =
     Config.apiUrl ++ "/supports"
+
+
+unsupportProposalEndpoint : String -> String
+unsupportProposalEndpoint id =
+    Config.apiUrl ++ "/proposals/" ++ id ++ "/support"
 
 
 getProposalEndpoint : String -> String
@@ -258,17 +264,24 @@ createProposal proposalInput accessToken wrapMsg =
         |> Cmd.map wrapMsg
 
 
-supportProposal : String -> Bool -> String -> (Msg -> a) -> Cmd a
-supportProposal id newState accessToken wrapMsg =
-    -- ToDo: Send DELETE request to remove support (if newState == False)
-    supportProposalEndpoint
-        |> HttpBuilder.post
-        |> Api.Util.withJsonApiBody (encodeSupportProposal id)
-        |> Api.Util.withAccessToken accessToken
-        |> Api.Util.withExpectJsonApi assembleSupport
-        |> HttpBuilder.toTask
-        |> Api.Util.attempt SupportProposalFailed ProposalSupported
-        |> Cmd.map wrapMsg
+toggleSupport : String -> Bool -> String -> (Msg -> a) -> Cmd a
+toggleSupport id newState accessToken wrapMsg =
+    if newState then
+        supportProposalEndpoint
+            |> HttpBuilder.post
+            |> Api.Util.withJsonApiBody (encodeSupportProposal id)
+            |> Api.Util.withAccessToken accessToken
+            |> Api.Util.withExpectJsonApi assembleSupport
+            |> HttpBuilder.toTask
+            |> Api.Util.attempt ToggleSupportFailed ProposalSupported
+            |> Cmd.map wrapMsg
+    else
+        unsupportProposalEndpoint id
+            |> HttpBuilder.delete
+            |> Api.Util.withAccessToken accessToken
+            |> HttpBuilder.toTask
+            |> Api.Util.attempt ToggleSupportFailed (\_ -> ProposalUnsupported id)
+            |> Cmd.map wrapMsg
 
 
 getProposal : String -> String -> (Msg -> a) -> Cmd a

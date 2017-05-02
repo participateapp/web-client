@@ -193,6 +193,24 @@ updateProposalSupport support model =
         { model | proposals = newProposals }
 
 
+subtractProposalSupport : String -> Model -> Model
+subtractProposalSupport proposalId model =
+    let
+        newProposals =
+            Dict.update proposalId
+                (Maybe.map
+                    (\proposal ->
+                        { proposal
+                            | supportCount = proposal.supportCount - 1
+                            , supportedByMe = False
+                        }
+                    )
+                )
+                model.proposals
+    in
+        { model | proposals = newProposals }
+
+
 progressStart : Model -> Model
 progressStart model =
     { model | progress = True }
@@ -293,9 +311,15 @@ update msg model =
                     )
                         |> withSnackbarNote "Proposal supported"
 
-                Api.SupportProposalFailed httpError ->
+                Api.ProposalUnsupported proposalId ->
+                    ( model |> subtractProposalSupport proposalId |> progressDone
+                    , Cmd.none
+                    )
+                        |> withSnackbarNote "Proposal support withdrawn"
+
+                Api.ToggleSupportFailed httpError ->
                     withHttpErrorResponse
-                        "Supporting proposal failed"
+                        "(Un-)Supporting proposal failed"
                         httpError
                         ( model, Cmd.none )
 
@@ -358,7 +382,7 @@ update msg model =
 
         SupportProposal id newState ->
             ( model |> progressStart
-            , Api.supportProposal id newState model.accessToken ApiMsg
+            , Api.toggleSupport id newState model.accessToken ApiMsg
             )
 
         SignOut ->
