@@ -5,7 +5,7 @@ module Api
         , authenticate
         , getMe
         , createProposal
-        , toggleProposal
+        , toggleSupport
         , getProposal
         , getProposalList
         )
@@ -32,7 +32,7 @@ type Msg
     | ProposalCreationFailed Http.Error
     | ProposalSupported Support
     | ProposalUnsupported String
-    | SupportProposalFailed Http.Error
+    | ToggleSupportFailed Http.Error
     | GotProposal Proposal
     | GettingProposalFailed Http.Error
     | GotProposalList ProposalList
@@ -264,8 +264,8 @@ createProposal proposalInput accessToken wrapMsg =
         |> Cmd.map wrapMsg
 
 
-toggleProposal : String -> Bool -> String -> (Msg -> a) -> Cmd a
-toggleProposal id newState accessToken wrapMsg =
+toggleSupport : String -> Bool -> String -> (Msg -> a) -> Cmd a
+toggleSupport id newState accessToken wrapMsg =
     if newState then
         supportProposalEndpoint
             |> HttpBuilder.post
@@ -273,14 +273,14 @@ toggleProposal id newState accessToken wrapMsg =
             |> Api.Util.withAccessToken accessToken
             |> Api.Util.withExpectJsonApi assembleSupport
             |> HttpBuilder.toTask
-            |> Api.Util.attempt SupportProposalFailed ProposalSupported
+            |> Api.Util.attempt ToggleSupportFailed ProposalSupported
             |> Cmd.map wrapMsg
     else
         unsupportProposalEndpoint id
             |> HttpBuilder.delete
             |> Api.Util.withAccessToken accessToken
             |> HttpBuilder.toTask
-            |> Api.Util.attempt SupportProposalFailed (\_ -> ProposalUnsupported id)
+            |> Api.Util.attempt ToggleSupportFailed (\_ -> ProposalUnsupported id)
             |> Cmd.map wrapMsg
 
 

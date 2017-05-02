@@ -317,7 +317,7 @@ update msg model =
                     )
                         |> withSnackbarNote "Proposal support withdrawn"
 
-                Api.SupportProposalFailed httpError ->
+                Api.ToggleSupportFailed httpError ->
                     withHttpErrorResponse
                         "(Un-)Supporting proposal failed"
                         httpError
@@ -382,7 +382,7 @@ update msg model =
 
         SupportProposal id newState ->
             ( model |> progressStart
-            , Api.toggleProposal id newState model.accessToken ApiMsg
+            , Api.toggleSupport id newState model.accessToken ApiMsg
             )
 
         SignOut ->
