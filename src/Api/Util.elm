@@ -1,10 +1,13 @@
 module Api.Util exposing (..)
 
+import Result.Extra
 import Task exposing (Task)
+import Json.Encode as Encode
 import Json.Decode as Decode
 import Http
+import HttpBuilder
 import JsonApi
-import JsonApi.Extra
+import JsonApi.Decode
 
 
 {-| Infix notation for Result.andThen. Makes andThen-chains look nicer.
@@ -12,107 +15,54 @@ import JsonApi.Extra
 infixl 0 :>
 (:>) : Result x a -> (a -> Result x b) -> Result x b
 (:>) =
-    Result.andThen
+    flip Result.andThen
+
+
+{-| Convenience version of `Task.attempt` that performs Tasks that may fail.
+That's the same as in `elm-lang/core 4.x` (Elm 0.17)
+-}
+attempt : (e -> msg) -> (a -> msg) -> Task e a -> Cmd msg
+attempt errorTagger successTagger task =
+    Task.attempt (Result.Extra.unpack errorTagger successTagger) task
 
 
 {-| Insert accessToken into Http header
 -}
-withAccessToken : String -> Http.Request -> Http.Request
+withAccessToken : String -> HttpBuilder.RequestBuilder a -> HttpBuilder.RequestBuilder a
 withAccessToken accessToken =
-    JsonApi.Extra.withHeader "Authorization" ("Bearer " ++ accessToken)
+    HttpBuilder.withHeader "Authorization" ("Bearer " ++ accessToken)
 
 
-{-| Build a GET request
+{-| Insert a JSON value as the body of a RequestBuilder.
+This will set the `Content-Type: application/vnd.api+json` header,
+as required by JSON API standard.
 -}
-requestGet : String -> Http.Request
-requestGet url =
-    { verb = "GET"
-    , headers = []
-    , url = url
-    , body = Http.empty
-    }
+withJsonApiBody : Encode.Value -> HttpBuilder.RequestBuilder a -> HttpBuilder.RequestBuilder a
+withJsonApiBody jsonValue =
+    HttpBuilder.withBody <|
+        Http.stringBody "application/vnd.api+json" (Encode.encode 0 jsonValue)
 
 
-{-| Build a DELETE request
+{-| Expect the response body to be a JsonApi Document.
 -}
-requestDelete : String -> Http.Request
-requestDelete url =
-    { verb = "DELETE"
-    , headers = []
-    , url = url
-    , body = Http.empty
-    }
-
-
-{-| Build a POST request
--}
-requestPost : String -> String -> Http.Request
-requestPost url body =
-    { verb = "POST"
-    , headers = []
-    , url = url
-    , body = Http.string body
-    }
-
-
-{-| Send a Http request with default settings
-and decode the response from a JSON API document
--}
-sendDefJsonApi :
+withExpectJsonApi :
     (JsonApi.Document -> Result String a)
-    -> Http.Request
-    -> Task Http.Error a
-sendDefJsonApi assembleResponse request =
-    JsonApi.Extra.sendJsonApi assembleResponse Http.defaultSettings request
+    -> HttpBuilder.RequestBuilder ()
+    -> HttpBuilder.RequestBuilder a
+withExpectJsonApi assembleResponse requestBuilder =
+    requestBuilder
+        |> HttpBuilder.withHeader "Accept" "application/vnd.api+json"
+        |> HttpBuilder.withExpect
+            (Http.expectJson
+                (JsonApi.Decode.document
+                    |> Decode.andThen
+                        (\document ->
+                            case assembleResponse document of
+                                Ok successValue ->
+                                    Decode.succeed successValue
 
-
-{-| Send a Http request with default settings
-and decode the response from JSON
--}
-sendDefJson :
-    Decode.Decoder a
-    -> Http.Request
-    -> Task Http.Error a
-sendDefJson decodeResponse request =
-    request
-        |> Http.send Http.defaultSettings
-        |> Http.fromJson decodeResponse
-
-
-{-| Send a Http request with default settings
-and discard the response
--}
-sendDefDiscard :
-    Http.Request
-    -> Task Http.Error ()
-sendDefDiscard request =
-    request
-        |> Http.send Http.defaultSettings
-        |> discardResponse
-
-
-
--- Things here will change in Elm 0.18 ...
-
-
-discardResponse : Task Http.RawError Http.Response -> Task Http.Error ()
-discardResponse responseTask =
-    responseTask
-        |> Task.mapError promoteError
-        |> (flip Task.andThen)
-            (\response ->
-                if 200 <= response.status && response.status < 300 then
-                    Task.succeed ()
-                else
-                    Task.fail (Http.BadResponse response.status response.statusText)
+                                Err errorMessage ->
+                                    Decode.fail errorMessage
+                        )
+                )
             )
-
-
-promoteError : Http.RawError -> Http.Error
-promoteError rawError =
-    case rawError of
-        Http.RawTimeout ->
-            Http.Timeout
-
-        Http.RawNetworkError ->
-            Http.NetworkError
